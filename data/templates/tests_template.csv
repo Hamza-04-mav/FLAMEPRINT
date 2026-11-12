@@ -1,0 +1,2 @@
+investigation,test_id,fuel,o2 (%),pressure (kPa),flow (cm/s),gravity (g),diluent,outcome,spread_rate (mm/s)
+BASS-II,EXAMPLE-1,PMMA,,,,,N2,burned,

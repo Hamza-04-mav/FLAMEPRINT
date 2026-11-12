@@ -1,0 +1,26 @@
+{
+  "investigations": [
+    {
+      "id": "NEW-INVESTIGATION",
+      "name": "Full investigation name",
+      "facility": "CIR | MSG | ...",
+      "apparatus": "MDCA | ACME modular hardware | SPICE flow duct | ...",
+      "platform": "ISS",
+      "fuelPhase": ["solid"],
+      "fuels": ["material name"],
+      "geometry": "sample / burner shape and size",
+      "objective": "What the investigation set out to learn.",
+      "pillars": { "prevention": 0.8, "detection": 0.2, "suppression": 0.4 },
+      "conditions": { "o2Pct": [21, 21], "pressureKpa": [101, 101], "flowCmS": [0, 20], "confidence": "approx" },
+      "diluents": ["N2"],
+      "measurements": ["video", "flame spread rate"],
+      "insights": { "prevention": "A finding stated in the PSI documentation." },
+      "earthApplications": [],
+      "status": "in-psi",
+      "provenance": "PSI dataset <name / DOI>"
+    }
+  ],
+  "relations": [
+    { "from": "BASS-II", "to": "NEW-INVESTIGATION", "type": "follow-on", "note": "" }
+  ]
+}

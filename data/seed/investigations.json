@@ -1,0 +1,1135 @@
+{
+  "_about": "FLAMEPRINT seed catalog. Investigation-level metadata curated from the NASA Space Apps 2026 'Flame in Freefall' challenge brief and public NASA investigation descriptions. It contains NO test-level measurements. Condition envelopes marked 'approx' are coarse orientation ranges that must be verified against PSI; null means 'not characterized here'. Importing PSI test files (data/psi or the Data Lab) replaces envelopes with values derived from real test records. Any investigation can be overridden by importing a JSON object with the same id.",
+  "investigations": [
+    {
+      "id": "BASS",
+      "name": "Burning and Suppression of Solids",
+      "facility": "MSG",
+      "apparatus": "SPICE flow duct",
+      "platform": "ISS",
+      "fuelPhase": [
+        "solid"
+      ],
+      "fuels": [
+        "PMMA (acrylic)",
+        "cotton-fiberglass fabric (SIBAL)",
+        "other spacecraft solids"
+      ],
+      "geometry": "Small flat samples, rods/cylinders and spheres in a fan-driven low-speed flow duct",
+      "objective": "Observe ignition, flame spread and extinction of solid materials in low-speed flow in microgravity, and how flames respond to reduced flow and suppressant.",
+      "pillars": {
+        "prevention": 1.0,
+        "detection": 0.3,
+        "suppression": 0.7
+      },
+      "conditions": {
+        "o2Pct": [
+          21,
+          21
+        ],
+        "pressureKpa": [
+          101,
+          101
+        ],
+        "flowCmS": [
+          0,
+          40
+        ],
+        "confidence": "approx",
+        "note": "Cabin-air MSG environment; flow varied by the duct fan. Coarse envelope: verify against PSI."
+      },
+      "diluents": [
+        "N2"
+      ],
+      "measurements": [
+        "color video",
+        "flame spread rate",
+        "extinction flow speed",
+        "thermocouples"
+      ],
+      "insights": {
+        "prevention": "Solids in microgravity can keep burning in low-speed flows that never occur on Earth, so cabin ventilation speed directly affects material flammability.",
+        "suppression": "Cutting the flow, or adding suppressant, can put out solid flames. The response depends on sample geometry and flow speed.",
+        "modeling": "Flame-spread and extinction data across flat, cylindrical and spherical samples, for validating spread models."
+      },
+      "earthApplications": [
+        "Fire-resistant material screening",
+        "Flame-spread model validation"
+      ],
+      "status": "in-psi",
+      "provenance": "Challenge brief + public NASA summaries"
+    },
+    {
+      "id": "BASS-II",
+      "name": "Burning and Suppression of Solids – II",
+      "facility": "MSG",
+      "apparatus": "SPICE flow duct",
+      "platform": "ISS",
+      "fuelPhase": [
+        "solid"
+      ],
+      "fuels": [
+        "PMMA",
+        "cotton-fiberglass fabric (SIBAL)",
+        "thin cellulose",
+        "other solids"
+      ],
+      "geometry": "Flat, cylindrical and spherical solid samples in a fan-driven low-speed flow duct",
+      "objective": "Extend BASS by varying oxygen concentration (nitrogen dilution) and flow speed to map flammability limits of solids in microgravity.",
+      "pillars": {
+        "prevention": 1.0,
+        "detection": 0.3,
+        "suppression": 0.6
+      },
+      "conditions": {
+        "o2Pct": [
+          15,
+          21
+        ],
+        "pressureKpa": [
+          101,
+          101
+        ],
+        "flowCmS": [
+          0,
+          40
+        ],
+        "confidence": "approx",
+        "note": "Reduced-O2 tests by nitrogen dilution. Coarse envelope: exact test matrix in PSI."
+      },
+      "diluents": [
+        "N2"
+      ],
+      "measurements": [
+        "video",
+        "flame spread rate",
+        "limiting oxygen vs. flow",
+        "thermocouples"
+      ],
+      "insights": {
+        "prevention": "Maps the limiting oxygen concentration for solids against flow speed in microgravity, which is the core input for accepting materials in a new atmosphere.",
+        "modeling": "Oxygen and flow flammability boundaries, suitable for calibrating predictive flammability models.",
+        "general": "Tests whether normal-gravity material screening remains conservative under microgravity conditions."
+      },
+      "earthApplications": [
+        "Flammability test-method development",
+        "Low-oxygen fire-prevention atmospheres"
+      ],
+      "status": "in-psi",
+      "provenance": "Challenge brief + public NASA summaries"
+    },
+    {
+      "id": "SAFFIRE-I",
+      "name": "Spacecraft Fire Safety Demonstration – I",
+      "facility": "Saffire flow unit",
+      "apparatus": "Saffire flow duct",
+      "platform": "Cygnus (uncrewed, after ISS departure)",
+      "fuelPhase": [
+        "solid"
+      ],
+      "fuels": [
+        "cotton-fiberglass fabric (SIBAL), large sample"
+      ],
+      "geometry": "Large fabric sheet in forced flow",
+      "objective": "Observe large-scale fire growth over a spacecraft material in microgravity, at a scale impossible to test safely aboard a crewed vehicle.",
+      "pillars": {
+        "prevention": 0.9,
+        "detection": 0.8,
+        "suppression": 0.3
+      },
+      "conditions": {
+        "o2Pct": [
+          21,
+          21
+        ],
+        "pressureKpa": [
+          101,
+          101
+        ],
+        "flowCmS": [
+          15,
+          25
+        ],
+        "confidence": "approx",
+        "note": "Vehicle cabin air with low forced flow. Coarse envelope."
+      },
+      "measurements": [
+        "video",
+        "flame spread rate",
+        "cabin O2/CO2",
+        "temperature",
+        "pressure"
+      ],
+      "insights": {
+        "prevention": "Large-scale flame spread over a fabric in microgravity, showing the size and growth a real spacecraft fire could reach.",
+        "detection": "Recorded how a large fire changes cabin pressure, temperature and gas composition, which matters for detector placement and alarm thresholds.",
+        "modeling": "A scale-up benchmark for whole-vehicle fire models."
+      },
+      "earthApplications": [
+        "Large-scale fire-growth model validation"
+      ],
+      "status": "in-psi",
+      "provenance": "Challenge brief + public NASA summaries"
+    },
+    {
+      "id": "SAFFIRE-II",
+      "name": "Spacecraft Fire Safety Demonstration – II",
+      "facility": "Saffire flow unit",
+      "apparatus": "Saffire flow duct",
+      "platform": "Cygnus (uncrewed, after ISS departure)",
+      "fuelPhase": [
+        "solid"
+      ],
+      "fuels": [
+        "multiple spacecraft materials (fabrics, plastics, silicone)"
+      ],
+      "geometry": "Several smaller material samples burned in sequence",
+      "objective": "Measure ignition and flammability of a set of different spacecraft materials in microgravity.",
+      "pillars": {
+        "prevention": 1.0,
+        "detection": 0.6,
+        "suppression": 0.2
+      },
+      "conditions": {
+        "o2Pct": [
+          21,
+          21
+        ],
+        "pressureKpa": [
+          101,
+          101
+        ],
+        "flowCmS": [
+          15,
+          25
+        ],
+        "confidence": "approx",
+        "note": "Coarse envelope."
+      },
+      "measurements": [
+        "video",
+        "ignition success",
+        "flame spread",
+        "cabin gas composition"
+      ],
+      "insights": {
+        "prevention": "Compares several real spacecraft materials under the same microgravity conditions, so they can be ranked against each other for material selection.",
+        "detection": "Recorded fire signatures of several materials in a spacecraft-scale volume."
+      },
+      "earthApplications": [
+        "Material flammability ranking"
+      ],
+      "status": "in-psi",
+      "provenance": "Challenge brief + public NASA summaries"
+    },
+    {
+      "id": "SAFFIRE-III",
+      "name": "Spacecraft Fire Safety Demonstration – III",
+      "facility": "Saffire flow unit",
+      "apparatus": "Saffire flow duct",
+      "platform": "Cygnus (uncrewed, after ISS departure)",
+      "fuelPhase": [
+        "solid"
+      ],
+      "fuels": [
+        "cotton-fiberglass fabric (SIBAL), large sample"
+      ],
+      "geometry": "Large fabric sheet in forced flow (repeat and extension of Saffire-I)",
+      "objective": "Repeat and extend large-scale microgravity flame spread to build confidence in fire-growth and spacecraft-response data.",
+      "pillars": {
+        "prevention": 0.9,
+        "detection": 0.8,
+        "suppression": 0.3
+      },
+      "conditions": {
+        "o2Pct": [
+          21,
+          21
+        ],
+        "pressureKpa": [
+          101,
+          101
+        ],
+        "flowCmS": [
+          15,
+          25
+        ],
+        "confidence": "approx",
+        "note": "Coarse envelope."
+      },
+      "measurements": [
+        "video",
+        "flame spread rate",
+        "cabin O2/CO2",
+        "temperature",
+        "pressure"
+      ],
+      "insights": {
+        "detection": "Repeat large-scale fire data, so detection and cabin-response measurements can be checked for repeatability.",
+        "modeling": "A second large-scale benchmark for whole-vehicle fire models."
+      },
+      "status": "in-psi",
+      "provenance": "Challenge brief + public NASA summaries"
+    },
+    {
+      "id": "FLEX",
+      "name": "Flame Extinguishment Experiment",
+      "facility": "CIR",
+      "apparatus": "MDCA",
+      "platform": "ISS",
+      "fuelPhase": [
+        "liquid"
+      ],
+      "fuels": [
+        "n-heptane",
+        "methanol"
+      ],
+      "geometry": "Free-floating or tethered spherical fuel droplets (millimetre scale)",
+      "objective": "Test how well gaseous suppressants (dilution with carbon dioxide and helium) put out burning fuel droplets in microgravity.",
+      "pillars": {
+        "prevention": 0.5,
+        "detection": 0.3,
+        "suppression": 1.0
+      },
+      "conditions": {
+        "o2Pct": null,
+        "pressureKpa": null,
+        "flowCmS": [
+          0,
+          0
+        ],
+        "confidence": "approx",
+        "note": "Quiescent chamber; O2, pressure and CO2/He dilution varied. Import the PSI test matrix for exact values."
+      },
+      "diluents": [
+        "CO2",
+        "He",
+        "N2"
+      ],
+      "measurements": [
+        "droplet diameter vs. time",
+        "flame diameter",
+        "radiometry",
+        "extinction diameter"
+      ],
+      "insights": {
+        "suppression": "Measured how much CO2 or helium dilution it takes to put out droplet flames, which directly informs suppressant choice and post-fire atmospheres.",
+        "general": "Large n-heptane droplets kept burning after the visible flame went out, through a low-temperature 'cool flame'.",
+        "detection": "Burning can continue with no visible flame, so optical flame detection alone can miss it."
+      },
+      "earthApplications": [
+        "Gaseous fire-suppression design",
+        "Combustion chemistry for cleaner engines"
+      ],
+      "status": "in-psi",
+      "provenance": "Challenge brief + public NASA summaries"
+    },
+    {
+      "id": "FLEX-2",
+      "name": "Flame Extinguishment Experiment – 2",
+      "facility": "CIR",
+      "apparatus": "MDCA",
+      "platform": "ISS",
+      "fuelPhase": [
+        "liquid"
+      ],
+      "fuels": [
+        "n-heptane",
+        "n-decane",
+        "binary fuel mixtures",
+        "surrogate fuels"
+      ],
+      "geometry": "Single droplets and droplet arrays, some with slow convective flow",
+      "objective": "Study burning rates, soot formation and extinction of single- and multi-component fuel droplets, including the effect of slow flow.",
+      "pillars": {
+        "prevention": 0.4,
+        "detection": 0.3,
+        "suppression": 0.7
+      },
+      "conditions": {
+        "o2Pct": null,
+        "pressureKpa": null,
+        "flowCmS": null,
+        "confidence": "approx",
+        "note": "Import the PSI test matrix for exact values."
+      },
+      "diluents": [
+        "N2",
+        "CO2",
+        "He"
+      ],
+      "measurements": [
+        "droplet diameter vs. time",
+        "soot imaging",
+        "radiometry",
+        "extinction"
+      ],
+      "insights": {
+        "suppression": "Extinction behaviour of fuel mixtures, relevant to liquid spills and leaks.",
+        "modeling": "Droplet burning-rate and soot data for validating models of multi-component fuels."
+      },
+      "status": "in-psi",
+      "provenance": "Challenge brief + public NASA summaries"
+    },
+    {
+      "id": "CFI",
+      "name": "Cool Flames Investigation",
+      "facility": "CIR",
+      "apparatus": "MDCA",
+      "platform": "ISS",
+      "fuelPhase": [
+        "liquid"
+      ],
+      "fuels": [
+        "n-alkane droplets"
+      ],
+      "geometry": "Spherical fuel droplets",
+      "objective": "Characterize low-temperature 'cool flame' droplet combustion, first observed in FLEX, across fuels, pressures and oxygen levels.",
+      "pillars": {
+        "prevention": 0.5,
+        "detection": 0.5,
+        "suppression": 0.4
+      },
+      "conditions": {
+        "o2Pct": null,
+        "pressureKpa": null,
+        "flowCmS": [
+          0,
+          0
+        ],
+        "confidence": "approx",
+        "note": "Includes elevated pressures. Import the PSI test matrix for exact values."
+      },
+      "diluents": [
+        "N2",
+        "CO2",
+        "He"
+      ],
+      "measurements": [
+        "droplet diameter vs. time",
+        "radiometry",
+        "chemiluminescence imaging"
+      ],
+      "insights": {
+        "detection": "Cool flames are nearly invisible and produce different products from hot flames, so detection strategies need to account for them.",
+        "modeling": "Low-temperature chemistry data for validating kinetic models."
+      },
+      "earthApplications": [
+        "Low-temperature combustion for cleaner engines"
+      ],
+      "status": "in-psi",
+      "provenance": "Challenge brief + public NASA summaries"
+    },
+    {
+      "id": "ACME-BRE",
+      "name": "Burning Rate Emulator (ACME)",
+      "project": "ACME",
+      "facility": "CIR",
+      "apparatus": "ACME modular hardware",
+      "platform": "ISS",
+      "fuelPhase": [
+        "gas"
+      ],
+      "fuels": [
+        "gaseous fuels emulating condensed-phase fuels"
+      ],
+      "geometry": "Porous burner surface emulating a burning solid or liquid",
+      "objective": "Use gaseous fuels to emulate burning solids and liquids, and find flammability in still atmospheres as a function of material properties.",
+      "pillars": {
+        "prevention": 1.0,
+        "detection": 0.3,
+        "suppression": 0.4
+      },
+      "conditions": {
+        "o2Pct": null,
+        "pressureKpa": null,
+        "flowCmS": [
+          0,
+          0
+        ],
+        "confidence": "approx",
+        "note": "Still (quiescent) atmospheres; import the PSI test matrix for O2 and pressure."
+      },
+      "measurements": [
+        "heat-flux gauges",
+        "flame imaging",
+        "fuel flow rate",
+        "extinction"
+      ],
+      "insights": {
+        "prevention": "Relates still-air flammability to material properties, so new materials can be assessed without burning every one.",
+        "modeling": "Property-based flammability correlations for predictive models."
+      },
+      "status": "in-psi",
+      "provenance": "Challenge brief + public NASA summaries"
+    },
+    {
+      "id": "ACME-CFI-G",
+      "name": "Cool Flames Investigation with Gases (ACME)",
+      "project": "ACME",
+      "facility": "CIR",
+      "apparatus": "ACME modular hardware",
+      "platform": "ISS",
+      "fuelPhase": [
+        "gas"
+      ],
+      "fuels": [
+        "flammable gas (e.g., propane) mixed with nitrogen in the chamber"
+      ],
+      "geometry": "Inside-out spherical flames: an O2/N2 mixture flows out of a spherical burner into a fuel/N2 chamber",
+      "objective": "Study gaseous cool flames. These include the highest-oxygen microgravity tests in PSI, with an oxidizer stream of up to 85% O2.",
+      "pillars": {
+        "prevention": 0.7,
+        "detection": 0.4,
+        "suppression": 0.3
+      },
+      "conditions": {
+        "o2Pct": [
+          21,
+          85
+        ],
+        "pressureKpa": null,
+        "flowCmS": [
+          0,
+          0
+        ],
+        "confidence": "approx",
+        "note": "85% is the challenge-stated maximum of the burner OXIDIZER stream, not ambient O2. Lower bound is a placeholder."
+      },
+      "measurements": [
+        "flame imaging",
+        "radiometry",
+        "thermocouples"
+      ],
+      "insights": {
+        "prevention": "The only microgravity data in PSI at or above Moon-base oxygen levels (30% or more). It is an inverse gaseous flame, not a burning solid.",
+        "modeling": "High-oxygen and cool-flame chemistry data."
+      },
+      "status": "in-psi",
+      "provenance": "Challenge brief"
+    },
+    {
+      "id": "ACME-EFIELD",
+      "name": "Electric-Field Effects on Laminar Diffusion Flames (ACME)",
+      "project": "ACME",
+      "facility": "CIR",
+      "apparatus": "ACME modular hardware",
+      "platform": "ISS",
+      "fuelPhase": [
+        "gas"
+      ],
+      "fuels": [
+        "gaseous fuels"
+      ],
+      "geometry": "Laminar diffusion flames with an applied electric field",
+      "objective": "Study how electric fields act on the ions in flames. The resulting body force mimics partial gravity.",
+      "pillars": {
+        "prevention": 0.4,
+        "detection": 0.2,
+        "suppression": 0.4
+      },
+      "conditions": {
+        "o2Pct": null,
+        "pressureKpa": null,
+        "flowCmS": null,
+        "confidence": "unknown"
+      },
+      "measurements": [
+        "flame imaging",
+        "ion current",
+        "temperature"
+      ],
+      "insights": {
+        "general": "The only partial-gravity proxy in PSI: an electric body force on flame ions acts like adjustable gravity.",
+        "modeling": "Lets models be tested between 0 g and 1 g before LUCI and FM2 data exist."
+      },
+      "tags": [
+        "partial-gravity-proxy"
+      ],
+      "status": "in-psi",
+      "provenance": "Challenge brief"
+    },
+    {
+      "id": "ACME-CLD",
+      "name": "Coflow Laminar Diffusion Flame (ACME)",
+      "project": "ACME",
+      "facility": "CIR",
+      "apparatus": "ACME modular hardware",
+      "platform": "ISS",
+      "fuelPhase": [
+        "gas"
+      ],
+      "fuels": [
+        "diluted gaseous hydrocarbon fuels"
+      ],
+      "geometry": "Axisymmetric coflow jet flames",
+      "objective": "Measure the structure, soot and stability of laminar coflow diffusion flames in microgravity.",
+      "pillars": {
+        "prevention": 0.3,
+        "detection": 0.5,
+        "suppression": 0.3
+      },
+      "conditions": {
+        "o2Pct": null,
+        "pressureKpa": null,
+        "flowCmS": null,
+        "confidence": "unknown"
+      },
+      "measurements": [
+        "flame imaging",
+        "soot volume fraction",
+        "temperature"
+      ],
+      "insights": {
+        "detection": "Without buoyancy, soot forms differently, which changes the smoke that detectors rely on.",
+        "modeling": "Benchmark flames for detailed soot and flame-structure models."
+      },
+      "status": "in-psi",
+      "provenance": "Public NASA summaries"
+    },
+    {
+      "id": "ACME-FLAME-DESIGN",
+      "name": "Flame Design (ACME)",
+      "project": "ACME",
+      "facility": "CIR",
+      "apparatus": "ACME modular hardware",
+      "platform": "ISS",
+      "fuelPhase": [
+        "gas"
+      ],
+      "fuels": [
+        "gaseous fuels with inert dilution (normal and inverse flames)"
+      ],
+      "geometry": "Spherical diffusion flames",
+      "objective": "Learn how flame structure (normal vs. inverse, dilution) controls soot, to design soot-free, robust flames.",
+      "pillars": {
+        "prevention": 0.3,
+        "detection": 0.4,
+        "suppression": 0.3
+      },
+      "conditions": {
+        "o2Pct": null,
+        "pressureKpa": null,
+        "flowCmS": [
+          0,
+          0
+        ],
+        "confidence": "unknown"
+      },
+      "measurements": [
+        "flame imaging",
+        "radiometry",
+        "soot"
+      ],
+      "insights": {
+        "detection": "Relates flame structure to soot (smoke) production.",
+        "modeling": "Spherical flames are effectively 1-D, which makes them clean model-validation cases."
+      },
+      "status": "in-psi",
+      "provenance": "Public NASA summaries"
+    },
+    {
+      "id": "ACME-S-FLAME",
+      "name": "Structure & Response of Spherical Diffusion Flames (ACME)",
+      "project": "ACME",
+      "facility": "CIR",
+      "apparatus": "ACME modular hardware",
+      "platform": "ISS",
+      "fuelPhase": [
+        "gas"
+      ],
+      "fuels": [
+        "gaseous fuels with inert dilution"
+      ],
+      "geometry": "Spherical diffusion flames",
+      "objective": "Measure the growth, structure and extinction of spherical diffusion flames for comparison with models.",
+      "pillars": {
+        "prevention": 0.3,
+        "detection": 0.2,
+        "suppression": 0.4
+      },
+      "conditions": {
+        "o2Pct": null,
+        "pressureKpa": null,
+        "flowCmS": [
+          0,
+          0
+        ],
+        "confidence": "unknown"
+      },
+      "measurements": [
+        "flame imaging",
+        "radiometry",
+        "temperature"
+      ],
+      "insights": {
+        "suppression": "Extinction limits of diffusion flames caused by radiation and dilution.",
+        "modeling": "Transient spherical flames as model-validation targets."
+      },
+      "status": "in-psi",
+      "provenance": "Public NASA summaries"
+    },
+    {
+      "id": "SPICE",
+      "name": "Smoke Point In Co-flow Experiment",
+      "facility": "MSG",
+      "apparatus": "SPICE flow duct",
+      "platform": "ISS",
+      "fuelPhase": [
+        "gas"
+      ],
+      "fuels": [
+        "gaseous hydrocarbon fuels"
+      ],
+      "geometry": "Laminar jet diffusion flames in co-flowing air",
+      "objective": "Find the smoke points (the onset of soot emission) of gas-jet flames in microgravity.",
+      "pillars": {
+        "prevention": 0.3,
+        "detection": 0.7,
+        "suppression": 0.2
+      },
+      "conditions": {
+        "o2Pct": [
+          21,
+          21
+        ],
+        "pressureKpa": [
+          101,
+          101
+        ],
+        "flowCmS": null,
+        "confidence": "approx",
+        "note": "Coarse envelope."
+      },
+      "measurements": [
+        "flame imaging",
+        "smoke-point fuel flow rate"
+      ],
+      "insights": {
+        "detection": "Shows when microgravity flames start emitting smoke, the signal smoke detectors rely on.",
+        "modeling": "Soot-emission criteria for radiation and smoke models."
+      },
+      "status": "in-psi",
+      "provenance": "Challenge brief + public NASA summaries"
+    },
+    {
+      "id": "SLICE",
+      "name": "Structure & Liftoff In Combustion Experiment",
+      "facility": "MSG",
+      "apparatus": "SPICE flow duct",
+      "platform": "ISS",
+      "fuelPhase": [
+        "gas"
+      ],
+      "fuels": [
+        "gaseous fuels with nitrogen dilution"
+      ],
+      "geometry": "Lifted and attached jet diffusion flames in co-flow",
+      "objective": "Study flame liftoff and blowout of jet flames in microgravity.",
+      "pillars": {
+        "prevention": 0.4,
+        "detection": 0.2,
+        "suppression": 0.5
+      },
+      "conditions": {
+        "o2Pct": [
+          21,
+          21
+        ],
+        "pressureKpa": [
+          101,
+          101
+        ],
+        "flowCmS": null,
+        "confidence": "approx",
+        "note": "Coarse envelope."
+      },
+      "measurements": [
+        "flame imaging",
+        "liftoff height",
+        "blowout limits"
+      ],
+      "insights": {
+        "suppression": "Liftoff and blowout limits show when flow alone can detach or extinguish a gas flame, such as one fed by a leak.",
+        "modeling": "Flame-stabilization data for leak-fire models."
+      },
+      "status": "in-psi",
+      "provenance": "Challenge brief + public NASA summaries"
+    },
+    {
+      "id": "SAME",
+      "name": "Smoke and Aerosol Measurement Experiment",
+      "facility": "MSG",
+      "apparatus": "SAME smoke generator + particle instruments",
+      "platform": "ISS",
+      "fuelPhase": [
+        "solid"
+      ],
+      "fuels": [
+        "overheated (pyrolyzed) spacecraft materials"
+      ],
+      "geometry": "Small material samples heated to produce smoke (non-flaming)",
+      "objective": "Measure smoke particle size from overheated spacecraft materials to improve smoke-detector design.",
+      "pillars": {
+        "prevention": 0.2,
+        "detection": 1.0,
+        "suppression": 0.1
+      },
+      "conditions": {
+        "o2Pct": [
+          21,
+          21
+        ],
+        "pressureKpa": [
+          101,
+          101
+        ],
+        "flowCmS": null,
+        "confidence": "approx",
+        "note": "Pyrolysis smoke in cabin air. Coarse envelope."
+      },
+      "measurements": [
+        "particle counters / sizers",
+        "smoke aging",
+        "detector response"
+      ],
+      "insights": {
+        "detection": "Smoke made in microgravity can differ from ground-test smoke, which affects detector response. This is the basis for detector design.",
+        "general": "Early-warning detection aims at overheating (pyrolysis) before any open flame."
+      },
+      "earthApplications": [
+        "Improved smoke-detector design"
+      ],
+      "status": "in-psi",
+      "provenance": "Challenge brief + public NASA summaries"
+    },
+    {
+      "id": "SAME-R",
+      "name": "Smoke and Aerosol Measurement Experiment – Refurbished",
+      "facility": "MSG",
+      "apparatus": "SAME smoke generator + particle instruments",
+      "platform": "ISS",
+      "fuelPhase": [
+        "solid"
+      ],
+      "fuels": [
+        "overheated spacecraft materials (expanded set)"
+      ],
+      "geometry": "Small heated samples producing smoke",
+      "objective": "Extend SAME smoke characterization with more materials and conditions to support detector design.",
+      "pillars": {
+        "prevention": 0.2,
+        "detection": 1.0,
+        "suppression": 0.1
+      },
+      "conditions": {
+        "o2Pct": [
+          21,
+          21
+        ],
+        "pressureKpa": [
+          101,
+          101
+        ],
+        "flowCmS": null,
+        "confidence": "approx",
+        "note": "Coarse envelope."
+      },
+      "measurements": [
+        "particle counters / sizers",
+        "smoke aging",
+        "detector response"
+      ],
+      "insights": {
+        "detection": "Adds materials and repeat data to the smoke database used to set detector thresholds."
+      },
+      "earthApplications": [
+        "Improved smoke-detector design"
+      ],
+      "status": "in-psi",
+      "provenance": "Challenge brief"
+    },
+    {
+      "id": "DAFT",
+      "name": "Dust and Aerosol Measurement Feasibility Test",
+      "facility": "ISS cabin",
+      "apparatus": "SAME particle instrument",
+      "platform": "ISS",
+      "fuelPhase": [],
+      "fuels": [
+        "none: ambient cabin dust"
+      ],
+      "geometry": "Cabin aerosol sampling",
+      "objective": "Test whether a particle instrument used for SAME smoke studies can measure cabin dust.",
+      "pillars": {
+        "prevention": 0.1,
+        "detection": 0.6,
+        "suppression": 0.0
+      },
+      "conditions": {
+        "o2Pct": [
+          21,
+          21
+        ],
+        "pressureKpa": [
+          101,
+          101
+        ],
+        "flowCmS": null,
+        "confidence": "approx"
+      },
+      "measurements": [
+        "particle counts"
+      ],
+      "insights": {
+        "detection": "Cabin dust is background noise for smoke detectors. Knowing its level helps avoid false alarms, which will matter with lunar dust."
+      },
+      "status": "in-psi",
+      "provenance": "Challenge brief"
+    },
+    {
+      "id": "DAFT-2",
+      "name": "Dust and Aerosol Measurement Feasibility Test – 2",
+      "facility": "ISS cabin",
+      "apparatus": "SAME particle instrument",
+      "platform": "ISS",
+      "fuelPhase": [],
+      "fuels": [
+        "none: ambient cabin dust"
+      ],
+      "geometry": "Cabin aerosol sampling",
+      "objective": "Follow-on dust-measurement feasibility test.",
+      "pillars": {
+        "prevention": 0.1,
+        "detection": 0.6,
+        "suppression": 0.0
+      },
+      "conditions": {
+        "o2Pct": [
+          21,
+          21
+        ],
+        "pressureKpa": [
+          101,
+          101
+        ],
+        "flowCmS": null,
+        "confidence": "approx"
+      },
+      "measurements": [
+        "particle counts"
+      ],
+      "insights": {
+        "detection": "More background-aerosol data, relevant to smoke-detector false-alarm rates."
+      },
+      "status": "in-psi",
+      "provenance": "Challenge brief"
+    },
+    {
+      "id": "LUCI",
+      "name": "Lunar-g Combustion Investigation (expected)",
+      "facility": "TBD",
+      "apparatus": "TBD",
+      "platform": "Lunar gravity (planned)",
+      "fuelPhase": [
+        "solid"
+      ],
+      "fuels": [
+        "TBD"
+      ],
+      "geometry": "TBD",
+      "objective": "Expected partial-gravity combustion data. Not yet in PSI.",
+      "pillars": {
+        "prevention": 1.0,
+        "detection": 0.3,
+        "suppression": 0.3
+      },
+      "conditions": {
+        "o2Pct": null,
+        "pressureKpa": null,
+        "flowCmS": null,
+        "confidence": "unknown"
+      },
+      "measurements": [],
+      "insights": {
+        "general": "Expected to fill the partial-gravity gap. FLAMEPRINT will use it automatically once its data are imported."
+      },
+      "tags": [
+        "partial-gravity",
+        "pending"
+      ],
+      "status": "pending",
+      "provenance": "Challenge brief"
+    },
+    {
+      "id": "FM2",
+      "name": "Flammability of Materials on the Moon (expected)",
+      "facility": "TBD",
+      "apparatus": "TBD",
+      "platform": "Lunar gravity (planned)",
+      "fuelPhase": [
+        "solid"
+      ],
+      "fuels": [
+        "spacecraft materials (TBD)"
+      ],
+      "geometry": "TBD",
+      "objective": "Expected lunar-gravity material flammability data. Not yet in PSI.",
+      "pillars": {
+        "prevention": 1.0,
+        "detection": 0.2,
+        "suppression": 0.2
+      },
+      "conditions": {
+        "o2Pct": null,
+        "pressureKpa": null,
+        "flowCmS": null,
+        "confidence": "unknown"
+      },
+      "measurements": [],
+      "insights": {
+        "general": "Expected to provide lunar-gravity material flammability data directly."
+      },
+      "tags": [
+        "partial-gravity",
+        "pending"
+      ],
+      "status": "pending",
+      "provenance": "Challenge brief"
+    }
+  ],
+  "relations": [
+    {
+      "from": "BASS",
+      "to": "BASS-II",
+      "type": "follow-on",
+      "note": "Adds reduced-O2 tests"
+    },
+    {
+      "from": "SAFFIRE-I",
+      "to": "SAFFIRE-II",
+      "type": "follow-on",
+      "note": "Multiple materials"
+    },
+    {
+      "from": "SAFFIRE-II",
+      "to": "SAFFIRE-III",
+      "type": "follow-on",
+      "note": "Large-scale repeat"
+    },
+    {
+      "from": "FLEX",
+      "to": "FLEX-2",
+      "type": "follow-on",
+      "note": "Mixtures, flow, soot"
+    },
+    {
+      "from": "FLEX",
+      "to": "CFI",
+      "type": "discovery",
+      "note": "Cool flames discovered in FLEX"
+    },
+    {
+      "from": "CFI",
+      "to": "ACME-CFI-G",
+      "type": "discovery",
+      "note": "Cool flames, gaseous fuels"
+    },
+    {
+      "from": "SAME",
+      "to": "SAME-R",
+      "type": "follow-on",
+      "note": "More materials"
+    },
+    {
+      "from": "SAME",
+      "to": "DAFT",
+      "type": "shared-instrument",
+      "note": "Smoke instrument reused for dust"
+    },
+    {
+      "from": "DAFT",
+      "to": "DAFT-2",
+      "type": "follow-on",
+      "note": ""
+    },
+    {
+      "from": "ACME-EFIELD",
+      "to": "LUCI",
+      "type": "proxy-for",
+      "note": "E-field body force mimics partial g"
+    },
+    {
+      "from": "BASS-II",
+      "to": "FM2",
+      "type": "informs",
+      "note": "μg solids → lunar-g solids"
+    }
+  ],
+  "earthSpinoffs": [
+    {
+      "title": "Fine-water-mist extinguishers",
+      "text": "Fine-water-mist extinguishers developed for the ISS have practical uses on Earth.",
+      "pillar": "suppression",
+      "related": [
+        "FLEX",
+        "FLEX-2"
+      ],
+      "basis": "Challenge brief"
+    },
+    {
+      "title": "Smoke detection",
+      "text": "NASA technology has led to improvements in smoke detection on Earth. Microgravity smoke-particle data inform detector design.",
+      "pillar": "detection",
+      "related": [
+        "SAME",
+        "SAME-R",
+        "DAFT"
+      ],
+      "basis": "Challenge brief"
+    },
+    {
+      "title": "Firefighter gear",
+      "text": "NASA technology has improved firefighter protective clothing and air tanks.",
+      "pillar": "suppression",
+      "related": [],
+      "basis": "Challenge brief"
+    },
+    {
+      "title": "Material flammability testing",
+      "text": "Microgravity flammability limits test whether ground-based material screening is conservative, which helps flammability testing on Earth too.",
+      "pillar": "prevention",
+      "related": [
+        "BASS",
+        "BASS-II",
+        "SAFFIRE-II",
+        "ACME-BRE"
+      ],
+      "basis": "Inference from investigation objectives"
+    },
+    {
+      "title": "Cleaner combustion",
+      "text": "Cool-flame and soot chemistry measured without buoyancy feed combustion models used for engines and burners.",
+      "pillar": "prevention",
+      "related": [
+        "CFI",
+        "FLEX",
+        "ACME-CLD",
+        "SPICE"
+      ],
+      "basis": "Inference from investigation objectives"
+    },
+    {
+      "title": "Fire safety in confined spaces",
+      "text": "Saffire grew large fires inside a closed, ventilated cargo module, and SAME characterized smoke without buoyancy. Both bear on places people cannot quickly leave, such as submarines, aircraft cabins and mines.",
+      "pillar": "detection",
+      "related": [
+        "SAFFIRE-I",
+        "SAFFIRE-II",
+        "SAFFIRE-III",
+        "SAME"
+      ],
+      "basis": "Inference from investigation objectives"
+    }
+  ]
+}
