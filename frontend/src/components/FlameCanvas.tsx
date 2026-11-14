@@ -58,17 +58,18 @@ export function FlameCanvas({ g, level, className = "", width = 56, height = 64 
       path.closePath();
       if (tg.level === "unknown") {
         ctx.setLineDash([3, 3]);
-        ctx.strokeStyle = "rgba(126,148,180,0.8)";
+        ctx.strokeStyle = "rgba(138,129,120,0.85)"; // dust, dashed = untested
         ctx.lineWidth = 1.2;
         ctx.stroke(path);
         ctx.setLineDash([]);
       } else {
+        // Ink-sun recolour: 0 g = dim dust sphere → 1 g = warm sun teardrop (no blue)
         const cyMid = base - r;
         const grad = ctx.createRadialGradient(cx, cyMid, r * 0.1, cx, cyMid - tall * 0.3 * gs, Math.max(r, tall));
         const mix = (a: number[], b: number[], k: number) => a.map((v, i) => Math.round(v + (b[i] - v) * k));
-        const inner = mix([140, 200, 255], [255, 236, 190], gs);
-        const mid = mix([40, 120, 255], [255, 150, 50], gs);
-        const outer = mix([20, 70, 220], [226, 85, 43], gs);
+        const inner = mix([239, 234, 227], [255, 224, 138], gs);
+        const mid = mix([163, 154, 144], [255, 210, 63], gs);
+        const outer = mix([74, 69, 64], [224, 165, 30], gs);
         grad.addColorStop(0, `rgba(${inner},0.95)`);
         grad.addColorStop(0.45, `rgba(${mid},0.85)`);
         grad.addColorStop(1, `rgba(${outer},0.0)`);
@@ -77,8 +78,8 @@ export function FlameCanvas({ g, level, className = "", width = 56, height = 64 
         ctx.fillStyle = grad;
         ctx.fill(path);
         ctx.shadowBlur = 0;
-        // blue base, as seen on real flames
-        ctx.fillStyle = "rgba(60,130,255,0.35)";
+        // cool dust base at the foot of the flame
+        ctx.fillStyle = "rgba(194,186,176,0.3)";
         ctx.beginPath();
         ctx.ellipse(cx, base - r * 0.25, r * 0.55, r * 0.22, 0, 0, Math.PI * 2);
         ctx.fill();

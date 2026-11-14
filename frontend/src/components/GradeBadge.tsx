@@ -35,11 +35,20 @@ export function GradeBadge({ grade, size = "md", showReason = false, inert = fal
   const st = GRADE_STYLE[grade.letter];
   const target = inert ? undefined : grade.basis[0];
   const title = `Evidence grade ${grade.letter} (${st.meaning}): ${grade.reason}.${target ? ` Click to open ${target}.` : ""}`;
+  const lit = { A: 4, B: 3, C: 2, M: 1 }[grade.letter];
   const body = showReason ? (
     <span className="flex min-w-0 items-center gap-3.5 text-left">
       <Stamp letter={grade.letter} size={size} />
       <span className="min-w-0 leading-snug">
-        <span className="block font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: st.color }}>Confidence {grade.letter}</span>
+        <span className="flex items-center gap-2 font-mono text-[11px]" style={{ color: st.color }}>
+          Confidence {grade.letter}
+          <span className="flex items-center gap-[3px]" aria-hidden>
+            {[0, 1, 2, 3].map((i) => (
+              <span key={i} className="h-1.5 w-5 rounded-full" style={{ background: i < lit ? st.color : "rgba(138,129,120,0.25)" }} />
+            ))}
+          </span>
+        </span>
+        <span className="mt-0.5 block text-[12.5px] text-dust-400">{st.meaning}</span>
         <span className="block text-[13px] text-slate-300">{grade.reason}</span>
       </span>
     </span>

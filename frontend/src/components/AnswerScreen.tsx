@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
-import { ArrowUp, Box, ChevronDown, FileDown, RefreshCw, RotateCcw, SlidersHorizontal } from "lucide-react";
+import { ArrowUp, Box, ChevronDown, FileDown, Flame, RefreshCw, RotateCcw, SlidersHorizontal } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { buildVerdict, fmtPressure, LEVEL_STYLE, levelRose } from "@/lib/answer";
@@ -11,6 +11,7 @@ import { useMission } from "@/lib/mission";
 import type { MaterialVerdict, RiskLevel } from "@/lib/types";
 import { useInView, useWebGL } from "@/lib/webgl";
 import { AnswerPipeline } from "./AnswerPipeline";
+import { ConditionReadout } from "./ConditionGauges";
 import { FlameCanvas } from "./FlameCanvas";
 import { GradeBadge } from "./GradeBadge";
 import { MissionTimeline } from "./MissionTimeline";
@@ -71,6 +72,8 @@ function Verdict() {
         {analysis ? <GradeBadge grade={analysis.coverage.grade} size="lg" showReason /> : <Skeleton className="h-14 w-72" />}
       </div>
 
+      {analysis ? <ConditionReadout /> : <Skeleton className="mt-6 h-24 w-full" />}
+
       <div className="mt-8 flex flex-wrap items-center gap-3">
         <a href={passport} target="_blank" rel="noreferrer" className="btn btn-primary"><FileDown className="h-4 w-4" />Get Fire Passport</a>
         <button onClick={() => setAdjust((x) => !x)} aria-expanded={adjust} className="btn btn-ghost">
@@ -127,20 +130,32 @@ function HeroFlame() {
 }
 
 /* ───────────────────────── materials ───────────────────────── */
+const RISK_FILL: Record<RiskLevel, number> = { high: 100, elevated: 65, low: 30, unknown: 0 };
+
 function MaterialCard({ m, g, rose }: { m: MaterialVerdict; g: number; rose: boolean }) {
   const lv = LEVEL_STYLE[m.level];
+  const unknown = m.level === "unknown";
   return (
     <motion.li layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       transition={{ duration: 0.28, ease: EASE }}
-      className="relative flex min-h-[76px] items-center gap-3 overflow-hidden rounded-[14px] bg-space-900/70 py-3 pl-4 pr-3"
-      style={{ boxShadow: rose ? "0 0 0 1.5px #FFD23F, 0 0 24px -6px var(--sun-glow)" : undefined }}>
-      <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: lv.color }} />
+      className={`relative flex min-h-[76px] items-center gap-3 overflow-hidden rounded-[14px] py-3 pl-4 pr-3 ${unknown ? "border border-dashed border-dust-500/55 bg-ink-900/40" : "bg-ink-900/70"}`}
+      style={{ boxShadow: rose ? "0 0 0 1.5px var(--sun-500), 0 0 22px -6px var(--sun-glow)" : undefined }}>
+      {unknown && <span aria-hidden className="hatch pointer-events-none absolute inset-0 opacity-25" />}
+      {!unknown && <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: lv.color }} />}
       <FlameCanvas g={g} level={m.level} width={34} height={44} />
-      <div className="min-w-0 flex-1">
+      <div className="relative min-w-0 flex-1">
         <div className="line-clamp-2 text-[14px] font-semibold leading-snug text-ink" title={`${m.name}: ${m.usedFor}`}>{m.name}</div>
-        <div className="mt-0.5 flex items-center gap-1 text-[12.5px]" style={{ color: lv.color }} title={m.why}>
+        <div className="mt-1 flex items-center gap-1.5 text-[12px]" style={{ color: lv.color }} title={m.why}>
+          {unknown
+            ? <span className="grid h-3.5 w-3.5 place-items-center rounded-full border border-dust-500 text-[9px] font-semibold text-dust-400">?</span>
+            : <Flame className="h-3.5 w-3.5" fill={lv.flame === "solid" ? "currentColor" : "none"} strokeWidth={lv.flame === "none" ? 1.5 : 2} />}
           {lv.label}{rose && <ArrowUp className="h-3.5 w-3.5" aria-label="risk went up" />}
         </div>
+        {!unknown && (
+          <div className="mt-1.5 h-1.5 w-full max-w-[120px] overflow-hidden rounded-full" style={{ background: "rgba(138,129,120,0.2)" }}>
+            <div className="h-full rounded-full" style={{ width: `${RISK_FILL[m.level]}%`, background: lv.color, boxShadow: lv.glow ? "0 0 10px var(--sun-glow)" : undefined }} />
+          </div>
+        )}
       </div>
       <GradeBadge grade={m.grade} size="sm" />
     </motion.li>
@@ -176,11 +191,16 @@ function Materials() {
           <h2 className="font-display text-[20px] font-semibold text-ink">Will your things burn here?</h2>
           <p className="mt-1 flex flex-wrap items-center gap-2 text-[13px] text-mute">
             Highest risk first. <Evidence kind="illustrative" label="illustrative model" />
-            {unrated && <span className="text-amber-200/90" title="Add sourced oxygen thresholds to data/seed/materials.json (see docs/OPEN_QUESTIONS.md).">Thresholds not loaded yet.</span>}
           </p>
         </div>
         <div className="w-full sm:w-[360px]"><StowageSearch /></div>
       </div>
+      {unrated && (
+        <div className="mb-4 flex items-start gap-2.5 rounded-[12px] border border-dashed border-dust-500/55 bg-ink-900/40 px-4 py-3 text-[13px] text-dust-300">
+          <span aria-hidden className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border border-dust-500 text-[10px] text-dust-400">?</span>
+          <span>Oxygen thresholds for these materials aren’t loaded, so risk can’t be rated — the tiles below show the <strong className="text-dust-100">unknown</strong> state, which is not the same as safe. Add sourced thresholds to <code className="text-dust-200">data/seed/materials.json</code>.</span>
+        </div>
+      )}
       <LayoutGroup>
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {!mats && [...Array(VISIBLE_MATERIALS)].map((_, i) => <li key={i}><Skeleton className="h-[68px] !rounded-[14px]" /></li>)}
