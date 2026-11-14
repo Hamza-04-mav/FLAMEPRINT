@@ -14,6 +14,7 @@ import { FlameCanvas } from "./FlameCanvas";
 import { GradeBadge } from "./GradeBadge";
 import { MissionTimeline } from "./MissionTimeline";
 import { StowageSearch } from "./StowageInspector";
+import { TiltCard } from "./TiltCard";
 import { Evidence, Skeleton, Slider } from "./ui";
 
 const FlameMorph = dynamic(() => import("./FlameMorph"), { ssr: false });
@@ -37,7 +38,7 @@ function Verdict() {
   }).toString()}`;
 
   return (
-    <section className="panel flex min-w-0 flex-col p-6 sm:p-8">
+    <TiltCard as="section" className="panel flex min-w-0 flex-col p-6 sm:p-8">
       <div className="font-mono text-[12px] text-mute">
         {name} <span className="text-slate-500">· {Math.round(scenario.o2Pct)}% O₂ · {p.psi} <span className="text-[10px]">({Math.round(scenario.pressureKpa)} kPa)</span> · {fmtGravity(scenario.gravityG)} g</span>
         {hab?.assumed && <span className="ml-2 align-middle"><Evidence kind="estimate" label="assumed" /></span>}
@@ -79,7 +80,7 @@ function Verdict() {
           </motion.div>
         )}
       </AnimatePresence>
-    </section>
+    </TiltCard>
   );
 }
 
