@@ -19,8 +19,6 @@ function scenarioFrom(q: URLSearchParams, habitats: Habitat[]): { sc: Scenario; 
   };
 }
 
-const strip = (md: string) => md.replace(/^- /, "").replace(/\*\*?([^*]+)\*\*?/g, "$1").replace(/\s*\*\(([^)]*)\)\*/g, " ($1)");
-
 function Grade({ letter }: { letter: keyof typeof GRADE_STYLE }) {
   const c = { A: "#047857", B: "#0369a1", C: "#b45309", M: "#475569" }[letter];
   return <span className="inline-grid h-6 w-6 place-items-center rounded border font-bold" style={{ color: c, borderColor: c }}>{letter}</span>;
@@ -115,7 +113,7 @@ export default function PassportPage() {
         </div>
 
         <section className="mt-4">
-          <h2 className="pp-h">Most relevant PSI investigations</h2>
+          <h2 className="pp-h">Most relevant PSI investigations <span className="font-normal text-slate-500">(catalog ranges, approx)</span></h2>
           <table className="pp-table">
             <thead><tr><th>#</th><th>PSI id</th><th>Investigation</th><th>Relevance</th><th>Grade</th></tr></thead>
             <tbody>
@@ -126,10 +124,6 @@ export default function PassportPage() {
           </table>
         </section>
 
-        <section className="mt-4">
-          <h2 className="pp-h">Atmosphere notes</h2>
-          <ul className="list-disc space-y-0.5 pl-5 text-[12px]">{a.briefPreview.map((l) => <li key={l}>{strip(l)}</li>)}</ul>
-        </section>
 
         <footer className="mt-5 border-t border-slate-300 pt-2 text-[10.5px] leading-snug text-slate-600">
           Independent project, not NASA-endorsed. Values marked illustrative or modeled must be verified against PSI.
