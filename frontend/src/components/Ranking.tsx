@@ -4,74 +4,57 @@ import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { ChevronDown, FileSearch, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { rankReason } from "@/lib/answer";
-import { fmtRange, scoreColor, toPsi } from "@/lib/format";
+import { fmtRange, toPsi } from "@/lib/format";
 import { DEFAULT_WEIGHTS, useMission } from "@/lib/mission";
-import type { Factor, Ranked, Weights } from "@/lib/types";
+import type { Ranked, Weights } from "@/lib/types";
 import { GradeBadge } from "./GradeBadge";
 import { ConfidenceBadge, PageHeader, Skeleton, Slider } from "./ui";
 
-export const FACTOR_COLOR: Record<keyof Weights, string> = {
+const FACTOR_COLOR: Record<keyof Weights, string> = {
   o2: "#19C9FF", pressure: "#087BFF", flow: "#8FD8FF", material: "#FF8B32", pillar: "#FFC15B", gravity: "#A5B8D2",
 };
 const FACTOR_NAME: Record<keyof Weights, string> = {
-  o2: "O₂ proximity", pressure: "Pressure proximity", flow: "Flow compatibility", material: "Material compatibility",
-  pillar: "Safety focus", gravity: "Gravity compatibility",
+  o2: "Oxygen match", pressure: "Pressure match", flow: "Airflow match", material: "Fuel or material match",
+  pillar: "Safety area match", gravity: "Gravity match",
 };
-const FACTOR_SHORT: Record<keyof Weights, string> = { o2: "O₂", pressure: "Pressure", flow: "Flow", material: "Material", gravity: "Gravity", pillar: "Focus" };
 const ORDER: (keyof Weights)[] = ["o2", "pressure", "flow", "material", "gravity", "pillar"];
-const COLS = "md:grid-cols-[40px_minmax(0,1fr)_44px_72px_96px_24px]";
-const COLS_FACTORS = "md:grid-cols-[40px_minmax(170px,1.5fr)_44px_72px_repeat(6,minmax(52px,1fr))_96px_24px]";
+const TOP = 5;
+const EASE = [0.2, 0.7, 0.2, 1] as const;
 
-function FactorCell({ f }: { f?: Factor }) {
-  if (!f) return <span className="text-slate-600">–</span>;
-  const pct = Math.round(f.score * 100);
-  return (
-    <div title={`${f.label}: ${pct}% · ${f.why}`} className="pr-2">
-      <div className="font-mono text-[11.5px] tabular-nums text-slate-200">{pct}</div>
-      <div className="mt-1 h-[3px] overflow-hidden rounded-full bg-slate-800">
-        <motion.div className="h-full rounded-full" style={{ background: FACTOR_COLOR[f.key], opacity: f.confidence === "unknown" ? 0.45 : 1 }}
-          animate={{ width: `${pct}%` }} transition={{ duration: 0.5 }} />
-      </div>
-    </div>
-  );
-}
-
+/** Expanded row: the six factor bars, the tested range and the dossier link. No nested boxes. */
 function Breakdown({ r, onOpen }: { r: Ranked; onOpen: () => void }) {
   const ws = r.factors.reduce((a, f) => a + f.weight, 0) || 1;
+  // ordered by how much each factor adds to the score
   const contrib = r.factors.map((f) => ({ f, pts: (100 * f.weight * f.score) / ws })).sort((a, b) => b.pts - a.pts);
+  const p = r.envelope.pressureKpa;
   return (
-    <div className="grid gap-5 border-t border-[var(--line)] p-4 lg:grid-cols-[1.2fr_1fr] sm:p-5">
-      <div>
-        <div className="label mb-3">How the score is built</div>
-        <div className="space-y-2.5">
-          {contrib.map(({ f, pts }) => (
-            <div key={f.key}>
-              <div className="flex items-baseline justify-between text-[12.5px]">
-                <span className="flex items-center gap-2 text-slate-200"><span className="h-2 w-2 rounded-[2px]" style={{ background: FACTOR_COLOR[f.key] }} />{FACTOR_NAME[f.key]}</span>
-                <span className="font-mono text-[11.5px] text-mute">{Math.round(f.score * 100)}% × {Math.round((f.weight / ws) * 100)}% = <span className="text-ink">{pts.toFixed(1)}</span></span>
-              </div>
-              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-800">
-                <motion.div className="h-full rounded-full" style={{ background: FACTOR_COLOR[f.key] }} initial={{ width: 0 }} animate={{ width: `${pts}%` }} transition={{ duration: 0.6 }} />
-              </div>
-              <p className="mt-1 text-[11.5px] leading-snug text-slate-500">{f.why}</p>
+    <div className="grid gap-x-10 gap-y-6 px-5 pb-6 pt-1 sm:px-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+      <ul className="space-y-3">
+        {contrib.map(({ f }) => (
+          <li key={f.key}>
+            <div className="flex items-baseline justify-between gap-3 text-[13px]">
+              <span className="text-slate-200">{FACTOR_NAME[f.key]}</span>
+              <span className="font-mono text-[11.5px] text-mute">{Math.round(f.score * 100)}%</span>
             </div>
-          ))}
-        </div>
-      </div>
-      <div className="flex flex-col">
-        <div className="label mb-3">Tested range</div>
-        <div className="well divide-y divide-[var(--line)] px-3">
-          {[["O₂", fmtRange(r.envelope.o2Pct, " %")],
-            ["Pressure", r.envelope.pressureKpa ? `${fmtRange([toPsi(r.envelope.pressureKpa[0]), toPsi(r.envelope.pressureKpa[1])], " psi")} (${fmtRange(r.envelope.pressureKpa, " kPa")})` : fmtRange(null, "")],
-            ["Flow", fmtRange(r.envelope.flowCmS, " cm/s")]].map(([k, v]) => (
-            <div key={k} className="flex justify-between py-2 text-[12.5px]"><span className="text-mute">{k}</span><span className="font-mono text-[12px] text-ink">{v}</span></div>
-          ))}
-          <div className="flex items-center justify-between py-2 text-[12.5px]"><span className="text-mute">Evidence</span><span className="flex items-center gap-2"><ConfidenceBadge c={r.envelope.confidence} /><GradeBadge grade={r.grade} size="sm" /></span></div>
-          {r.grade && <div className="py-2 text-[12px] text-mute">Grade {r.grade.letter}: {r.grade.reason}</div>}
-          <div className="flex justify-between py-2 text-[12.5px]"><span className="text-mute">Imported tests near you</span><span className="font-mono text-[12px] text-ink">{r.totalTests ? `${r.nearbyTests} / ${r.totalTests}` : "none imported"}</span></div>
-        </div>
-        <div className="mt-auto flex items-center justify-between pt-4">
-          <span className="font-mono text-[11px] text-slate-500">Σ = {Math.round(r.score)}</span>
+            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-800">
+              <motion.div className="h-full rounded-full" style={{ background: FACTOR_COLOR[f.key], opacity: f.confidence === "unknown" ? 0.5 : 1 }}
+                initial={{ width: 0 }} animate={{ width: `${Math.max(2, f.score * 100)}%` }} transition={{ duration: 0.3, ease: EASE }} />
+            </div>
+            <p className="mt-1 text-[12px] leading-snug text-slate-500">{f.why}</p>
+          </li>
+        ))}
+      </ul>
+      <div className="flex flex-col gap-3 text-[13px]">
+        <div className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-mute">Tested range</div>
+        <dl className="space-y-1.5">
+          <div className="flex justify-between gap-3"><dt className="text-mute">Oxygen</dt><dd className="font-mono text-ink">{fmtRange(r.envelope.o2Pct, "%")}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-mute">Pressure</dt><dd className="font-mono text-ink">{p ? `${fmtRange([toPsi(p[0]), toPsi(p[1])], " psi")}` : fmtRange(null, "")}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-mute">Airflow</dt><dd className="font-mono text-ink">{fmtRange(r.envelope.flowCmS, " cm/s")}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-mute">Relevance</dt><dd className="font-mono text-ink">{Math.round(r.score)} / 100</dd></div>
+        </dl>
+        {r.grade && <p className="text-[12.5px] leading-snug text-mute">Grade {r.grade.letter}: {r.grade.reason}.</p>}
+        <div className="mt-auto flex items-center justify-between gap-3 pt-2">
+          <ConfidenceBadge c={r.envelope.confidence} />
           <button onClick={onOpen} className="btn btn-outline !py-1.5"><FileSearch className="h-4 w-4" />Open dossier</button>
         </div>
       </div>
@@ -79,128 +62,114 @@ function Breakdown({ r, onOpen }: { r: Ranked; onOpen: () => void }) {
   );
 }
 
-export function Ranking() {
-  const { analysis, weights, setWeights, openInvestigation, dataset, habitats, scenario } = useMission();
-  const [open, setOpen] = useState<string | null>(null);
-  const [showPending, setShowPending] = useState(true);
-  const [tuning, setTuning] = useState(false);
-  const cols = tuning ? COLS_FACTORS : COLS;
+function Row({ r, i, open, onToggle, planned }: { r: Ranked; i: number; open: boolean; onToggle: () => void; planned: boolean }) {
+  const { scenario, openInvestigation } = useMission();
+  return (
+    <motion.li layout="position" transition={{ duration: 0.28, ease: EASE }} className={open ? "bg-white/[0.025]" : ""}>
+      <button onClick={onToggle} aria-expanded={open}
+        className="grid w-full grid-cols-[28px_minmax(0,1fr)_auto_20px] items-center gap-4 px-5 py-4 text-left transition-colors duration-150 hover:bg-white/[0.02] sm:px-6">
+        <span className={`font-mono text-[13px] ${i < 3 ? "text-flame-1" : "text-slate-500"}`}>{i + 1}</span>
+        <span className="min-w-0">
+          <span className="flex flex-wrap items-baseline gap-x-2">
+            <span className="font-display text-[16px] font-semibold text-ink">{r.id}</span>
+            <span className="hidden truncate text-[13px] text-slate-500 sm:inline">{r.name}</span>
+            {planned && <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-ox-2">planned</span>}
+          </span>
+          <span className="mt-0.5 block text-[13.5px] leading-snug text-slate-300">{rankReason(r, i, scenario).replace(/^#\d+ because it (\w)/, (_, c: string) => c.toUpperCase())}</span>
+        </span>
+        <span className="flex items-center gap-3">
+          <span className="hidden font-mono text-[10px] uppercase tracking-[0.1em] text-slate-500 sm:inline"
+            title="How the tested range is known: approx = catalog summary, PSI data = imported test records">
+            {r.envelope.confidence === "data" ? "PSI data" : r.envelope.confidence}
+          </span>
+          <GradeBadge grade={r.grade} size="md" inert />
+        </span>
+        <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: EASE }} className="overflow-hidden">
+            <Breakdown r={r} onOpen={() => openInvestigation(r.id)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.li>
+  );
+}
+
+function Scoring({ showPending, setShowPending }: { showPending: boolean; setShowPending: (v: boolean) => void }) {
+  const { weights, setWeights } = useMission();
   const wsum = Object.values(weights).reduce((a, b) => a + b, 0) || 1;
+  return (
+    <div className="grid gap-8 px-5 pb-6 pt-2 sm:px-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+        {ORDER.map((k) => (
+          <Slider key={k} label={FACTOR_NAME[k]} value={weights[k]} min={0} max={1} step={0.05} color={FACTOR_COLOR[k]}
+            display={`${Math.round((weights[k] / wsum) * 100)}`} unit="%" onChange={(v) => setWeights({ ...weights, [k]: v })} />
+        ))}
+      </div>
+      <div className="space-y-3 text-[12.5px] text-mute">
+        <p className="font-mono text-[11.5px] leading-relaxed text-slate-300">score = 100 · Σ wᵢ·sᵢ / Σ wᵢ · sᵢ = exp(−(d/scale)²)</p>
+        <p>d = distance outside the tested range. Approx ranges × 0.92, an untested axis gets 0.3 credit, planned investigations × 0.6.
+          Deterministic code: the language model never sets a score.</p>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={showPending} onChange={(e) => setShowPending(e.target.checked)} className="accent-[#087BFF]" />
+          Include planned investigations (LUCI, FM2)
+        </label>
+        <button onClick={() => setWeights(DEFAULT_WEIGHTS)} className="inline-flex items-center gap-1.5 text-ox hover:underline"><RotateCcw className="h-3.5 w-3.5" />Reset weights</button>
+      </div>
+    </div>
+  );
+}
+
+export function Ranking() {
+  const { analysis, dataset, habitats, scenario } = useMission();
+  const [open, setOpen] = useState<string | null>(null);
+  const [all, setAll] = useState(false);
+  const [tuning, setTuning] = useState(false);
+  const [showPending, setShowPending] = useState(true);
   const pending = new Set(dataset?.investigations.filter((i) => i.status === "pending").map((i) => i.id));
   const rows = (analysis?.ranked ?? []).filter((r) => showPending || !pending.has(r.id));
+  const shown = all ? rows : rows.slice(0, TOP);
   const hab = habitats.find((h) => h.id === scenario.habitatId);
 
   return (
     <div>
-      <PageHeader index="03" kicker="Investigation rankings" title={<>Which experiments matter for <span className="text-ox">{hab?.name ?? "this mission"}</span></>}>
-        Every row says in one sentence why it ranks where it does, with an evidence grade. Expand a row to audit the score.
+      <PageHeader kicker="Evidence" title="Which NASA experiments back this up?">
+        The {TOP} investigations closest to {hab ? `the ${hab.name}` : "this habitat"}, each with an evidence grade.
       </PageHeader>
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <button onClick={() => setTuning((v) => !v)} aria-expanded={tuning} className={`btn ${tuning ? "btn-outline" : "btn-ghost border border-[var(--line)]"} !py-1.5`}>
-          <SlidersHorizontal className="h-4 w-4" />Adjust scoring<ChevronDown className={`h-4 w-4 transition-transform ${tuning ? "rotate-180" : ""}`} />
-        </button>
-        <label className="flex items-center gap-2 text-[12.5px] text-mute">
-          <input type="checkbox" checked={showPending} onChange={(e) => setShowPending(e.target.checked)} className="accent-[#087BFF]" />
-          Include planned investigations (LUCI, FM2)
-        </label>
-      </div>
-
-      <div className={`grid gap-5 ${tuning ? "xl:grid-cols-[minmax(0,1fr)_320px]" : ""}`}>
-        <section className="panel overflow-hidden">
-          {/* header row */}
-          <div className={`hidden items-end gap-2 border-b border-[var(--line)] px-4 py-3 md:grid ${cols}`}>
-            <span className="label !text-[9.5px]">#</span>
-            <span className="label !text-[9.5px]">Investigation</span>
-            <span className="label !text-[9.5px]">Grade</span>
-            <span className="label !text-[9.5px]">Relevance</span>
-            {tuning && ORDER.map((k) => (
-              <span key={k} className="label flex items-center gap-1.5 !text-[9.5px]"><span className="h-1.5 w-1.5 rounded-[1px]" style={{ background: FACTOR_COLOR[k] }} />{FACTOR_SHORT[k]}</span>
+      <section className="panel overflow-hidden">
+        {!analysis && <div className="space-y-2 p-5">{[...Array(TOP)].map((_, i) => <Skeleton key={i} className="h-16" />)}</div>}
+        <LayoutGroup>
+          <ol className="divide-y divide-[var(--line)]">
+            {shown.map((r, i) => (
+              <Row key={r.id} r={r} i={i} planned={pending.has(r.id)} open={open === r.id} onToggle={() => setOpen(open === r.id ? null : r.id)} />
             ))}
-            <span className="label !text-[9.5px]">Evidence</span>
-            <span />
-          </div>
-          {!analysis && <div className="space-y-2 p-4">{[...Array(8)].map((_, i) => <Skeleton key={i} className="h-14" />)}</div>}
-          <LayoutGroup>
-            <ol>
-              {rows.map((r, i) => {
-                const isOpen = open === r.id;
-                const top = i < 3;
-                const fx = new Map(r.factors.map((f) => [f.key, f]));
-                return (
-                  <motion.li layout key={r.id} transition={{ type: "spring", stiffness: 280, damping: 32 }}
-                    className={`relative border-b border-[var(--line)] last:border-0 ${isOpen ? "bg-blue/[0.06]" : "hover:bg-white/[0.02]"}`}>
-                    {top && <span className="absolute inset-y-0 left-0 w-[2px] bg-flame-2" />}
-                    <button onClick={() => setOpen(isOpen ? null : r.id)} aria-expanded={isOpen}
-                      className={`grid w-full grid-cols-[32px_1fr_auto_auto_20px] items-center gap-2 px-4 py-3 text-left ${cols}`}>
-                      <span className={`font-mono text-[12px] ${top ? "text-flame-2" : "text-slate-500"}`}>{String(i + 1).padStart(2, "0")}</span>
-                      <span className="min-w-0">
-                        <span className="flex items-center gap-2">
-                          <span className="font-display text-[15px] font-semibold text-ink">{r.id}</span>
-                          {pending.has(r.id) && <span className="rounded-[4px] border border-ox-2/40 px-1.5 font-mono text-[9.5px] uppercase text-ox-2">planned</span>}
-                          <span className="hidden truncate text-[11.5px] text-slate-500 sm:inline">{r.name}</span>
-                        </span>
-                        <span className="block text-[12.5px] leading-snug text-slate-300">{rankReason(r, i, scenario)}</span>
-                      </span>
-                      <span className="flex justify-start"><GradeBadge grade={r.grade} size="sm" inert /></span>
-                      <span className="flex items-center gap-2">
-                        <span className="font-display text-[22px] font-semibold tabular-nums" style={{ color: top ? "#FFC15B" : scoreColor(r.score) }}>{Math.round(r.score)}</span>
-                      </span>
-                      {tuning && ORDER.map((k) => <span key={k} className="hidden md:block"><FactorCell f={fx.get(k)} /></span>)}
-                      <span className="hidden md:block"><ConfidenceBadge c={r.envelope.confidence} /></span>
-                      <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
-                      {/* compact contribution bar on mobile */}
-                      <span className="col-span-5 flex h-1.5 overflow-hidden rounded-full bg-slate-800 md:hidden">
-                        {r.factors.map((f) => (
-                          <motion.span key={f.key} animate={{ width: `${(f.weight * f.score * 100) / wsum}%` }} style={{ background: FACTOR_COLOR[f.key] }} className="block h-full" />
-                        ))}
-                      </span>
-                    </button>
-                    <AnimatePresence initial={false}>
-                      {isOpen && (
-                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.28 }} className="overflow-hidden">
-                          <Breakdown r={r} onOpen={() => openInvestigation(r.id)} />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.li>
-                );
-              })}
-            </ol>
-          </LayoutGroup>
-        </section>
+          </ol>
+        </LayoutGroup>
+      </section>
 
-        {tuning && <aside className="space-y-5 xl:sticky xl:top-[112px] xl:self-start">
-          <section className="panel p-5">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display text-[16px] font-semibold text-ink">Factor weights</h3>
-              <button onClick={() => setWeights(DEFAULT_WEIGHTS)} className="flex items-center gap-1.5 text-[12px] text-mute hover:text-ox"><RotateCcw className="h-3.5 w-3.5" />Reset</button>
-            </div>
-            {/* weight distribution */}
-            <div className="mt-4 flex h-2 overflow-hidden rounded-full">
-              {ORDER.map((k) => <motion.span key={k} animate={{ width: `${(weights[k] / wsum) * 100}%` }} style={{ background: FACTOR_COLOR[k] }} className="block h-full" />)}
-            </div>
-            <div className="mt-5 space-y-4">
-              {ORDER.map((k) => (
-                <Slider key={k} label={FACTOR_NAME[k]} value={weights[k]} min={0} max={1} step={0.05} color={FACTOR_COLOR[k]}
-                  display={`${Math.round((weights[k] / wsum) * 100)}`} unit="%" onChange={(v) => setWeights({ ...weights, [k]: v })} />
-              ))}
-            </div>
-          </section>
-          <section className="panel p-5">
-            <div className="label mb-2">Scoring model</div>
-            <div className="well p-3 font-mono text-[11px] leading-relaxed text-slate-300">
-              score = 100 · Σ wᵢ·sᵢ / Σ wᵢ<br />
-              sᵢ = exp(−(d/scale)²)<br />
-              <span className="text-slate-500">d = distance outside the tested range</span>
-            </div>
-            <ul className="mt-3 space-y-1 text-[11.5px] text-mute">
-              <li>approx tested ranges × 0.92</li><li>uncharacterized axis → 0.3 credit</li><li>planned, not yet in PSI × 0.6</li>
-            </ul>
-            <p className="mt-3 text-[11.5px] leading-snug text-slate-500">Deterministic code. The language model never sets a score.</p>
-          </section>
-        </aside>}
+      <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+        {rows.length > TOP && (
+          <button onClick={() => setAll((x) => !x)} aria-expanded={all} className="btn btn-ghost !px-0">
+            {all ? "Show top 5 only" : `Show all ${rows.length}`}<ChevronDown className={`h-4 w-4 transition-transform duration-200 ${all ? "rotate-180" : ""}`} />
+          </button>
+        )}
+        <button onClick={() => setTuning((x) => !x)} aria-expanded={tuning} className="btn btn-ghost !px-0">
+          <SlidersHorizontal className="h-4 w-4" />Adjust scoring<ChevronDown className={`h-4 w-4 transition-transform duration-200 ${tuning ? "rotate-180" : ""}`} />
+        </button>
       </div>
+
+      <AnimatePresence initial={false}>
+        {tuning && (
+          <motion.section initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: EASE }} className="panel mt-4 overflow-hidden">
+            <Scoring showPending={showPending} setShowPending={setShowPending} />
+          </motion.section>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
