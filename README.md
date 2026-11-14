@@ -3,6 +3,8 @@
 **Fire-safety insights from NASA microgravity combustion data, starting from the mission instead of the database.**
 NASA Space Apps Challenge 2026 · *Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data*
 
+> **New to the project?** Read [`CONTEXT.md`](CONTEXT.md) first: goal, status, architecture, rules and what's left.
+
 > **Is my habitat safe from fire, and how sure are we?** Pick where your crew will live (ISS, Moon base, spacesuit, rover,
 > Mars) and FLAMEPRINT answers on the first screen: which materials are high risk there, with an evidence grade from A to M
 > that says how much NASA PSI data stands behind that answer. Then it shows what NASA should test next.
