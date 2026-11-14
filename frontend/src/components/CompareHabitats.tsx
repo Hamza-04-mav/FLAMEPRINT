@@ -5,7 +5,7 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { fmtPressure, LEVEL_STYLE, levelRose } from "@/lib/answer";
 import { api, ApiError } from "@/lib/api";
-import { SEVERITY_COLOR } from "@/lib/format";
+import { clamp, fmtGravity, SEVERITY_COLOR, toPsi } from "@/lib/format";
 import { useMission } from "@/lib/mission";
 import type { CompareHabitatsResult, Habitat, Scenario } from "@/lib/types";
 import { Genome } from "./Genome";
@@ -27,7 +27,7 @@ function Pick({ value, onChange, habitats, label }: { value: string; onChange: (
         className="mt-1.5 w-full rounded-[10px] border border-[var(--line-strong)] bg-space-950 px-3 py-2.5 font-display text-[17px] font-semibold text-ink focus:border-ox/60 focus:outline-none">
         {habitats.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
       </select>
-      {h && p && <span className="mt-1.5 block font-mono text-[12px] text-slate-500">{Math.round(h.o2Pct)}% O₂ · {p.psi} · {h.gravityG} g</span>}
+      {h && p && <span className="mt-1.5 block font-mono text-[12px] text-slate-500">{Math.round(h.o2Pct)}% O₂ · {p.psi} · {fmtGravity(h.gravityG)} g</span>}
     </label>
   );
 }
@@ -37,6 +37,48 @@ function Toggle({ open, onClick, children }: { open: boolean; onClick: () => voi
     <button onClick={onClick} aria-expanded={open} className="btn btn-ghost !px-0">
       {children}<ChevronDown className={`h-4 w-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
     </button>
+  );
+}
+
+/** Both habitats overlaid on each atmosphere axis: A = dust marker, B = sun marker, with the delta. */
+function AxisCompare({ ha, hb }: { ha: Habitat; hb: Habitat }) {
+  const rows = [
+    { k: "Oxygen", a: ha.o2Pct, b: hb.o2Pct, min: 10, max: 100, fmt: (v: number) => `${Math.round(v)}%` },
+    { k: "Pressure", a: toPsi(ha.pressureKpa), b: toPsi(hb.pressureKpa), min: 0, max: 16, fmt: (v: number) => `${v} psi` },
+    { k: "Airflow", a: ha.flowCmS, b: hb.flowCmS, min: 0, max: 60, fmt: (v: number) => `${+v.toFixed(1)} cm/s` },
+    { k: "Gravity", a: ha.gravityG, b: hb.gravityG, min: 0, max: 1, fmt: (v: number) => `${fmtGravity(v)} g` },
+  ];
+  const pos = (v: number, min: number, max: number) => clamp(((v - min) / (max - min)) * 100, 0, 100);
+  return (
+    <section className="panel p-5 sm:p-6">
+      <div className="mb-4 flex items-center gap-4 text-[12px] text-dust-400">
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-dust-400" />{ha.short}</span>
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-sun shadow-[0_0_8px_var(--sun-glow)]" />{hb.short}</span>
+      </div>
+      <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+        {rows.map((r) => {
+          const pa = pos(r.a, r.min, r.max), pb = pos(r.b, r.min, r.max);
+          const up = r.b > r.a, same = Math.abs(r.b - r.a) < 1e-6;
+          return (
+            <div key={r.k}>
+              <div className="mb-1 flex items-baseline justify-between text-[12px]">
+                <span className="text-dust-400">{r.k}</span>
+                <span className="flex items-center gap-1.5 font-mono tabular-nums">
+                  <span className="text-dust-300">{r.fmt(r.a)}</span>
+                  {!same && <ArrowRight className={`h-3 w-3 ${up ? "-rotate-45 text-sun" : "rotate-45 text-dust-400"}`} />}
+                  <span className="text-dust-100">{r.fmt(r.b)}</span>
+                </span>
+              </div>
+              <div className="relative h-2 rounded-full" style={{ background: "rgba(138,129,120,0.16)" }}>
+                {!same && <span className="absolute inset-y-0 rounded-full" style={{ left: `${Math.min(pa, pb)}%`, width: `${Math.abs(pb - pa)}%`, background: "rgba(163,154,144,0.35)" }} />}
+                <span className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-dust-400 ring-1 ring-ink-900" style={{ left: `${pa}%` }} />
+                <span className="absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ left: `${pb}%`, background: "var(--sun-500)", boxShadow: "0 0 0 1px var(--sun-ring), 0 0 12px 2px var(--sun-glow)" }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -73,6 +115,8 @@ function HabitatDiff() {
         <ArrowRight className="mx-auto mb-3 h-5 w-5 shrink-0 rotate-90 text-mute sm:rotate-0" aria-hidden />
         <Pick value={b} onChange={setB} habitats={habitats} label="To" />
       </section>
+
+      {ha && hb && <div className="mt-4"><AxisCompare ha={ha} hb={hb} /></div>}
 
       {!res ? <Skeleton className="mt-6 h-64" /> : (
         <section className="panel mt-6 grid grid-cols-1 gap-8 p-6 sm:p-8 lg:grid-cols-3">

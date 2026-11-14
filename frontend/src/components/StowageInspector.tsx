@@ -113,7 +113,7 @@ export function StowageSearch() {
   return (
     <div className="relative">
       <form onSubmit={(e) => { e.preventDefault(); void s.run(s.item); }} className="relative">
-        <Luggage className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-flame-1" />
+        <Luggage className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-dust-400" />
         <input value={s.item} onChange={(e) => s.setItem(e.target.value)} maxLength={200}
           onKeyDown={(e) => e.key === "Escape" && close()}
           placeholder="Can I bring this aboard? e.g. foam pillow" aria-label="Can I bring this aboard? Type an item"
@@ -157,7 +157,14 @@ export function StowageInspector() {
           <AnimatePresence mode="wait">
             {s.err ? <p key="e" className="text-[13px] text-rose-300">{s.err}</p>
               : s.res ? <ResultCard res={s.res} g={scenario.gravityG} habitatName={name} />
-              : <p key="h" className="text-[13px] text-mute">Try one of the examples above.</p>}
+              : (
+                <div key="h" className="flex flex-col items-center gap-3 py-8 text-center">
+                  <span className="grid h-16 w-16 place-items-center rounded-full border border-dashed border-dust-500/50">
+                    <Luggage className="h-7 w-7 text-dust-400" />
+                  </span>
+                  <p className="max-w-xs text-[13px] text-mute">Type any item — a foam pillow, a laptop, a cotton shirt — to see the closest NASA-tested material and its fire risk in {name}.</p>
+                </div>
+              )}
           </AnimatePresence>
         </div>
       </div>

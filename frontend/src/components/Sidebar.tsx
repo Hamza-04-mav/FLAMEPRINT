@@ -125,7 +125,7 @@ function ToolsMenu({ rail, onNavigate }: { rail: boolean; onNavigate?: () => voi
 
 function Panel({ rail, onNavigate }: { rail: boolean; onNavigate?: () => void }) {
   return (
-    <div className={`flex h-full flex-col ${rail ? "items-stretch px-3 py-5" : "px-4 py-6"}`}>
+    <div className={`flex h-full flex-col ${rail ? "items-stretch px-3 pb-16 pt-5" : "px-4 pb-16 pt-6"}`}>
       <div className={rail ? "" : "px-1"}><Logo compact={rail} /></div>
       <nav aria-label="Pages" className={`flex flex-col gap-1 ${rail ? "mt-8" : "mt-10"}`}>
         {NAV.filter((n) => n.group === "main").map((n) => <NavItem key={n.id} item={n} rail={rail} onNavigate={onNavigate} />)}
