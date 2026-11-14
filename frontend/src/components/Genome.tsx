@@ -74,7 +74,7 @@ function layout(nodes: GenomeNode[], edges: GenomeEdge[]): P[] {
   return pts.map((p) => ({ ...p, x: 30 + (p.x - minX) * s + ((W - 60) - (maxX - minX) * s) / 2, y: 25 + (p.y - minY) * s + ((H - 50) - (maxY - minY) * s) / 2 }));
 }
 
-export function Genome() {
+export function Genome({ embedded = false }: { embedded?: boolean }) {
   const { openInvestigation, dataVersion, dataset } = useMission();
   const [graph, setGraph] = useState<{ nodes: GenomeNode[]; edges: GenomeEdge[] } | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -126,10 +126,11 @@ export function Genome() {
 
   return (
     <div>
-      <PageHeader index="05" kicker="Compare experiments" title="Hardware lineage & scientific ancestry">
-        Facilities host apparatus, and apparatus host investigations. Experiments on the same hardware differ only in conditions and fuels, so they compare directly.
-        Select any node to inspect it.
-      </PageHeader>
+      {embedded
+        ? <p className="mb-5 text-[14px] text-mute">Experiments on the same hardware differ only in conditions and fuels. Select a node to inspect or compare it.</p>
+        : <PageHeader kicker="Compare experiments" title="How do two experiments differ?">
+            Experiments on the same hardware differ only in conditions and fuels. Select a node to inspect or compare it.
+          </PageHeader>}
       {err && <div className="mb-4"><ErrorNote message={err} /></div>}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
