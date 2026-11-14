@@ -1,106 +1,115 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
+import { OUTCOME_COLOR } from "@/lib/format";
 import { useMission } from "@/lib/mission";
-import { OUTCOME_COLOR, PHASE_COLOR } from "@/lib/format";
 import type { ConditionSpace } from "@/lib/types";
 import { EvidenceMark } from "./ui";
 
-const W = 560, H = 300, PAD = { l: 44, r: 14, t: 14, b: 34 };
+const W = 700, H = 420, PAD = { l: 58, r: 16, t: 16, b: 54 };
 const X_MAX = 60, Y_MIN = 10, Y_MAX = 50;
-const sx = (v: number) => PAD.l + (Math.min(v, X_MAX) / X_MAX) * (W - PAD.l - PAD.r);
+const sx = (v: number) => PAD.l + (Math.min(Math.max(v, 0), X_MAX) / X_MAX) * (W - PAD.l - PAD.r);
 const sy = (v: number) => H - PAD.b - ((Math.min(Math.max(v, Y_MIN), Y_MAX) - Y_MIN) / (Y_MAX - Y_MIN)) * (H - PAD.t - PAD.b);
 
-/** O₂ × flow plane: catalog envelopes, imported PSI test outcomes, the schematic limiting-O₂ curve and the scenario. */
-export function FlammabilityMap({ space }: { space: ConditionSpace | null }) {
+/**
+ * Oxygen × airflow gap map. The whole plot is dark "untested" space; tested ranges light up softly where they exist;
+ * the habitat is a glowing dot. Optional: the schematic limiting-O₂ curve (teaching aid) and the full legend.
+ */
+export function FlammabilityMap({ space, missionName = "your habitat", showCurve = false, detailed = false }: {
+  space: ConditionSpace | null; missionName?: string; showCurve?: boolean; detailed?: boolean;
+}) {
   const { scenario, analysis } = useMission();
+  const uid = useId().replace(/:/g, "");
   const uEff = analysis?.readout.effectiveFlowCmS ?? scenario.flowCmS;
-
-  const curve = useMemo(() => {
-    if (!space) return "";
-    return space.schematicCurve.filter((p) => p.flowCmS <= X_MAX)
-      .map((p, i) => `${i ? "L" : "M"}${sx(p.flowCmS).toFixed(1)},${sy(p.o2Pct).toFixed(1)}`).join(" ");
-  }, [space]);
-
+  const curve = useMemo(() => !space ? "" : space.schematicCurve.filter((p) => p.flowCmS <= X_MAX)
+    .map((p, i) => `${i ? "L" : "M"}${sx(p.flowCmS).toFixed(1)},${sy(p.o2Pct).toFixed(1)}`).join(" "), [space]);
   const boxes = (space?.envelopes ?? []).filter((e) => e.envelope.o2Pct && e.envelope.flowCmS && e.status !== "pending");
+  const tests = (space?.tests ?? []).filter((t) => t.flowCmS != null);
+  const plotW = W - PAD.l - PAD.r, plotH = H - PAD.t - PAD.b;
+  const mx = sx(uEff), my = sy(scenario.o2Pct);
+  const labelLeft = mx > W - 190;
 
   return (
-    <div className="relative">
-      <svg viewBox={`0 0 ${W} ${H}`} className="hud-frame w-full" role="img" aria-label="Oxygen versus flow coverage map">
-        {/* grid */}
+    <div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
+        aria-label={`Oxygen versus airflow: tested ranges and ${missionName} at ${Math.round(scenario.o2Pct)}% oxygen, ${uEff.toFixed(0)} centimetres per second`}>
+        <defs>
+          <pattern id={`void${uid}`} width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="9" stroke="#566C8E" strokeOpacity="0.16" strokeWidth="1" />
+          </pattern>
+          <radialGradient id={`glow${uid}`}>
+            <stop offset="0" stopColor="#FF8B32" stopOpacity="0.55" />
+            <stop offset="1" stopColor="#FF8B32" stopOpacity="0" />
+          </radialGradient>
+          <filter id={`soft${uid}`} x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" /></filter>
+        </defs>
+
+        {/* the void: everything is untested unless a range lights it up */}
+        <rect x={PAD.l} y={PAD.t} width={plotW} height={plotH} rx={10} fill="#02060f" />
+        <rect x={PAD.l} y={PAD.t} width={plotW} height={plotH} rx={10} fill={`url(#void${uid})`} />
+        <text x={W - PAD.r - 14} y={PAD.t + 22} textAnchor="end" className="fill-slate-500 font-mono text-[14px] tracking-[0.2em]">UNTESTED</text>
+
+        {/* axes */}
         {[10, 20, 30, 40, 50].map((y) => (
-          <g key={y}>
-            <line x1={PAD.l} x2={W - PAD.r} y1={sy(y)} y2={sy(y)} stroke="rgba(148,163,184,0.1)" />
-            <text x={PAD.l - 8} y={sy(y) + 3} textAnchor="end" className="fill-slate-500 font-mono text-[9px]">{y}%</text>
-          </g>
+          <text key={y} x={PAD.l - 10} y={sy(y) + 4} textAnchor="end" className="fill-slate-500 font-mono text-[14px]">{y}%</text>
         ))}
         {[0, 10, 20, 30, 40, 50, 60].map((x) => (
-          <g key={x}>
-            <line y1={PAD.t} y2={H - PAD.b} x1={sx(x)} x2={sx(x)} stroke="rgba(148,163,184,0.07)" />
-            <text x={sx(x)} y={H - PAD.b + 13} textAnchor="middle" className="fill-slate-500 font-mono text-[9px]">{x}</text>
-          </g>
+          <text key={x} x={sx(x)} y={H - PAD.b + 22} textAnchor="middle" className="fill-slate-500 font-mono text-[14px]">{x}</text>
         ))}
-        <text x={(W + PAD.l) / 2} y={H - 4} textAnchor="middle" className="fill-slate-400 text-[10px]">effective flow (cm/s)</text>
-        <text x={11} y={H / 2} textAnchor="middle" transform={`rotate(-90 11 ${H / 2})`} className="fill-slate-400 text-[10px]">O₂ (%)</text>
+        <text x={PAD.l + plotW / 2} y={H - 8} textAnchor="middle" className="fill-slate-400 text-[15px]">Airflow the flame feels (cm/s)</text>
+        <text x={14} y={PAD.t + plotH / 2} textAnchor="middle" transform={`rotate(-90 14 ${PAD.t + plotH / 2})`} className="fill-slate-400 text-[15px]">Oxygen</text>
 
-        {/* Earth-impossible low-flow band in 1 g */}
-        <rect x={sx(0)} y={PAD.t} width={sx(20) - sx(0)} height={H - PAD.t - PAD.b} fill="url(#lowflow)" />
-        <defs>
-          <linearGradient id="lowflow" x1="0" x2="1">
-            <stop offset="0" stopColor="#19C9FF" stopOpacity="0.07" />
-            <stop offset="1" stopColor="#19C9FF" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <text x={sx(1)} y={PAD.t + 10} className="fill-ox/60 text-[9px]">flow regime only reachable in μg</text>
-
-        {/* catalog envelopes */}
+        {/* tested ranges: soft light inside the void */}
         {boxes.map((e) => {
           const [o0, o1] = e.envelope.o2Pct!; const [f0, f1] = e.envelope.flowCmS!;
-          const c = PHASE_COLOR[e.fuelPhase[0]] ?? "#94a3b8";
-          const x = sx(f0), w = Math.max(3, sx(f1) - sx(f0)), y = sy(o1), h = Math.max(3, sy(o0) - sy(o1));
+          const data = e.envelope.confidence === "data";
+          const x = sx(f0), w = Math.max(4, sx(f1) - sx(f0)), y = sy(o1), h = Math.max(4, sy(o0) - sy(o1));
           return (
             <g key={e.id}>
-              <rect x={x} y={y} width={w} height={h} rx={2} fill={c} fillOpacity={e.envelope.confidence === "data" ? 0.22 : 0.1}
-                stroke={c} strokeOpacity={0.6} strokeDasharray={e.envelope.confidence === "data" ? undefined : "3 3"}>
-                <title>{`${e.id}: ${o0}–${o1}% O₂, ${f0}–${f1} cm/s (${e.envelope.confidence})`}</title>
+              <rect x={x} y={y} width={w} height={h} rx={4} fill={data ? "#34D399" : "#3D9BFF"} fillOpacity={data ? 0.2 : 0.14} filter={`url(#soft${uid})`} />
+              <rect x={x} y={y} width={w} height={h} rx={4} fill="none" stroke={data ? "#34D399" : "#3D9BFF"} strokeOpacity={0.45}
+                strokeDasharray={data ? undefined : "4 4"}>
+                <title>{`${e.id}: tested ${o0}–${o1}% O₂, ${f0}–${f1} cm/s (${data ? "PSI data" : "approx"})`}</title>
               </rect>
             </g>
           );
         })}
 
-        {/* schematic curve (labelled) */}
-        <path d={curve} fill="none" stroke="#48BFFF" strokeWidth={1.4} strokeDasharray="5 4" opacity={0.8} />
-        <text x={sx(46)} y={sy(18.5)} className="fill-[#48BFFF] font-mono text-[8.5px]">SCHEMATIC LIMIT · ILLUSTRATIVE</text>
+        {showCurve && (
+          <g>
+            <path d={curve} fill="none" stroke="#48BFFF" strokeWidth={1.4} strokeDasharray="5 4" opacity={0.75} />
+            <text x={sx(44)} y={sy(19)} className="fill-[#48BFFF] font-mono text-[12px]">schematic limit · illustrative</text>
+          </g>
+        )}
 
-        {/* imported PSI tests */}
-        {(space?.tests ?? []).filter((t) => t.flowCmS != null).map((t) => (
-          <circle key={t.id} cx={sx(t.flowCmS!)} cy={sy(t.o2Pct)} r={3.2} fill={OUTCOME_COLOR[t.outcome] ?? "#e2e8f0"}
-            stroke="#050A15" strokeWidth={0.8}>
+        {tests.map((t) => (
+          <circle key={t.id} cx={sx(t.flowCmS!)} cy={sy(t.o2Pct)} r={3.5} fill={OUTCOME_COLOR[t.outcome] ?? "#e2e8f0"} stroke="#02060f" strokeWidth={1}>
             <title>{`${t.investigationId} · ${t.o2Pct}% O₂ · ${t.flowCmS} cm/s · ${t.outcome} (${t.source})`}</title>
           </circle>
         ))}
 
-        {/* scenario */}
-        <motion.g animate={{ x: sx(uEff), y: sy(scenario.o2Pct) }} transition={{ type: "spring", stiffness: 140, damping: 18 }}>
-          <circle r={14} fill="#FF8B32" opacity={0.12}>
-            <animate attributeName="r" values="8;18;8" dur="2.4s" repeatCount="indefinite" />
-          </circle>
-          <circle r={5} fill="#FF8B32" stroke="#fff7ed" strokeWidth={1.5} />
-          <text x={9} y={-8} className="fill-orange-200 text-[10px] font-semibold">your mission</text>
+        {/* the habitat: a steady glow, no looping pulse */}
+        <motion.g initial={false} animate={{ x: mx, y: my }} transition={{ duration: 0.3, ease: [0.2, 0.7, 0.2, 1] }}>
+          <circle r={30} fill={`url(#glow${uid})`} />
+          <circle r={7} fill="#FF8B32" stroke="#FFF1E0" strokeWidth={2} />
+          <text x={labelLeft ? -14 : 14} y={-12} textAnchor={labelLeft ? "end" : "start"} className="fill-orange-100 text-[17px] font-semibold">{missionName}</text>
         </motion.g>
       </svg>
-      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-400">
-        <span className="flex items-center gap-1.5"><EvidenceMark kind="catalog" />catalog tested range (approx)</span>
-        <span className="flex items-center gap-1.5"><EvidenceMark kind="psi" />tested range from PSI tests</span>
-        {Object.entries(OUTCOME_COLOR).map(([k, c]) => (
-          <span key={k}><span className="mr-1 inline-block h-2 w-2 rounded-full align-middle" style={{ background: c }} />{k}</span>
-        ))}
-        <span className="flex items-center gap-1.5 text-[#48BFFF]"><EvidenceMark kind="illustrative" />schematic U-curve (teaching aid, not data)</span>
+
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12px] text-slate-400">
+        <span className="flex items-center gap-2"><span className="h-3 w-4 rounded-[3px] border border-dashed border-[#3D9BFF]/60 bg-[#3D9BFF]/20" />Tested range (approx)</span>
+        <span className="flex items-center gap-2"><span className="hatch h-3 w-4 rounded-[3px] bg-[#02060f] ring-1 ring-slate-700" />Untested</span>
+        <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-flame-2 shadow-[0_0_8px_#FF8B32]" />{missionName}</span>
+        {detailed && (
+          <>
+            <span className="flex items-center gap-1.5"><EvidenceMark kind="psi" />Range from PSI tests</span>
+            {Object.entries(OUTCOME_COLOR).map(([k, c]) => (
+              <span key={k} className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: c }} />{k}</span>
+            ))}
+          </>
+        )}
       </div>
-      {space && space.plottedTests === 0 && (
-        <div className="mt-2 text-[11.5px] text-slate-500">No PSI test points imported yet. Import test matrices in the Data Lab and they will appear here as dots.</div>
-      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Box, Crosshair, FileSearch, FlaskConical, Map as MapIcon, Pause, Play, RotateCcw, X } from "lucide-react";
+import { Box, ChevronDown, Crosshair, FileSearch, FlaskConical, Pause, Play, RotateCcw, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
@@ -46,10 +46,10 @@ function NextExperimentsList() {
   useEffect(() => { api.nextExperiments().then(setItems).catch(() => setItems([])); }, [dataVersion]);
   const short = (id: string) => habitats.find((h) => h.id === id)?.short ?? id;
   return (
-    <section className="panel mb-5 p-5">
+    <section className="panel p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="flex items-center gap-2 font-display text-[18px] font-semibold text-ink"><FlaskConical className="h-5 w-5 text-ox" />What NASA should test next</h2>
-        <span className="text-[12px] text-mute">Missing test conditions across all mission presets · score = severity × habitats affected</span>
+        <h2 className="font-display text-[16px] font-semibold text-ink">Missing test conditions across every habitat</h2>
+        <span className="text-[12px] text-mute">score = severity × habitats affected</span>
       </div>
       {!items && <Skeleton className="mt-4 h-24" />}
       <ol className="mt-4 grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3">
@@ -82,6 +82,7 @@ export function SpaceView() {
   const [nonce, setNonce] = useState(0);
   const [spin, setSpin] = useState(true);
   const [show3d, setShow3d] = useState(false);
+  const [details, setDetails] = useState(false);
   const webgl = useWebGL();
   const load = () => api.space().then((s) => { setSpace(s); setErr(null); }).catch((e) => setErr(e.message));
   useEffect(() => { void load(); }, [dataVersion]);
@@ -99,76 +100,49 @@ export function SpaceView() {
   const selRanked = selRank >= 0 ? analysis!.ranked[selRank] : null;
   const selInv = selEnv ? dataset?.investigations.find((i) => i.id === selEnv.id) : null;
   const go = (v: ViewPreset) => { setView(v); setNonce((n) => n + 1); };
+  const gaps = analysis?.coverage.gaps.filter((g) => g.severity !== "info").slice(0, 3);
+  const next = analysis?.nextExperiments.slice(0, 3);
+  const short = (id: string) => habitats.find((h) => h.id === id)?.short ?? id;
+  const missionLabel = hab?.name ?? "Custom mission";
 
-  return (
-    <div>
-      <PageHeader index="04" kicker="Where data exists" title="Where the evidence stops"
-        actions={<Evidence kind={(space?.totalTests ?? 0) > 0 ? "psi" : "catalog"} label={(space?.totalTests ?? 0) > 0 ? `${space?.totalTests} PSI test points` : "Catalog ranges · approx"} />}>
-        Each region is the range of O₂, pressure and airflow an investigation actually tested. Your habitat is the marker. Anything outside
-        every region has not been tested, so its risk is unknown, not low.
-      </PageHeader>
-      {err && <div className="mb-4"><ErrorNote message={err} onRetry={load} /></div>}
-      <NextExperimentsList />
-
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-        {!show3d ? (
-          <section className="panel p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h3 className="flex items-center gap-2 font-display text-[17px] font-semibold text-ink"><MapIcon className="h-4 w-4 text-ox" />O₂ × airflow</h3>
-              {webgl !== false && <button onClick={() => setShow3d(true)} className="btn btn-outline !py-1.5"><Box className="h-4 w-4" />Explore in 3D</button>}
-            </div>
-            <p className="mt-1 text-[12px] text-mute">2D slice with imported PSI test outcomes. Add pressure as a third axis in the 3D view.</p>
-            <div className="mt-3"><FlammabilityMap space={space} /></div>
-          </section>
-        ) : (
-        <div className="hud-frame relative h-[62vh] min-h-[420px] overflow-hidden !rounded-[16px] xl:h-[min(72vh,700px)]">
-          {webgl === false ? (
-            <div className="grid h-full place-items-center p-6 text-center text-[13px] text-mute">
-              WebGL is not available in this browser. The 2D O₂ × flow plane below shows the same envelopes and your mission.
-            </div>
-          ) : space ? (
-            <ConditionSpace3D space={space} scenario={scenario} uEff={uEff} habitats={habitats} highlight={highlight} inVoid={inVoid} missionName={name}
-              selection={sel} onSelect={setSel} view={view} viewNonce={nonce} autoRotate={spin} />
-          ) : !err && <Skeleton className="absolute inset-0 !rounded-none !bg-transparent" />}
-
-          {/* overlays */}
-          <div className="pointer-events-none absolute left-4 top-4 flex flex-wrap gap-2">
-            {[
-              [<span key="a" className="led" style={{ color: "#087BFF" }} />, "Tested region"],
-              [<span key="b" className="led" style={{ color: "#FF8B32" }} />, "High relevance"],
-              [<span key="c" className="hatch h-3 w-3.5 rounded-[2px] border border-dashed border-ox-2" />, "Data gap"],
-              [<span key="d" className="h-2.5 w-2.5 rotate-45 bg-slate-300" />, "Mission presets"],
-            ].map(([icon, label]) => (
-              <span key={label as string} className="flex items-center gap-2 rounded-full border border-[var(--line)] bg-space-950/75 px-3 py-1 text-[11.5px] text-slate-200 backdrop-blur">{icon}{label}</span>
+  const gapCards = (
+    <>
+        <section className="panel p-6">
+          <h2 className="font-display text-[18px] font-semibold text-ink">Biggest gaps</h2>
+          {!gaps && <Skeleton className="mt-4 h-32" />}
+          {gaps?.length === 0 && <p className="mt-3 text-[14px] text-emerald-300">No major gaps for this habitat in the loaded data.</p>}
+          <ul className="mt-4 space-y-3.5">
+            {gaps?.map((g) => (
+              <li key={g.title} className="relative pl-4" title={g.detail}>
+                <span className="absolute inset-y-1 left-0 w-[3px] rounded-full" style={{ background: SEVERITY_COLOR[g.severity] }} />
+                <div className="text-[14.5px] font-semibold leading-snug text-ink">{g.title}</div>
+                <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-mute">{g.detail.split(/(?<=\.)\s/)[0]}</p>
+              </li>
             ))}
-          </div>
-          <div className="absolute right-4 top-4 flex items-center gap-2">
-            <div className="flex rounded-[10px] border border-[var(--line)] bg-space-950/80 p-1 backdrop-blur">
-              {VIEWS.map((v) => (
-                <button key={v.id} title={v.hint} onClick={() => go(v.id)}
-                  className={`relative rounded-[7px] px-2.5 py-1 font-mono text-[11px] transition-colors ${view === v.id ? "text-white" : "text-mute hover:text-ink"}`}>
-                  {view === v.id && <motion.span layoutId="view-pill" className="absolute inset-0 rounded-[7px] bg-blue" />}
-                  <span className="relative">{v.label}</span>
-                </button>
-              ))}
-            </div>
-            <button onClick={() => setSpin((v) => !v)} title={spin ? "Pause rotation" : "Auto-rotate"}
-              className="grid h-8 w-8 place-items-center rounded-[9px] border border-[var(--line)] bg-space-950/80 text-mute backdrop-blur hover:text-ink">
-              {spin ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-            </button>
-            <button onClick={() => go("iso")} title="Reset camera"
-              className="grid h-8 w-8 place-items-center rounded-[9px] border border-[var(--line)] bg-space-950/80 text-mute backdrop-blur hover:text-ink">
-              <RotateCcw className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          <div className="pointer-events-none absolute bottom-4 left-4 font-mono text-[10px] tracking-[0.16em] text-slate-500">
-            DRAG TO ORBIT · SCROLL TO ZOOM · CLICK A REGION OR POINT TO INSPECT
-          </div>
-          <button onClick={() => setShow3d(false)} className="chip-link absolute bottom-4 right-4">Back to 2D</button>
-        </div>
-        )}
+          </ul>
+        </section>
+        <section className="panel p-6">
+          <h2 className="flex items-center gap-2 font-display text-[18px] font-semibold text-ink"><FlaskConical className="h-[18px] w-[18px] text-ox" />What to test next</h2>
+          {!next && <Skeleton className="mt-4 h-32" />}
+          {next?.length === 0 && <p className="mt-3 text-[14px] text-emerald-300">No missing test condition for this habitat.</p>}
+          <ol className="mt-4 space-y-3.5">
+            {next?.map((x) => (
+              <li key={x.id} className="relative pl-4">
+                <span className="absolute inset-y-1 left-0 w-[3px] rounded-full bg-ox" />
+                <div className="text-[14.5px] font-semibold leading-snug text-ink">{x.title}</div>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[13px] text-mute">
+                  {x.plannedBy.length ? <>Planned investigation:{x.plannedBy.map((id) => (
+                    <button key={id} onClick={() => openInvestigation(id)} className="rounded-[4px] border border-ox/35 bg-ox/10 px-1.5 font-mono text-[11px] text-[#9BE6FF] hover:bg-ox/20">{id}</button>
+                  ))}</> : <>No planned investigation yet · affects {x.habitatsAffected.map(short).join(", ")}</>}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+    </>
+  );
 
-        {/* inspector */}
+  const inspector = (
         <aside className="panel flex flex-col p-5">
           <div className="flex items-center justify-between">
             <div className="label">Inspector</div>
@@ -251,16 +225,95 @@ export function SpaceView() {
           </AnimatePresence>
           <div className="mt-4 text-[11px] leading-snug text-slate-500">Airflow includes the buoyancy estimate (∝ √g). Boxes that span a full axis have that axis uncharacterized.</div>
         </aside>
+  );
+
+  return (
+    <div>
+      <PageHeader kicker="Gaps" title="Where NASA has no data yet">
+        Untested is not the same as safe. Here is what is missing, and what to test next.
+      </PageHeader>
+      {err && <div className="mb-4"><ErrorNote message={err} onRetry={load} /></div>}
+      <div className={`grid grid-cols-1 gap-6 ${show3d ? "xl:grid-cols-[minmax(0,1fr)_340px]" : "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]"}`}>
+        {!show3d ? (
+          <section className="panel p-6">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="font-display text-[20px] font-semibold text-ink">Oxygen and airflow tested so far</h2>
+                <p className={`mt-1 text-[14px] ${inVoid ? "text-orange-200" : "text-emerald-200"}`}>
+                  {!space ? "Locating your habitat…" : inVoid
+                    ? `${missionLabel} sits outside every tested range: its risk is unknown, not low.`
+                    : `${missionLabel} sits inside at least one tested range.`}
+                </p>
+              </div>
+              {webgl !== false && <button onClick={() => setShow3d(true)} className="btn btn-ghost"><Box className="h-4 w-4" />Explore in 3D</button>}
+            </div>
+            {space ? <FlammabilityMap space={space} missionName={hab?.short ?? "Custom"} showCurve={details} detailed={details} /> : <Skeleton className="h-[360px]" />}
+          </section>
+        ) : (
+        <div className="hud-frame relative h-[62vh] min-h-[420px] overflow-hidden !rounded-[16px] xl:h-[min(72vh,700px)]">
+          {webgl === false ? (
+            <div className="grid h-full place-items-center p-6 text-center text-[13px] text-mute">
+              WebGL is not available in this browser. The 2D O₂ × flow plane below shows the same envelopes and your mission.
+            </div>
+          ) : space ? (
+            <ConditionSpace3D space={space} scenario={scenario} uEff={uEff} habitats={habitats} highlight={highlight} inVoid={inVoid} missionName={name}
+              selection={sel} onSelect={setSel} view={view} viewNonce={nonce} autoRotate={spin} />
+          ) : !err && <Skeleton className="absolute inset-0 !rounded-none !bg-transparent" />}
+
+          {/* overlays */}
+          <div className="pointer-events-none absolute left-4 top-4 flex flex-wrap gap-2">
+            {[
+              [<span key="a" className="led" style={{ color: "#087BFF" }} />, "Tested region"],
+              [<span key="b" className="led" style={{ color: "#FF8B32" }} />, "High relevance"],
+              [<span key="c" className="hatch h-3 w-3.5 rounded-[2px] border border-dashed border-ox-2" />, "Data gap"],
+              [<span key="d" className="h-2.5 w-2.5 rotate-45 bg-slate-300" />, "Mission presets"],
+            ].map(([icon, label]) => (
+              <span key={label as string} className="flex items-center gap-2 rounded-full border border-[var(--line)] bg-space-950/75 px-3 py-1 text-[11.5px] text-slate-200 backdrop-blur">{icon}{label}</span>
+            ))}
+          </div>
+          <div className="absolute right-4 top-4 flex items-center gap-2">
+            <div className="flex rounded-[10px] border border-[var(--line)] bg-space-950/80 p-1 backdrop-blur">
+              {VIEWS.map((v) => (
+                <button key={v.id} title={v.hint} onClick={() => go(v.id)}
+                  className={`relative rounded-[7px] px-2.5 py-1 font-mono text-[11px] transition-colors ${view === v.id ? "text-white" : "text-mute hover:text-ink"}`}>
+                  {view === v.id && <motion.span layoutId="view-pill" className="absolute inset-0 rounded-[7px] bg-blue" />}
+                  <span className="relative">{v.label}</span>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setSpin((v) => !v)} title={spin ? "Pause rotation" : "Auto-rotate"}
+              className="grid h-8 w-8 place-items-center rounded-[9px] border border-[var(--line)] bg-space-950/80 text-mute backdrop-blur hover:text-ink">
+              {spin ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+            </button>
+            <button onClick={() => go("iso")} title="Reset camera"
+              className="grid h-8 w-8 place-items-center rounded-[9px] border border-[var(--line)] bg-space-950/80 text-mute backdrop-blur hover:text-ink">
+              <RotateCcw className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <div className="pointer-events-none absolute bottom-4 left-4 font-mono text-[10px] tracking-[0.16em] text-slate-500">
+            DRAG TO ORBIT · SCROLL TO ZOOM · CLICK A REGION OR POINT TO INSPECT
+          </div>
+          <button onClick={() => setShow3d(false)} className="chip-link absolute bottom-4 right-4">Back to 2D</button>
+        </div>
+        )}
+        {show3d ? inspector : <div className="flex flex-col gap-6">{gapCards}</div>}
+
       </div>
 
-      <div className={`mt-5 grid grid-cols-1 gap-5 ${show3d ? "xl:grid-cols-[minmax(0,1.3fr)_1fr]" : ""}`}>
-        {show3d && <section className="panel p-5">
-          <div className="flex items-baseline justify-between gap-3">
-            <h3 className="font-display text-[17px] font-semibold text-ink">O₂ × airflow plane</h3>
-            <span className="text-[12px] text-mute">2D slice with imported PSI test outcomes</span>
-          </div>
-          <div className="mt-3"><FlammabilityMap space={space} /></div>
-        </section>}
+      {show3d && <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">{gapCards}</div>}
+
+      <button onClick={() => setDetails((x) => !x)} aria-expanded={details} className="btn btn-ghost mt-6 !px-0">
+        {details ? "Hide details" : "Show details"}<ChevronDown className={`h-4 w-4 transition-transform duration-200 ${details ? "rotate-180" : ""}`} />
+      </button>
+      <AnimatePresence initial={false}>
+        {details && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }} className="overflow-hidden">
+            <div className="mt-4 space-y-6">
+              <p className="text-[12.5px] text-mute">The chart now also shows the schematic limiting-oxygen curve (a teaching aid, not data) and the PSI test legend.</p>
+              <NextExperimentsList />
+              <div className="grid grid-cols-1 gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
+                {!show3d && inspector}
         <section className="panel p-5">
           <h3 className="font-display text-[17px] font-semibold text-ink">Not plottable yet</h3>
           <p className="mt-1 text-[12.5px] text-mute">O₂ not characterized in the catalog. Import their PSI test matrices in the Data Lab to place them in the map.</p>
@@ -280,7 +333,11 @@ export function SpaceView() {
             ))}
           </div>
         </section>
-      </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
