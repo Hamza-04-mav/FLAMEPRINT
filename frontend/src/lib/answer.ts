@@ -65,3 +65,9 @@ export function rankReason(r: Ranked, index: number, scenario: Scenario) {
   if (!parts.length) parts.push((r.factors.slice().sort((a, b) => b.score * b.weight - a.score * a.weight)[0]?.why ?? "it is the closest match").replace(/^./, (c) => c.toLowerCase()));
   return `#${index + 1} because ${parts.join(" ")}.`;
 }
+
+/** First sentence of a catalog summary, for two-line cards. Abbreviations like "e.g." or "1 g." stay whole. */
+export function firstSentence(t: string) {
+  const m = t.match(/^.+?[.!?](?=\s+[A-Z(]|$)/);
+  return (m?.[0] ?? t).trim();
+}

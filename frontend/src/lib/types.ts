@@ -277,3 +277,11 @@ export interface IngestReport {
   unmapped: string[];
   origin?: string;
 }
+
+export interface BriefBullet { text: string; cite: string[]; approx: boolean }
+export interface BriefCards {
+  cards: Record<Pillar, { bullets: BriefBullet[]; more: number; gap: string | null }>;
+  earth: { text: string; cite: string[] } | null;
+  audit: { valid: string[]; invalid: string[] };
+  dataNote: string;
+}

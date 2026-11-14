@@ -1,12 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronDown, Copy, Download, FileSearch, FileText, Radar, Shield, ShieldCheck, Sparkles, SprayCan, Square } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Copy, Download, FileSearch, FileText, Globe2, Radar, Shield, ShieldCheck, Sparkles, SprayCan, Square } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { streamSSE } from "@/lib/api";
+import { firstSentence } from "@/lib/answer";
+import { api, streamSSE } from "@/lib/api";
 import { PILLAR_COLOR, toPsi } from "@/lib/format";
 import { useMission } from "@/lib/mission";
-import type { Investigation, Pillar } from "@/lib/types";
+import type { BriefCards, Investigation, Pillar } from "@/lib/types";
 import { CitedMarkdown } from "./CitedMarkdown";
 import { ConfidenceBadge, ErrorNote, Evidence, PageHeader, Skeleton } from "./ui";
 
@@ -87,7 +88,8 @@ function EvidencePanel({ ids, pillar, byId, onOpen }: { ids: string[]; pillar?: 
   );
 }
 
-export function BriefPanel() {
+/** The full streamed brief with its contents and citation audit (opened by 'Read full brief'). */
+function FullBrief() {
   const { scenario, weights, health, habitats, analysis, dataset, openInvestigation } = useMission();
   const [text, setText] = useState("");
   const [meta, setMeta] = useState<Meta>({});
@@ -148,12 +150,12 @@ export function BriefPanel() {
 
   return (
     <div>
-      <PageHeader index="04" kicker="Fire safety brief" title="Mission fire-safety brief"
-        actions={busy
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[14px] text-mute">The full brief, written only from the evidence packet. Every citation is audited.</p>
+        {busy
           ? <button onClick={stop} className="btn btn-ghost border border-[var(--line-strong)]"><Square className="h-4 w-4" />Stop</button>
-          : <motion.button whileTap={{ scale: 0.97 }} onClick={run} className="btn btn-primary"><Sparkles className="h-4 w-4" />{text ? "Regenerate" : "Generate brief"}</motion.button>}>
-        A cited Prevention, Detection and Suppression brief written only from the deterministic evidence packet. Every citation is audited.
-      </PageHeader>
+          : <motion.button whileTap={{ scale: 0.97 }} onClick={run} className="btn btn-primary"><Sparkles className="h-4 w-4" />{text ? "Regenerate" : "Generate full brief"}</motion.button>}
+      </div>
       {err && <div className="mb-4"><ErrorNote message={err} onRetry={run} /></div>}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
@@ -315,6 +317,105 @@ export function BriefPanel() {
           )}
         </aside>
       </div>
+    </div>
+  );
+}
+
+
+function Cite({ id }: { id: string }) {
+  const { openInvestigation } = useMission();
+  return (
+    <button onClick={() => openInvestigation(id)} title={`Open ${id}`}
+      className="rounded-[4px] border border-ox/35 bg-ox/10 px-1.5 align-baseline font-mono text-[10.5px] text-[#9BE6FF] transition-colors duration-150 hover:bg-ox/20">{id}</button>
+  );
+}
+
+/** Brief page: three short cited cards first; the full streamed brief on request. */
+export function BriefPanel() {
+  const { scenario, weights, habitats, dataVersion, setTab } = useMission();
+  const [cards, setCards] = useState<BriefCards | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [full, setFull] = useState(false);
+  const hab = habitats.find((h) => h.id === scenario.habitatId);
+
+  useEffect(() => { if (new URLSearchParams(window.location.search).has("generate")) setFull(true); }, []);
+  useEffect(() => {
+    let live = true;
+    const t = setTimeout(() => {
+      api.briefCards(scenario, weights).then((c) => { if (live) { setCards(c); setErr(null); } })
+        .catch((e) => live && setErr((e as Error).message));
+    }, 120);
+    return () => { live = false; clearTimeout(t); };
+  }, [scenario, weights, dataVersion]);
+
+  return (
+    <div>
+      <PageHeader kicker="Brief" title="What should engineers do?">
+        Cited guidance for {hab ? `the ${hab.name}` : "this habitat"}, in three safety areas.
+      </PageHeader>
+      {err && <div className="mb-4"><ErrorNote message={err} /></div>}
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {PILLARS.map((p) => {
+          const I = PILLAR_ICON[p];
+          const c = cards?.cards[p];
+          return (
+            <section key={p} className="panel flex flex-col p-6">
+              <h2 className="flex items-center gap-2.5 font-display text-[19px] font-semibold capitalize text-ink">
+                <I className="h-5 w-5" style={{ color: PILLAR_COLOR[p] }} aria-hidden />{p}
+              </h2>
+              {!c ? <Skeleton className="mt-4 h-28" /> : (
+                <ul className="mt-4 space-y-3.5">
+                  {c.bullets.map((b) => (
+                    <li key={b.text} className="text-[14px] leading-snug text-slate-200" title={b.text}>
+                      <span className="line-clamp-2">{firstSentence(b.text)}</span>
+                      <span className="mt-1 flex flex-wrap gap-1">{b.cite.map((id) => <Cite key={id} id={id} />)}</span>
+                    </li>
+                  ))}
+                  {c.gap && <li className="text-[13.5px] leading-snug text-amber-200">{c.gap}</li>}
+                </ul>
+              )}
+              {c && c.more > 0 && <p className="mt-auto pt-4 text-[12.5px] text-slate-500">+{c.more} more in the full brief</p>}
+            </section>
+          );
+        })}
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[12.5px] text-mute">
+          <Evidence kind="catalog" label="from investigation summaries · approx" />
+          {cards && (
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className={`h-3.5 w-3.5 ${cards.audit.invalid.length ? "text-rose-300" : "text-ok"}`} />
+              {cards.audit.invalid.length ? `${cards.audit.invalid.length} citation(s) failed the audit` : `All ${cards.audit.valid.length} citations checked`}
+            </span>
+          )}
+        </div>
+        <button onClick={() => setFull((x) => !x)} aria-expanded={full} className="btn btn-outline">
+          <FileText className="h-4 w-4" />{full ? "Hide full brief" : "Read full brief"}
+          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${full ? "rotate-180" : ""}`} />
+        </button>
+      </div>
+
+      <AnimatePresence initial={false}>
+        {full && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }} className="overflow-hidden">
+            <div className="pt-8"><FullBrief /></div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <button onClick={() => setTab("earth")}
+        className="group mt-10 flex w-full items-center justify-between gap-4 border-t border-[var(--line)] pt-6 text-left">
+        <span className="min-w-0">
+          <span className="flex items-center gap-2 text-[15px] font-semibold text-ink"><Globe2 className="h-4 w-4 text-ok" aria-hidden />On Earth too</span>
+          <span className="mt-1 block text-[13.5px] text-mute">
+            {cards?.earth ? <>{cards.earth.text}, and more, from the same experiments.</> : "The same experiments improve fire safety at home."}
+          </span>
+        </span>
+        <ArrowRight className="h-5 w-5 shrink-0 text-mute transition-transform duration-200 group-hover:translate-x-0.5" />
+      </button>
     </div>
   );
 }

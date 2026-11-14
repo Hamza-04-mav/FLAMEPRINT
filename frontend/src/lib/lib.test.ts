@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { streamSSE } from "./api";
-import { buildVerdict, fmtPressure, levelRose } from "./answer";
+import { buildVerdict, firstSentence, fmtPressure, levelRose } from "./answer";
 import { fmtRange, scoreColor, toKpa, toPsi } from "./format";
 import type { MaterialVerdict } from "./types";
 
@@ -74,5 +74,13 @@ describe("answer screen helpers", () => {
     expect(levelRose("low", "high")).toBe(true);
     expect(levelRose("high", "low")).toBe(false);
     expect(levelRose("unknown", "high")).toBe(false);
+  });
+});
+
+describe("brief cards", () => {
+  it("keeps only the first sentence of a summary", () => {
+    expect(firstSentence("Solids keep burning in low flow. Ventilation matters.")).toBe("Solids keep burning in low flow.");
+    expect(firstSentence("Use CO₂, e.g. at 1 g. It works.")).toBe("Use CO₂, e.g. at 1 g.");
+    expect(firstSentence("No full stop here")).toBe("No full stop here");
   });
 });

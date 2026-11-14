@@ -1,5 +1,5 @@
 import type {
-  Analysis, CompareHabitatsResult, CompareResult, NextExperiment, StowageResult, ConditionSpace, DatasetResponse, GenomeEdge, GenomeNode, Habitat, Health,
+  Analysis, BriefCards, CompareHabitatsResult, CompareResult, NextExperiment, StowageResult, ConditionSpace, DatasetResponse, GenomeEdge, GenomeNode, Habitat, Health,
   IngestReport, Investigation, Relation, Scenario, TestRecord, Weights,
 } from "./types";
 
@@ -45,6 +45,7 @@ export const api = {
   compareHabitats: (a: Scenario, b: Scenario, weights: Weights) =>
     req<CompareHabitatsResult>("/api/compare-habitats", json({ a, b, weights })),
   nextExperiments: () => req<NextExperiment[]>("/api/next-experiments"),
+  briefCards: (scenario: Scenario, weights: Weights) => req<BriefCards>("/api/brief-cards", json({ scenario, weights })),
   investigation: (id: string) =>
     req<{ investigation: Investigation; tests: TestRecord[]; totalTests: number; relations: Relation[] }>(
       `/api/investigations/${encodeURIComponent(id)}`),

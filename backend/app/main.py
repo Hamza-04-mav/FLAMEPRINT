@@ -15,8 +15,8 @@ from fastapi.responses import FileResponse, StreamingResponse
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 from . import engine, llm, materials  # noqa: E402
-from .brief import (SYSTEM_ASK, SYSTEM_BRIEF, allowed_ids, build_context, check_citations,  # noqa: E402
-                    local_answer, local_brief)
+from .brief import (SYSTEM_ASK, SYSTEM_BRIEF, allowed_ids, brief_cards, build_context,  # noqa: E402
+                    check_citations, local_answer, local_brief)
 from .habitats import HABITATS  # noqa: E402
 from .ingest import parse_file  # noqa: E402
 from .models import AskRequest, CompareHabitatsRequest, RankRequest, Scenario, StowageRequest, Weights  # noqa: E402
@@ -211,6 +211,12 @@ async def _stream(system: str, user: str, fallback_text: str, allowed: set[str],
             yield sse("delta", {"text": text[i:i + 48]})
     yield sse("citations", check_citations(text, allowed))
     yield sse("done", {"mode": mode, "note": note})
+
+
+@app.post("/api/brief-cards")
+def brief_cards_route(req: RankRequest):
+    """Prevention / Detection / Suppression cards for the Brief page. Deterministic, cited, audited; no LLM."""
+    return brief_cards(build_context(store.dataset, req.scenario, req.weights))
 
 
 @app.post("/api/brief")

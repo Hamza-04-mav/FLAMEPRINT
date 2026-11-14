@@ -157,6 +157,45 @@ def local_brief(ctx: dict) -> str:
     return "\n".join(out)
 
 
+MAX_CARD_BULLETS = 3
+
+
+def brief_cards(ctx: dict) -> dict:
+    """Three short cards (prevention, detection, suppression) for the Brief page, with no LLM.
+    Same evidence packet and selection rules as local_brief(): every bullet cites the investigation
+    it comes from, a safety area with no evidence says "Insufficient evidence", and the citations are
+    audited with check_citations()."""
+    s, c, invs = ctx["scenario"], ctx["coverage"], ctx["investigations"]
+    ids = {i["id"] for i in invs}
+    cards = {}
+    for pl in PILLARS:
+        bullets: list[dict] = []
+        rel = [i for i in invs if i["insights"].get(pl)]
+        if pl == "prevention" and len(rel) < 2:
+            rel += [i for i in invs if i["insights"].get("modeling") and i not in rel][: 2 - len(rel)]
+        for i in rel:
+            bullets.append({"text": i["insights"].get(pl) or i["insights"]["modeling"], "cite": [i["id"]],
+                            "approx": i["envelope"]["confidence"] == "approx"})
+        if pl == "detection":
+            if "FLEX" in ids or "CFI" in ids:
+                bullets.insert(0, {"text": "Burning can continue with no visible flame (cool flames), so pair optical sensors "
+                                           "with gas and particle sensing.", "cite": ["FLEX" if "FLEX" in ids else "CFI"],
+                                   "approx": False})
+        gap = None
+        if pl == "prevention" and "solid" in s["fuelPhases"] and s["o2Pct"] > c["highestO2Solids"] + 1:
+            gap = (f"Insufficient evidence: no microgravity solid-material data at {s['o2Pct']:g}% O₂ "
+                   f"(highest tested: {c['highestO2Solids']:g}%).")
+        if not bullets:
+            gap = gap or "Insufficient evidence among the top-ranked investigations for this safety area."
+        cards[pl] = {"bullets": bullets[:MAX_CARD_BULLETS], "more": max(0, len(bullets) - MAX_CARD_BULLETS), "gap": gap}
+
+    earth = next(({"text": e, "cite": [i["id"]]} for i in invs for e in i["earthApplications"]), None)
+    text = " ".join(f"{b['text']} [{', '.join(b['cite'])}]" for cd in cards.values() for b in cd["bullets"])
+    if earth:
+        text += f" {earth['text']} [{earth['cite'][0]}]"
+    return {"cards": cards, "earth": earth, "audit": check_citations(text, allowed_ids(ctx)), "dataNote": ctx["dataNote"]}
+
+
 def local_answer(question: str, hits: list[dict]) -> str:
     """Extractive answer: the most relevant sentences from retrieved chunks, each cited."""
     from .embed import tokens
