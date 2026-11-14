@@ -18,17 +18,21 @@ gravity level where **PSI has no data at all**.
 
 ## What FLAMEPRINT does
 
-### v2 at a glance
+### Five pages, one question each
 
-| Feature | What judges see |
-|---|---|
-| **Habitat passport** (home) | One sentence, e.g. *"6 of 8 materials are high risk at the Moon base."*, plus **Confidence C: no partial-gravity data in PSI**. Material cards with a small flame that turns from a blue sphere (0 g) into a teardrop (1 g). |
-| **Evidence grades A / B / C / M** | A = imported PSI tests at these conditions · B = one investigation tested this atmosphere · C = only bracketed · M = modeled. Partial gravity caps everything at C. Click a grade to open the investigation behind it. |
-| **Mission timeline** | Press play: ISS → Moon base → Spacesuit → Rover → Mars. Materials whose risk rises flash red. |
-| **Can I bring this aboard?** | Type "foam pillow" and get the closest tested material, its risk here and storage advice. Works offline; Claude may only pick a material id from a fixed list. |
-| **What NASA should test next** | Missing test conditions ranked by severity × habitats affected, with the planned investigations (LUCI, FM2) that would fill them. |
-| **Compare habitats** | ISS vs Moon base: what got riskier, the new gaps, the grade change. |
-| **Fire Passport** | A one-page printable PDF for any habitat. |
+| Page | The one question it answers | What judges see first | One click deeper |
+|---|---|---|---|
+| **Answer** (home) | Is my habitat safe from fire, and how sure are we? | Mission path with a play button (ISS → Moon base → Spacesuit → Rover → Mars), one verdict sentence (*"6 of 8 materials are high risk at the Moon base."*), a passport-stamp grade with its reason, the gravity flame (blue sphere at 0 g → teardrop at 1 g), the top 5 materials, a "Can I bring this aboard?" box and **Get Fire Passport** | Adjust conditions · all materials · habitat in 3D |
+| **Evidence** | Which NASA experiments back this up? | The top 5 PSI investigations: rank, one sentence of why, grade stamp | Six factor bars + dossier per row · all 22 · Adjust scoring |
+| **Gaps** | Where does NASA have no data, and what should be tested next? | One O₂ × airflow map: dark untested "void", softly lit tested ranges, the habitat as a glowing dot; top 3 gaps; top 3 next tests naming the planned investigation (LUCI, FM2) | Schematic curve, inspector, every-habitat list · Explore in 3D |
+| **Brief** | What should engineers do? | Prevention / Detection / Suppression cards, ≤3 bullets each with PSI citation chips; gaps say *Insufficient evidence*; citation audit | Full streamed brief and audit · On Earth too |
+| **Compare** | What changes between two habitats? | ISS → Moon base: grade B → C, materials that moved risk level, new gaps | Unchanged items · rank moves · Compare experiments (hardware lineage) |
+
+**Evidence grades** (fixed colours): **A** imported PSI tests at these conditions · **B** one investigation tested this
+atmosphere · **C** only bracketed (partial gravity caps everything at C) · **M** modeled. Tap a stamp to open the investigation behind it.
+
+**Tools menu:** Can I bring this aboard? (full page) · Data Lab · Ask the archive · Down to Earth.
+**Fire Passport** (`/passport?mission=lunar-base`): one printable light page. Before/after screenshots and the content budget: `docs/screens/`.
 
 ### Every challenge objective
 
@@ -165,6 +169,7 @@ The **Preview** step shows the column mapping, unit conversions and warnings bef
 | POST | `/api/stowage` | `{item, scenario}` → closest material, `matchedBy` (`keyword` · `claude` · `none`), verdict, advice |
 | POST | `/api/compare-habitats` | `{a, b}` → both analyses + `diff` (materials, new gaps, grade change, rank moves) |
 | GET | `/api/next-experiments` | missing test conditions across all presets |
+| POST | `/api/brief-cards` | `{scenario, weights}` → Prevention / Detection / Suppression cards (≤3 cited bullets each, gaps, citation audit). Deterministic, no LLM |
 | POST | `/api/brief` | SSE: `meta` → `delta`… → `citations` → `done` |
 | POST | `/api/ask` | SSE answer with retrieved passages |
 | GET | `/api/condition-space` · `/api/genome` · `/api/compare?a=&b=` | maps & comparisons |
@@ -178,27 +183,27 @@ The **Preview** step shows the column mapping, unit conversions and warnings bef
 ## Tests
 
 ```bash
-cd backend  && pip install -r requirements-dev.txt && python -m pytest -q   # 51 tests: engine, grades, materials, stowage, next experiments, API
-cd frontend && npm test                               # vitest: SSE parser, formatting, verdict sentence
+cd backend  && pip install -r requirements-dev.txt && python -m pytest -q   # 55 tests: engine, grades, materials, stowage, next experiments, brief cards, API
+cd frontend && npm test                               # vitest: SSE parser, formatting, verdict sentence, brief-card text
 cd frontend && npm run typecheck && npm run lint && npm run build
 ```
 
 ---
 
-## 3-minute demo script
+## 2-minute demo script
 
-1. **Question (0:00).** *"If you were packing for the Moon base, would your pillow burn?"* The site opens on the **Habitat passport**.
-2. **Answer (0:15).** Read the verdict aloud: *"6 of 8 materials are high risk at the Moon base. Confidence C: no partial-gravity data in PSI."*
-   Point at the grade: the app says how sure it is, not just what it thinks.
-3. **Journey (0:40).** Press **play** on the mission timeline: ISS → Moon base → Spacesuit. The flame stretches, levels change, risen
-   materials flash red. *"Same pillow, very different risk."*
-4. **Your own item (1:10).** In **Can I bring this aboard?**, click *foam pillow*: closest tested material, risk here, storage advice. Offline.
-5. **What NASA should test next (1:35).** Partial-gravity solid materials come out at #1, affecting three habitats, with LUCI and FM2
-   as the planned investigations. Open **Where data exists** to show the gap on the O₂ × airflow map.
-6. **Trust (2:05).** Click a grade → the investigation dossier opens. **Investigation rankings**: every row says why in one sentence.
-   **Fire safety brief**: every citation verified.
-7. **Take-away (2:30).** **Fire Passport** → a one-page PDF. *"FLAMEPRINT tells engineers what we know, how sure we are, and what to
-   test next, before the alarm goes off."*
+1. **Answer (0:00).** Open the site. Press **play** on the mission path: ISS → Moon base. Read the verdict aloud:
+   *"6 of 8 materials are high risk at the Moon base. Confidence C: no partial-gravity data in PSI."* The cards re-sort and
+   the ones that got riskier ring red; the flame stretches from a sphere toward a teardrop.
+2. **Tap a grade (0:30).** Tap the **C** stamp: the dossier of the investigation behind it opens. *"Every answer says how sure it is, and why."*
+3. **Gaps (0:50).** The Moon base glows alone in the dark untested area. Next test #1: *solid materials at lunar gravity*,
+   planned investigations **LUCI** and **FM2**.
+4. **Brief (1:15).** Three cards: what to do for prevention, detection, suppression, each line cited to a PSI id;
+   prevention says *Insufficient evidence* above 21 % O₂. All citations checked.
+5. **Compare (1:35).** ISS → Moon base: grade **B → C**, which materials got riskier, the new partial-gravity gap.
+6. **Fire Passport (1:50).** **Get Fire Passport** → a one-page PDF. *"What we know, how sure we are, and what to test next."*
+
+Works the same with `FLAMEPRINT_LLM=off`: every number, grade and gap comes from Python; Claude only words the full brief.
 
 **Judge Q&A, "what's real and what's mocked?"** Every number comes from deterministic code or imported PSI files. Catalog tested ranges are
 labelled approximate, material verdicts are labelled *illustrative model*, unsourced values are grade **M**, and the flame is
@@ -227,7 +232,8 @@ data/templates/     CSV + JSON import templates
 docker-compose.yml  PostgreSQL 16 + pgvector
 ```
 
-Deep links for demos: `?noboot` skips the intro (it only plays on the first visit anyway) · `#answer`, `#stowage`, `#ranking`, `#space`, `#genome`, `#habitats`, `#brief`, `#earth`, `#ask`, `#data` open a page (old `#overview` still works) ·
+Deep links for demos: `?noboot` skips the intro (it only plays on the first visit anyway) · `#answer`, `#evidence`, `#gaps`, `#brief`, `#compare` open the five pages
+(older `#overview`, `#ranking`, `#space`, `#habitats`, `#genome` still work) · `#stowage`, `#data`, `#ask`, `#earth` open the tools ·
 `?mission=mars` (or `iss`, `lunar-base`, `rover`, `suit`, `earth`) preselects a mission · `?generate#brief` issues the brief on arrival.
 
 ## Design system
