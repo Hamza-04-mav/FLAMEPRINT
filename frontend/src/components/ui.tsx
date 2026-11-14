@@ -16,8 +16,8 @@ export function PageHeader({ kicker, title, children, actions }: {
     <motion.header initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: [0.2, 0.7, 0.2, 1] }}
       className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div className="max-w-2xl">
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.2em] text-mute">{kicker}</div>
-        <h1 className="mt-2 font-display text-[28px] font-semibold leading-tight tracking-tight text-ink sm:text-[34px]">{title}</h1>
+        <div className="kicker">{kicker}</div>
+        <h1 className="mt-2 t-title">{title}</h1>
         {children && <p className="mt-2 text-[15px] leading-relaxed text-mute">{children}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}

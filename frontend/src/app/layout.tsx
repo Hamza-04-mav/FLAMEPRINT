@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-grotesk" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
+/**
+ * Apple devices render real SF Pro from the system stack (see globals.css).
+ * Inter is the cross-platform fallback; ss01/cv11 (applied in globals.css) make
+ * its a/g/l read close to SF on Windows/Android. We do not self-host SF Pro.
+ */
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
 
 export const metadata: Metadata = {
   title: "FLAMEPRINT · Fire safety from microgravity combustion data",
@@ -14,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>
+    <html lang="en" className={`${inter.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );

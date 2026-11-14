@@ -13,9 +13,10 @@
    JS mirror of these tokens: src/lib/theme.ts (three.js + chart code).
    ═══════════════════════════════════════════════════════════════════════ */
 @theme {
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-grotesk), var(--font-inter), sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", monospace;
+  /* the iPhone font: real SF Pro on Apple, Inter (ss01/cv11) everywhere else */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-inter), "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", var(--font-inter), "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", var(--font-jetbrains), Menlo, monospace;
 
   /* ── ink navy: surfaces ── */
   --color-ink-950: #0a111d;
@@ -116,18 +117,29 @@
   --ev-illustrative: #c2bab0; /* simulation / teaching aid (always hatched) */
   --line: rgba(138, 129, 120, 0.16);
   --line-strong: rgba(194, 186, 176, 0.28);
+  /* glassy text vibrancy: dust-100 at tiered alpha (tertiary bumped to keep ≥4.5:1 on glass) */
+  --text-1: rgba(239, 234, 227, 0.96); /* primary */
+  --text-2: rgba(239, 234, 227, 0.70); /* secondary */
+  --text-3: rgba(239, 234, 227, 0.56); /* tertiary / captions */
 }
 
 html,
 body {
   background: var(--color-space-950);
-  color: var(--color-ink);
+  color: var(--text-1);
 }
 body {
   overflow-x: clip;
   font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11"; /* Inter a/g/l closer to SF; SF ignores unknown features */
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.006em;
   min-height: 100vh;
+}
+/* on solid fallback surfaces (no backdrop-filter), text goes fully opaque */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root { --text-1: #efeae3; --text-2: #c2bab0; --text-3: #a39a90; }
 }
 
 /* ───────────── surfaces ───────────── */
@@ -158,20 +170,46 @@ body {
   background: rgba(10, 17, 29, 0.5);
 }
 
+/* eyebrows: sentence case, no letter-spaced ALL-CAPS (one caption style only) */
 .label {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-mute);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: normal;
+  color: var(--text-2);
 }
 .kicker {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: normal;
+  color: var(--text-2);
+}
+/* the one permitted tiny caption: chart axis tags */
+.axis-tag {
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-mute);
+  color: var(--text-3);
 }
+
+/* ───────────── type scale (desktop / mobile) ───────────── */
+.t-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 1.2rem + 3.2vw, 2.75rem); /* 32 → 44 */
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  /* subtle vertical vibrancy fill + 1px top highlight; no coloured gradient */
+  background: linear-gradient(180deg, var(--dust-100), var(--dust-300));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.t-title { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.5rem, 1.2rem + 1vw, 1.75rem); line-height: 1.2; letter-spacing: -0.015em; color: var(--text-1); }
+.t-headline { font-weight: 600; font-size: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem); line-height: 1.3; letter-spacing: -0.01em; color: var(--text-1); }
+.t-body { font-weight: 400; font-size: 1rem; line-height: 1.5; color: var(--text-2); }
+.t-callout { font-weight: 500; font-size: 0.875rem; line-height: 1.4; color: var(--text-2); }
+.t-caption { font-weight: 400; font-size: 0.75rem; line-height: 1.4; color: var(--text-3); }
 
 /* logo flame only (whitelisted sun role 6) */
 .flame-text {

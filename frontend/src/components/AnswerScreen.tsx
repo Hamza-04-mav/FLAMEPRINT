@@ -38,15 +38,15 @@ function Verdict() {
 
   return (
     <section className="panel flex min-w-0 flex-col p-6 sm:p-8">
-      <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-mute">
-        {name} <span className="normal-case tracking-normal text-slate-500">· {Math.round(scenario.o2Pct)}% O₂ · {p.psi} <span className="text-[10px]">({Math.round(scenario.pressureKpa)} kPa)</span> · {fmtGravity(scenario.gravityG)} g</span>
+      <div className="font-mono text-[12px] text-mute">
+        {name} <span className="text-slate-500">· {Math.round(scenario.o2Pct)}% O₂ · {p.psi} <span className="text-[10px]">({Math.round(scenario.pressureKpa)} kPa)</span> · {fmtGravity(scenario.gravityG)} g</span>
         {hab?.assumed && <span className="ml-2 align-middle"><Evidence kind="estimate" label="assumed" /></span>}
       </div>
 
       <div className="mt-4 min-h-[84px]" aria-live="polite">
         {v ? (
           <motion.h1 key={v.headline} initial={{ opacity: 0.4, y: 4 }} animate={{ opacity: analyzing ? 0.8 : 1, y: 0 }} transition={{ duration: 0.25, ease: EASE }}
-            className="font-display text-[28px] font-semibold leading-[1.12] tracking-tight text-ink sm:text-[38px]">
+            className="t-display">
             {v.high > 0
               ? <><span className="text-sun">{v.high} of {v.total}</span>{v.headline.slice(`${v.high} of ${v.total}`.length)}</>
               : v.headline}
