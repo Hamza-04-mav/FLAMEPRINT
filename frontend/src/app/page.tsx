@@ -9,7 +9,6 @@ import { CosmicBackdrop } from "@/components/CosmicBackdrop";
 import { CompareHabitats } from "@/components/CompareHabitats";
 import { DataLab } from "@/components/DataLab";
 import { EarthPanel } from "@/components/EarthPanel";
-import { Genome } from "@/components/Genome";
 import { Header } from "@/components/Header";
 import { InvestigationDrawer } from "@/components/InvestigationDrawer";
 import { MissionConfig } from "@/components/MissionConfig";
@@ -40,7 +39,7 @@ function Dashboard() {
               {tab === "space" && <SpaceView />}
               {tab === "ranking" && <Ranking />}
               {tab === "brief" && <BriefPanel />}
-              {tab === "genome" && <Genome />}
+              {tab === "genome" && <CompareHabitats initialMode="experiments" />}
               {tab === "earth" && <EarthPanel />}
               {tab === "ask" && <AskPanel />}
               {tab === "data" && <DataLab />}

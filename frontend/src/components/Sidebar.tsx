@@ -2,26 +2,23 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  BarChart3, Boxes, Database, FileText, GitCompareArrows, Globe2, Home, Luggage, MessageSquareText, Network, X,
+  BarChart3, Boxes, ChevronDown, Database, FileText, GitCompareArrows, Globe2, Home, Luggage, MessageSquareText, Wrench, X,
 } from "lucide-react";
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
 import { type Tab, useMission } from "@/lib/mission";
 
-export type NavGroup = "answer" | "evidence" | "tools";
-export const NAV: { id: Tab; label: string; short: string; icon: React.ReactNode; group: NavGroup }[] = [
-  { id: "answer", label: "Habitat passport", short: "Answer", icon: <Home className="h-[18px] w-[18px]" />, group: "answer" },
-  { id: "stowage", label: "Can I bring this aboard?", short: "Stowage", icon: <Luggage className="h-[18px] w-[18px]" />, group: "answer" },
-  { id: "ranking", label: "Investigation rankings", short: "Rankings", icon: <BarChart3 className="h-[18px] w-[18px]" />, group: "evidence" },
-  { id: "space", label: "Where data exists", short: "Data map", icon: <Boxes className="h-[18px] w-[18px]" />, group: "evidence" },
-  { id: "genome", label: "Compare experiments", short: "Compare", icon: <Network className="h-[18px] w-[18px]" />, group: "evidence" },
-  { id: "habitats", label: "Compare habitats", short: "Habitats", icon: <GitCompareArrows className="h-[18px] w-[18px]" />, group: "evidence" },
-  { id: "brief", label: "Fire safety brief", short: "Brief", icon: <FileText className="h-[18px] w-[18px]" />, group: "evidence" },
-  { id: "data", label: "Data Lab", short: "Data", icon: <Database className="h-[18px] w-[18px]" />, group: "tools" },
-  { id: "ask", label: "Ask the archive", short: "Ask", icon: <MessageSquareText className="h-[18px] w-[18px]" />, group: "tools" },
-  { id: "earth", label: "Down to Earth", short: "Earth", icon: <Globe2 className="h-[18px] w-[18px]" />, group: "tools" },
-];
-const GROUPS: { id: NavGroup; label: string }[] = [
-  { id: "answer", label: "Answer" }, { id: "evidence", label: "Evidence" }, { id: "tools", label: "Tools" },
+export type NavGroup = "main" | "tools";
+/** Five pages, each answering one question, plus a small Tools menu. */
+export const NAV: { id: Tab; label: string; question: string; icon: React.ReactNode; group: NavGroup; also?: Tab[] }[] = [
+  { id: "answer", label: "Answer", question: "Is my habitat safe?", icon: <Home className="h-[18px] w-[18px]" />, group: "main" },
+  { id: "ranking", label: "Evidence", question: "What backs it up?", icon: <BarChart3 className="h-[18px] w-[18px]" />, group: "main" },
+  { id: "space", label: "Gaps", question: "Where is there no data?", icon: <Boxes className="h-[18px] w-[18px]" />, group: "main" },
+  { id: "brief", label: "Brief", question: "What should engineers do?", icon: <FileText className="h-[18px] w-[18px]" />, group: "main" },
+  { id: "habitats", label: "Compare", question: "What changes if we move?", icon: <GitCompareArrows className="h-[18px] w-[18px]" />, group: "main", also: ["genome"] },
+  { id: "stowage", label: "Can I bring this aboard?", question: "", icon: <Luggage className="h-[16px] w-[16px]" />, group: "tools" },
+  { id: "data", label: "Data Lab", question: "", icon: <Database className="h-[16px] w-[16px]" />, group: "tools" },
+  { id: "ask", label: "Ask the archive", question: "", icon: <MessageSquareText className="h-[16px] w-[16px]" />, group: "tools" },
+  { id: "earth", label: "Down to Earth", question: "", icon: <Globe2 className="h-[16px] w-[16px]" />, group: "tools" },
 ];
 
 /** FLAMEPRINT mark: a flame held inside an orbital ring. */
@@ -64,59 +61,64 @@ export function Logo({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function NavItem({ id, label, icon, rail, onNavigate }: { id: Tab; label: string; icon: React.ReactNode; rail: boolean; onNavigate?: () => void }) {
+function NavItem({ item, rail, onNavigate, small = false }: { item: (typeof NAV)[number]; rail: boolean; onNavigate?: () => void; small?: boolean }) {
   const { tab, setTab } = useMission();
-  const active = tab === id;
+  const active = tab === item.id || !!item.also?.includes(tab);
   return (
-    <button title={rail ? label : undefined} aria-current={active ? "page" : undefined}
-      onClick={() => { setTab(id); onNavigate?.(); }}
-      className={`group relative flex w-full items-center gap-3 rounded-[10px] py-2.5 text-left transition-colors ${rail ? "justify-center px-0" : "px-3.5"} ${
+    <button title={rail ? item.label : undefined} aria-current={active ? "page" : undefined}
+      onClick={() => { setTab(item.id); onNavigate?.(); }}
+      className={`group relative flex w-full items-center gap-3 rounded-[10px] text-left transition-colors duration-150 ${small ? "py-2" : "py-2.5"} ${rail ? "justify-center px-0" : "px-3"} ${
         active ? "text-white" : "text-mute hover:text-ink"}`}>
       {active && (
-        <motion.span layoutId={rail ? "nav-active-rail" : "nav-active"}
-          className="absolute inset-0 rounded-[10px] bg-[linear-gradient(180deg,#1688ff,#0868e0)] shadow-[0_8px_24px_-10px_rgba(8,123,255,0.9),inset_0_1px_0_rgba(255,255,255,0.18)]"
-          transition={{ type: "spring", stiffness: 420, damping: 36 }} />
+        <motion.span layoutId={rail ? "nav-active-rail" : "nav-active"} className="absolute inset-0 rounded-[10px] bg-blue/90"
+          transition={{ duration: 0.25, ease: [0.2, 0.7, 0.2, 1] }} />
       )}
-      {!active && <span className="absolute inset-0 rounded-[10px] bg-white/[0.035] opacity-0 transition-opacity group-hover:opacity-100" />}
-      <span className={`relative z-10 transition-colors ${active ? "text-white" : "text-ox-2/80 group-hover:text-ox"}`}>{icon}</span>
-      {!rail && <span className="relative z-10 text-[13.5px] font-medium">{label}</span>}
+      {!active && <span className="absolute inset-0 rounded-[10px] bg-white/[0.035] opacity-0 transition-opacity duration-150 group-hover:opacity-100" />}
+      <span className={`relative z-10 ${active ? "text-white" : "text-ox-2/80 group-hover:text-ox"}`}>{item.icon}</span>
+      {!rail && (
+        <span className="relative z-10 min-w-0 leading-tight">
+          <span className={`block ${small ? "text-[13px]" : "text-[14px] font-semibold"}`}>{item.label}</span>
+          {item.question && <span className={`block truncate text-[11.5px] ${active ? "text-white/75" : "text-slate-500"}`}>{item.question}</span>}
+        </span>
+      )}
     </button>
   );
 }
 
-function SystemCard({ compact }: { compact?: boolean }) {
+function Status({ rail }: { rail: boolean }) {
   const { health, error } = useMission();
   const online = !!health && !error;
   const tone = error ? "#FF5A4E" : online ? "#34D399" : "#7E94B4";
-  if (compact) {
-    return <span title={error ? "Backend offline" : online ? "System online" : "Connecting"} className="led mx-auto block" style={{ color: tone }} />;
-  }
+  const text = error ? "Engine offline" : online ? (health.llm.enabled ? "Online · Claude" : "Online · offline writer") : "Connecting…";
+  if (rail) return <span title={text} className="led mx-auto block" style={{ color: tone }} />;
   return (
-    <div className="rounded-[12px] border border-[var(--line)] bg-space-900/60 px-3.5 py-3">
-      <div className="flex items-center gap-2 text-[13px] font-medium" style={{ color: online ? "#6EE7B7" : error ? "#FF9A91" : "#A5B8D2" }}>
-        <span className="led" style={{ color: tone }} />
-        {error ? "Backend offline" : online ? "System Online" : "Connecting…"}
-      </div>
-      <div className="mt-1 text-[11.5px] text-mute">
-        {health ? `${health.llm.enabled ? "Claude SI" : "Offline SI"} · ${health.db.backend === "postgres" ? "pgvector" : "local index"}` : "Linking archive"}
-      </div>
+    <div className="px-3 text-[11.5px] leading-relaxed text-slate-500">
+      <div className="flex items-center gap-2 text-slate-400"><span className="led" style={{ color: tone }} />{text}</div>
+      <div className="mt-1">Built on NASA PSI open data. Independent project, not NASA-endorsed.</div>
     </div>
   );
 }
 
-function Attribution() {
+function ToolsMenu({ rail, onNavigate }: { rail: boolean; onNavigate?: () => void }) {
+  const { tab } = useMission();
+  const tools = NAV.filter((n) => n.group === "tools");
+  const inTools = tools.some((t) => t.id === tab);
+  const [open, setOpen] = useState(inTools);
+  useEffect(() => { if (inTools) setOpen(true); }, [inTools]);
   return (
-    <div className="flex items-start gap-3 rounded-[12px] border border-[var(--line)] bg-space-900/40 px-3.5 py-3">
-      <svg viewBox="0 0 32 32" className="h-8 w-8 shrink-0" aria-hidden>
-        <circle cx="16" cy="16" r="10" fill="#0B1930" stroke="#087BFF" strokeWidth="1.3" />
-        <ellipse cx="16" cy="16" rx="15" ry="5" fill="none" stroke="#19C9FF" strokeWidth="1.1" transform="rotate(-25 16 16)" />
-        <circle cx="16" cy="16" r="3" fill="#48BFFF" />
-      </svg>
-      <div className="leading-snug">
-        <div className="text-[11px] text-mute">Built on open data from</div>
-        <div className="text-[12.5px] font-medium text-ink">NASA PSI</div>
-        <div className="mt-0.5 text-[10.5px] text-slate-500">Physical Sciences Informatics. Independent project, not NASA-endorsed.</div>
-      </div>
+    <div>
+      <button onClick={() => setOpen((x) => !x)} aria-expanded={open} title={rail ? "Tools" : undefined}
+        className={`flex w-full items-center gap-3 rounded-[10px] py-2 text-[13px] text-mute transition-colors duration-150 hover:text-ink ${rail ? "justify-center" : "px-3"}`}>
+        <Wrench className="h-4 w-4" />{!rail && <>Tools<ChevronDown className={`ml-auto h-4 w-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`} /></>}
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.nav aria-label="Tools" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }} className="flex flex-col gap-0.5 overflow-hidden">
+            {tools.map((n) => <NavItem key={n.id} item={n} rail={rail} onNavigate={onNavigate} small />)}
+          </motion.nav>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -125,19 +127,12 @@ function Panel({ rail, onNavigate }: { rail: boolean; onNavigate?: () => void })
   return (
     <div className={`flex h-full flex-col ${rail ? "items-stretch px-3 py-5" : "px-4 py-6"}`}>
       <div className={rail ? "" : "px-1"}><Logo compact={rail} /></div>
-      {GROUPS.map((g, gi) => (
-        <div key={g.id} className={gi === 0 ? (rail ? "mt-7" : "mt-8") : "mt-5"}>
-          <div className={`mb-1.5 ${rail ? "mx-auto w-6" : "px-3.5"}`}>
-            {rail ? (gi > 0 && <div className="rule" />) : <div className="label !text-[9.5px] !tracking-[0.22em] text-slate-500">{g.label}</div>}
-          </div>
-          <nav aria-label={g.label} className="flex flex-col gap-0.5">
-            {NAV.filter((n) => n.group === g.id).map((n) => <NavItem key={n.id} id={n.id} label={n.label} icon={n.icon} rail={rail} onNavigate={onNavigate} />)}
-          </nav>
-        </div>
-      ))}
-      <div className="mt-auto space-y-3 pt-6">
-        {!rail && <Attribution />}
-        <SystemCard compact={rail} />
+      <nav aria-label="Pages" className={`flex flex-col gap-1 ${rail ? "mt-8" : "mt-10"}`}>
+        {NAV.filter((n) => n.group === "main").map((n) => <NavItem key={n.id} item={n} rail={rail} onNavigate={onNavigate} />)}
+      </nav>
+      <div className="mt-auto space-y-4 pt-6">
+        <ToolsMenu rail={rail} onNavigate={onNavigate} />
+        <div className={rail ? "" : "border-t border-[var(--line)] pt-4"}><Status rail={rail} /></div>
       </div>
     </div>
   );

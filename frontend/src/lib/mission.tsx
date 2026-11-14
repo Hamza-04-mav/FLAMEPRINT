@@ -14,7 +14,11 @@ export const FALLBACK_SCENARIO: Scenario = {
 export const TABS = ["answer", "stowage", "ranking", "space", "genome", "brief", "habitats", "data", "ask", "earth"] as const;
 export type Tab = (typeof TABS)[number];
 /** Old deep links keep working. */
-const LEGACY: Record<string, Tab> = { overview: "answer", coverage: "space", control: "answer" };
+const LEGACY: Record<string, Tab> = {
+  overview: "answer", control: "answer", coverage: "space",
+  // plain names from the sidebar also work as links
+  evidence: "ranking", gaps: "space", compare: "habitats",
+};
 export const resolveTab = (h: string): Tab | null => (TABS as readonly string[]).includes(h) ? (h as Tab) : LEGACY[h] ?? null;
 
 interface MissionCtx {

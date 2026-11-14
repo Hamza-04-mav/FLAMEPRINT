@@ -141,6 +141,7 @@ export function StowageSearch() {
 
 /** Full tab. */
 export function StowageInspector() {
+  const [allMats, setAllMats] = useState(false);
   const s = useStowage();
   const { scenario, habitats, analysis } = useMission();
   const name = habitats.find((h) => h.id === scenario.habitatId)?.name ?? "Custom mission";
@@ -164,13 +165,18 @@ export function StowageInspector() {
         <div className="panel mt-5 p-5">
           <div className="label mb-3">Materials FLAMEPRINT knows</div>
           <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {analysis.materials.map((m) => (
+            {(allMats ? analysis.materials : analysis.materials.slice(0, 5)).map((m) => (
               <li key={m.id} className="flex items-center justify-between gap-2 rounded-[8px] bg-space-950/40 px-3 py-2 text-[13px]">
                 <span className="min-w-0"><span className="text-ink">{m.name}</span><span className="block truncate text-[11.5px] text-slate-500">{m.usedFor}</span></span>
                 <span className="shrink-0 text-[12px]" style={{ color: LEVEL_STYLE[m.level].color }}>{LEVEL_STYLE[m.level].label}</span>
               </li>
             ))}
           </ul>
+          {analysis.materials.length > 5 && (
+            <button onClick={() => setAllMats((x) => !x)} className="btn btn-ghost mt-3 !px-0">
+              {allMats ? "Show fewer" : `Show all ${analysis.materials.length}`}
+            </button>
+          )}
         </div>
       )}
     </div>

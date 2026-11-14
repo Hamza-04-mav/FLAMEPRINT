@@ -52,12 +52,12 @@ export function AskPanel() {
 
   return (
     <div>
-      <PageHeader index="07" kicker="Ask the archive" title="Retrieval-grounded answers with sources"
+      <PageHeader kicker="Tools · Ask the archive" title="Ask the archive"
         actions={<>
           {retrieval && <Pill>{retrieval === "postgres" ? "pgvector search" : "in-memory vector search"}</Pill>}
           {mode && <Pill tone={mode === "llm" ? "cyan" : "amber"}>{mode === "llm" ? "Claude synthesis" : "extractive (offline)"}</Pill>}
         </>}>
-        Semantic search over the investigation catalog and every imported PSI document. Answers cite the passages they use.
+        Search the catalog and imported PSI documents; every answer cites its sources.
       </PageHeader>
       <div className="panel panel-glow p-5 sm:p-7">
       <form onSubmit={(e) => { e.preventDefault(); void ask(q); }} className="relative">

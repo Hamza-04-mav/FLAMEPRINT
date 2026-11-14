@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
+import { useState } from "react";
 import { PILLAR_COLOR } from "@/lib/format";
 import { useMission } from "@/lib/mission";
 import type { Spinoff } from "@/lib/types";
@@ -135,17 +136,22 @@ function AppRow({ s, i }: { s: Spinoff; i: number }) {
 }
 
 export function EarthPanel() {
+  const [all, setAll] = useState(false);
   const { dataset } = useMission();
   const spin = dataset?.spinoffs ?? [];
   const links = new Set(spin.flatMap((s) => s.related)).size;
   return (
     <div>
-      <PageHeader index="06" kicker="Down to Earth" title="From orbit to everyday fire safety">
-        How space combustion research connects to suppression, detection, protective equipment and fire safety in confined spaces.
+      <PageHeader kicker="Tools · Down to Earth" title="From orbit to everyday fire safety">
         Each link says whether it comes from the challenge brief or is inferred from investigation objectives.
       </PageHeader>
       <EarthHero apps={spin.length} links={links} />
-      <div className="space-y-4">{spin.map((s, i) => <AppRow key={s.title} s={s} i={i} />)}</div>
+      <div className="space-y-4">{(all ? spin : spin.slice(0, 3)).map((s, i) => <AppRow key={s.title} s={s} i={i} />)}</div>
+      {spin.length > 3 && (
+        <button onClick={() => setAll((x) => !x)} aria-expanded={all} className="btn btn-ghost mt-4 !px-0">
+          {all ? "Show fewer" : `Show all ${spin.length}`}<ChevronDown className={`h-4 w-4 transition-transform duration-200 ${all ? "rotate-180" : ""}`} />
+        </button>
+      )}
     </div>
   );
 }

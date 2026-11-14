@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, Download, FileUp, RefreshCw, Sparkles, Trash2, TriangleAlert, UploadCloud } from "lucide-react";
+import { CheckCircle2, Download, FileUp, RefreshCw, Sparkles, Trash2, TriangleAlert, UploadCloud, ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { useMission } from "@/lib/mission";
@@ -13,6 +13,7 @@ type Preview = { file: File; report: IngestReport; sample: TestRecord[]; textPre
 export function DataLab() {
   const { dataset, health, refreshData } = useMission();
   const [drag, setDrag] = useState(false);
+  const [details, setDetails] = useState(false);
   const [inv, setInv] = useState("");
   const [preview, setPreview] = useState<Preview | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -63,11 +64,11 @@ export function DataLab() {
 
   return (
     <div>
-    <PageHeader index="08" kicker="Data lab" title="Plug in the official PSI dataset"
+    <PageHeader kicker="Tools · Data Lab" title="Plug in the official PSI dataset"
       actions={<button onClick={() => act("reload", api.reload, "Re-scanned data/psi and re-indexed.")} className="btn btn-outline !py-2 !text-[12.5px]">
         <RefreshCw className={`h-4 w-4 ${busy === "reload" ? "animate-spin" : ""}`} /> Reload data/psi
       </button>}>
-      Drop NASA PSI test matrices, metadata or documents. Columns are mapped and units converted before anything is saved, and every view updates.
+      Drop PSI test files here; columns and units are mapped before anything is saved.
     </PageHeader>
     <div className="grid gap-5 xl:grid-cols-[1.25fr_1fr]">
       <div className="space-y-5">
@@ -178,9 +179,9 @@ export function DataLab() {
           </AnimatePresence>
         </div>
 
-        <div className="panel p-4 sm:p-5">
+        {uploads.length > 0 && <div className="panel p-4 sm:p-5">
           <div className="label mb-3">Uploaded files</div>
-          {uploads.length === 0 ? <p className="text-sm text-slate-500">Nothing uploaded yet. Files in <code className="text-slate-300">data/psi/</code> are loaded automatically.</p> : (
+          {(
             <div className="space-y-1.5">
               {uploads.map((u) => (
                 <div key={u.file} className="flex flex-wrap items-center gap-2 rounded-[4px] border border-slate-800 bg-space-900/50 px-3 py-2 text-[12.5px]">
@@ -206,7 +207,7 @@ export function DataLab() {
                 className="mt-2 text-xs text-slate-500 hover:text-rose-300">Remove all uploads</button>
             </div>
           )}
-        </div>
+        </div>}
       </div>
 
       <div className="space-y-5">
@@ -236,6 +237,10 @@ export function DataLab() {
           </div>
         </div>
 
+        <button onClick={() => setDetails((x) => !x)} aria-expanded={details} className="btn btn-ghost !px-0">
+          {details ? "Hide details" : "Show details"}<ChevronDown className={`h-4 w-4 transition-transform duration-200 ${details ? "rotate-180" : ""}`} />
+        </button>
+        {details && <>
         <div className="panel p-4 sm:p-5">
           <div className="label mb-3">Ingestion log</div>
           <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1 scrollbar-thin">
@@ -262,6 +267,7 @@ export function DataLab() {
             <li>PDFs and text are indexed for retrieval and, with Claude, can be turned into structured metadata.</li>
           </ol>
         </div>
+        </>}
       </div>
     </div>
     </div>
