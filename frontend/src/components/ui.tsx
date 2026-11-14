@@ -3,7 +3,10 @@
 import { animate, motion, useMotionValue, useTransform } from "framer-motion";
 import { useEffect } from "react";
 import { CONF_LABEL } from "@/lib/format";
+import { DUST } from "@/lib/theme";
 import type { Confidence } from "@/lib/types";
+
+const DUST_TRACK = "rgba(138,129,120,0.2)";
 
 /** Page header: a small quiet label, one calm headline, at most one supporting sentence, actions on the right. */
 export function PageHeader({ kicker, title, children, actions }: {
@@ -23,13 +26,13 @@ export function PageHeader({ kicker, title, children, actions }: {
 }
 
 /** Full-circle progress ring used for coverage. */
-export function Ring({ value, size = 132, stroke = 10, color = "#19C9FF", label }: { value: number; size?: number; stroke?: number; color?: string; label?: string }) {
+export function Ring({ value, size = 132, stroke = 10, color = DUST[300], label }: { value: number; size?: number; stroke?: number; color?: string; label?: string }) {
   const r = size / 2 - stroke;
   const c = 2 * Math.PI * r;
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(120,160,210,0.14)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={DUST_TRACK} strokeWidth={stroke} />
         <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
           initial={{ strokeDasharray: `0 ${c}` }} animate={{ strokeDasharray: `${(c * Math.min(100, Math.max(0, value))) / 100} ${c}` }}
           transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
@@ -55,7 +58,7 @@ export function SectionTitle({ kicker, title, children }: { kicker: string; titl
 }
 
 export function Slider({
-  label, value, min, max, step, onChange, unit, color = "#19C9FF", hint, display,
+  label, value, min, max, step, onChange, unit, color = DUST[300], hint, display,
 }: {
   label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void;
   unit?: string; color?: string; hint?: string; display?: string;
@@ -81,7 +84,7 @@ export function Slider({
   );
 }
 
-export function Toggle({ active, onClick, children, color = "#19C9FF" }: { active: boolean; onClick: () => void; children: React.ReactNode; color?: string }) {
+export function Toggle({ active, onClick, children, color = DUST[300] }: { active: boolean; onClick: () => void; children: React.ReactNode; color?: string }) {
   return (
     <button
       type="button" onClick={onClick} aria-pressed={active}
@@ -114,11 +117,11 @@ export function Gauge({ value, label, size = 148 }: { value: number; label: stri
   const r = size / 2 - 12;
   const c = 2 * Math.PI * r;
   const arc = 0.75;
-  const color = value >= 70 ? "#19C9FF" : value >= 40 ? "#FFC15B" : "#FF8B32";
+  const color = value >= 70 ? DUST[100] : value >= 40 ? DUST[300] : DUST[500];
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="rotate-[135deg]">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(120,160,210,0.16)" strokeWidth="9"
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={DUST_TRACK} strokeWidth="9"
           strokeDasharray={`${c * arc} ${c}`} strokeLinecap="round" />
         <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth="9" strokeLinecap="round"
           initial={{ strokeDasharray: `0 ${c}` }}
@@ -145,7 +148,7 @@ export const EVIDENCE: Record<EvidenceKind, { label: string; color: string; hint
   catalog: { label: "Catalog · approx", color: "var(--ev-catalog)", hint: "Coarse range from public NASA summaries. Verify against PSI" },
   estimate: { label: "Estimate", color: "var(--ev-estimate)", hint: "Order-of-magnitude physics estimate, not a measurement" },
   illustrative: { label: "Illustrative", color: "var(--ev-illustrative)", hint: "Simulation / teaching aid. Not experimental data" },
-  unknown: { label: "Not characterized", color: "#64748b", hint: "No value available for this axis" },
+  unknown: { label: "Not characterized", color: "var(--dust-500)", hint: "No value available for this axis" },
 };
 
 export function EvidenceMark({ kind, size = 8 }: { kind: EvidenceKind; size?: number }) {
@@ -181,11 +184,11 @@ export function ErrorNote({ message, onRetry }: { message: string; onRetry?: () 
 
 export function Pill({ children, tone = "slate" }: { children: React.ReactNode; tone?: "slate" | "cyan" | "amber" | "emerald" | "rose" }) {
   const t = {
-    slate: "border-slate-600/50 text-slate-300",
-    cyan: "border-ox/40 text-[#9BE6FF] bg-ox/5",
-    amber: "border-amber-400/40 text-amber-200 bg-amber-400/5",
-    emerald: "border-emerald-400/40 text-emerald-200 bg-emerald-400/5",
-    rose: "border-rose-400/40 text-rose-200 bg-rose-400/5",
+    slate: "border-dust-600/50 text-dust-300",
+    cyan: "border-dust-500/40 text-dust-200 bg-dust-500/10",
+    amber: "border-sun/40 text-sun bg-sun/[0.06]",
+    emerald: "border-dust-400/40 text-dust-200 bg-dust-400/[0.06]",
+    rose: "border-sun/40 text-sun bg-sun/[0.06]",
   }[tone];
   return <span className={`inline-flex items-center gap-1 rounded-[3px] border px-1.5 py-0.5 font-mono text-[10.5px] tracking-wide ${t}`}>{children}</span>;
 }

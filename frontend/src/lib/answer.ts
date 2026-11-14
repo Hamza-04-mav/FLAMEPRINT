@@ -1,18 +1,25 @@
 import { toPsi } from "./format";
+import { DUST, GRADE, RISK, RISK_SHAPE } from "./theme";
 import type { Grade, GradeLetter, MaterialVerdict, Ranked, RiskLevel, Scenario } from "./types";
 
-export const LEVEL_STYLE: Record<RiskLevel, { label: string; color: string }> = {
-  high: { label: "High risk", color: "#FF5A4E" },
-  elevated: { label: "Elevated", color: "#FFC15B" },
-  low: { label: "Low risk", color: "#34D399" },
-  unknown: { label: "Not rated", color: "#7E94B4" },
+/**
+ * Risk is encoded as yellow intensity + shape, never red/green.
+ * `color` drives text/stroke; `flame`/`glow`/`hatch` drive the mark so meaning is
+ * never carried by color alone (high ≠ elevated ≠ low ≠ unknown by shape too).
+ */
+export const LEVEL_STYLE: Record<RiskLevel, { label: string; color: string } & (typeof RISK_SHAPE)[RiskLevel]> = {
+  high: { label: "High risk", color: RISK.high, ...RISK_SHAPE.high },
+  elevated: { label: "Elevated", color: RISK.elevated, ...RISK_SHAPE.elevated },
+  low: { label: "Low risk", color: DUST[400], ...RISK_SHAPE.low },
+  unknown: { label: "Not rated", color: DUST[400], ...RISK_SHAPE.unknown },
 };
 
+/** Evidence grade — neutral dust brightness ramp (not on the yellow whitelist). */
 export const GRADE_STYLE: Record<GradeLetter, { color: string; meaning: string }> = {
-  A: { color: "#34D399", meaning: "Imported PSI tests at these conditions" },
-  B: { color: "#3D9BFF", meaning: "One investigation tested this atmosphere" },
-  C: { color: "#FFC15B", meaning: "Only bracketed between investigations" },
-  M: { color: "#7E94B4", meaning: "Modeled: no test covers this" },
+  A: { color: GRADE.A, meaning: "Imported PSI tests at these conditions" },
+  B: { color: GRADE.B, meaning: "One investigation tested this atmosphere" },
+  C: { color: GRADE.C, meaning: "Only bracketed between investigations" },
+  M: { color: GRADE.M, meaning: "Modeled: no test covers this" },
 };
 
 const LEVEL_RANK: Record<RiskLevel, number> = { low: 0, elevated: 1, high: 2, unknown: -1 };

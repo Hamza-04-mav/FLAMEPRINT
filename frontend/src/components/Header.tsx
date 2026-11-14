@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Activity, Check, ChevronDown, Menu, SlidersHorizontal } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { type Environment, environmentFor, ENV_LABEL } from "@/lib/environment";
-import { toPsi } from "@/lib/format";
+import { fmtGravity, toPsi } from "@/lib/format";
 import { useMission } from "@/lib/mission";
 import { MobileNav } from "./Sidebar";
 import { EVIDENCE, type EvidenceKind, EvidenceMark } from "./ui";
@@ -58,7 +58,7 @@ function MissionPicker() {
         <PlanetGlyph env={env} size={28} />
         <span className="truncate text-[14px] font-semibold text-ink">{hab?.name ?? "Custom mission"}</span>
         <span className="hidden truncate font-mono text-[12px] text-mute sm:inline">
-          {Math.round(scenario.o2Pct)}% O₂ · {toPsi(scenario.pressureKpa)} psi · {+scenario.gravityG.toFixed(2)} g
+          {Math.round(scenario.o2Pct)}% O₂ · {toPsi(scenario.pressureKpa)} psi · {fmtGravity(scenario.gravityG)} g
         </span>
         <ChevronDown className={`h-4 w-4 shrink-0 text-mute transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
@@ -75,7 +75,7 @@ function MissionPicker() {
                   <PlanetGlyph env={environmentFor(h.id, h.gravityG)} size={30} />
                   <span className="min-w-0 flex-1">
                     <span className="block text-[13.5px] font-medium text-ink">{h.name}</span>
-                    <span className="block font-mono text-[10.5px] text-mute">{h.o2Pct}% O₂ · {toPsi(h.pressureKpa)} psi · {h.gravityG} g{h.assumed ? " · assumed" : ""}</span>
+                    <span className="block font-mono text-[10.5px] text-mute">{h.o2Pct}% O₂ · {toPsi(h.pressureKpa)} psi · {fmtGravity(h.gravityG)} g{h.assumed ? " · assumed" : ""}</span>
                   </span>
                   {on && <Check className="h-4 w-4 text-ox" />}
                 </button>

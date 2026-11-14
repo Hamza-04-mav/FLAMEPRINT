@@ -11,7 +11,7 @@ describe("format", () => {
     expect(fmtRange(null, "%")).toBe("not characterized");
     expect(toPsi(70.3)).toBe(10.2);
     expect(toKpa(14.7)).toBeCloseTo(101.4, 1);
-    expect(scoreColor(90)).toBe("#19C9FF");
+    expect(scoreColor(90)).toBe("#EFEAE3"); // relevance ramp is dust, not a hue
   });
 });
 

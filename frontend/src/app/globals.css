@@ -1,87 +1,121 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════════════════
-   FLAMEPRINT design system
-   One palette for the whole product:
-   blue / cyan = scientific intelligence · orange / amber = combustion
-   green (restrained) = verified or live
+   FLAMEPRINT design system — "Ink sun"
+   EXACTLY three colors. Every value is a tint / shade / alpha of these:
+     Ink navy    #0E1726  (space)      ~60% of screen
+     Dust taupe  #8A8178  (moon dust)  ~35% of screen
+     Solar yellow #FFD23F (the sun)    ≤5%, six whitelisted roles only
+   No other hues anywhere — no blue CTA, no cyan, no red/green status colors.
+   Yellow is allowed ONLY for: (1) the single primary CTA per view,
+   (2) the user's habitat marker, (3) fire/risk intensity, (4) the active
+   habitat in the stepper, (5) the keyboard focus ring, (6) the logo flame.
+   JS mirror of these tokens: src/lib/theme.ts (three.js + chart code).
    ═══════════════════════════════════════════════════════════════════════ */
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-grotesk), var(--font-inter), sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-grotesk), var(--font-inter), sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", monospace;
 
-  /* surfaces */
-  --color-space-950: #030814; /* primary background */
-  --color-space-900: #071225; /* secondary background */
-  --color-space-850: #091629;
-  --color-space-800: #0b1930; /* elevated surface */
-  --color-space-700: #12243f;
-  --color-space-600: #1b3354;
+  /* ── ink navy: surfaces ── */
+  --color-ink-950: #0a111d;
+  --color-ink-900: #0e1726; /* base surface */
+  --color-ink-850: #11192b;
+  --color-ink-800: #152033; /* elevated surface */
+  --color-ink-700: #1d2a40;
+  --color-ink-600: #26344a;
 
-  /* brand */
-  --color-blue: #087bff;      /* primary blue */
-  --color-ox: #19c9ff;        /* electric cyan */
-  --color-ox-2: #48bfff;      /* secondary cyan */
-  --color-flame-1: #ffc15b;   /* flame amber */
-  --color-flame-2: #ff8b32;   /* flame orange */
-  --color-flame-3: #e2552b;   /* ember, only inside flame gradients */
-  --color-ink: #f2f7ff;       /* primary text */
-  --color-mute: #a5b8d2;      /* secondary text */
-  --color-ok: #34d399;        /* verified / live */
-  --color-danger: #ff5a4e;    /* critical gaps only */
+  /* ── dust taupe: text, borders, structure ── */
+  --color-dust-100: #efeae3; /* primary text on navy */
+  --color-dust-200: #d8d1c7;
+  --color-dust-300: #c2bab0; /* bright structure / body text */
+  --color-dust-400: #a39a90; /* secondary text — 4.5:1 on navy */
+  --color-dust-500: #8a8178; /* borders, icons, chart structure */
+  --color-dust-600: #6b6459;
+  --color-dust-700: #4a4540;
 
-  /* neutrals re-tinted toward the navy palette, so every existing slate-* class follows the system */
-  --color-slate-50: #f7faff;
-  --color-slate-100: #f2f7ff;
-  --color-slate-200: #dce7f5;
-  --color-slate-300: #c3d3e8;
-  --color-slate-400: #a5b8d2;
-  --color-slate-500: #7e94b4;
-  --color-slate-600: #566c8e;
-  --color-slate-700: #2a3e5e;
-  --color-slate-800: #172a45;
-  --color-slate-900: #0d1b31;
-  --color-slate-950: #050c1a;
+  /* ── solar yellow: the rare accent ── */
+  --color-sun: #ffd23f;
+  --color-sun-light: #ffe08a;
+  --color-sun-deep: #e0a51e;
 
-  /* semantic tints mapped into the palette */
-  --color-amber-100: #fff1d6;
-  --color-amber-200: #ffdf9e;
-  --color-amber-300: #ffc15b;
-  --color-amber-400: #ffb23f;
-  --color-amber-500: #ff9d2e;
-  --color-emerald-100: #d6f9ea;
-  --color-emerald-200: #a7f0d1;
-  --color-emerald-300: #6ee7b7;
-  --color-emerald-400: #34d399;
-  --color-rose-100: #ffe1de;
-  --color-rose-200: #ffc2bc;
-  --color-rose-300: #ff9a91;
-  --color-rose-400: #ff6f63;
-  --color-rose-500: #ff5a4e;
-  --color-rose-950: #2a0d0d;
-  --color-orange-100: #ffe6d1;
-  --color-orange-200: #ffcfa8;
-  --color-orange-300: #ffab70;
-  --color-orange-950: #2a1306;
-  --color-sky-100: #dff3ff;
-  --color-sky-400: #48bfff;
-  --color-cyan-400: #19c9ff;
-  --color-indigo-300: #8fc3ff;
-  --color-violet-200: #c9e6ff;
-  --color-violet-400: #48bfff;
-  --color-pink-300: #48bfff;
+  /* ── legacy token names remapped onto the three colors, so every existing
+     text-ink / bg-space-900 / text-flame-2 class follows the system ── */
+  --color-space-950: #0a111d;
+  --color-space-900: #0e1726;
+  --color-space-850: #11192b;
+  --color-space-800: #152033;
+  --color-space-700: #1d2a40;
+  --color-space-600: #26344a;
+  --color-blue: #8a8178;    /* was primary blue → structural dust (CTA is sun) */
+  --color-ox: #c2bab0;      /* was cyan → bright dust structure */
+  --color-ox-2: #a39a90;    /* was secondary cyan → dust */
+  --color-flame-1: #ffe08a; /* flame light (risk/fire, whitelisted) */
+  --color-flame-2: #ffd23f; /* flame → sun */
+  --color-flame-3: #e0a51e; /* ember, flame gradients only */
+  --color-ink: #efeae3;     /* primary text */
+  --color-mute: #a39a90;    /* secondary text */
+  --color-ok: #c2bab0;      /* was verified-green → neutral dust (shape carries it) */
+  --color-danger: #ffd23f;  /* was red → sun (risk intensity) */
+
+  /* neutral slate ramp re-tinted: light = dust, dark = ink */
+  --color-slate-50: #f5f1ea;
+  --color-slate-100: #efeae3;
+  --color-slate-200: #d8d1c7;
+  --color-slate-300: #c2bab0;
+  --color-slate-400: #a39a90;
+  --color-slate-500: #8a8178;
+  --color-slate-600: #6b6459;
+  --color-slate-700: #4a4540;
+  --color-slate-800: #2a3240;
+  --color-slate-900: #152033;
+  --color-slate-950: #0a111d;
+
+  /* semantic tints collapsed onto the three colors (no stray hues) */
+  --color-amber-100: #fff3d6;
+  --color-amber-200: #ffe08a;
+  --color-amber-300: #ffd23f;
+  --color-amber-400: #f4c02e;
+  --color-amber-500: #e0a51e;
+  --color-emerald-100: #efeae3; /* was green → dust */
+  --color-emerald-200: #d8d1c7;
+  --color-emerald-300: #c2bab0;
+  --color-emerald-400: #a39a90;
+  --color-rose-100: #fff3d6;    /* was red → sun tints (risk) */
+  --color-rose-200: #ffe08a;
+  --color-rose-300: #ffd23f;
+  --color-rose-400: #ffd23f;
+  --color-rose-500: #ffd23f;
+  --color-rose-950: #241a08;
+  --color-orange-100: #ffe08a;
+  --color-orange-200: #ffd23f;
+  --color-orange-300: #e0a51e;
+  --color-orange-950: #241a08;
+  --color-sky-100: #efeae3;
+  --color-sky-400: #a39a90;
+  --color-cyan-400: #c2bab0;
+  --color-indigo-300: #c2bab0;
+  --color-violet-200: #d8d1c7;
+  --color-violet-400: #a39a90;
+  --color-pink-300: #a39a90;
 }
 
 :root {
   color-scheme: dark;
-  /* evidence classes: how far a number can be trusted */
-  --ev-psi: #34d399;          /* verified NASA PSI data */
-  --ev-catalog: #ffc15b;      /* curated catalog range, approximate */
-  --ev-estimate: #a5b8d2;     /* physics estimate */
-  --ev-illustrative: #48bfff; /* simulation / teaching aid (always hatched) */
-  --line: rgba(72, 150, 255, 0.14);
-  --line-strong: rgba(72, 170, 255, 0.28);
+  /* ink / dust / sun as raw properties for components and theme.ts parity */
+  --ink-950: #0a111d; --ink-900: #0e1726; --ink-850: #11192b; --ink-800: #152033; --ink-700: #1d2a40; --ink-600: #26344a;
+  --dust-100: #efeae3; --dust-200: #d8d1c7; --dust-300: #c2bab0; --dust-400: #a39a90; --dust-500: #8a8178; --dust-600: #6b6459; --dust-700: #4a4540;
+  --sun-500: #ffd23f; --sun-light: #ffe08a; --sun-deep: #e0a51e;
+  --sun-glow: rgba(255, 210, 63, 0.28);
+  --sun-wash: rgba(255, 210, 63, 0.10);
+  --sun-ring: rgba(255, 210, 63, 0.35);
+  /* evidence classes: how far a number can be trusted (dust + shape, never hue) */
+  --ev-psi: #efeae3;          /* verified NASA PSI data — bright, filled */
+  --ev-catalog: #a39a90;      /* curated catalog range, approximate */
+  --ev-estimate: #8a8178;     /* physics estimate */
+  --ev-illustrative: #c2bab0; /* simulation / teaching aid (always hatched) */
+  --line: rgba(138, 129, 120, 0.16);
+  --line-strong: rgba(194, 186, 176, 0.28);
 }
 
 html,
@@ -99,28 +133,29 @@ body {
 /* ───────────── surfaces ───────────── */
 .panel {
   position: relative;
-  border-radius: 10px;
+  border-radius: 14px;
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(13, 30, 56, 0.72), rgba(7, 18, 37, 0.78));
-  box-shadow: inset 0 1px 0 rgba(140, 200, 255, 0.05), 0 24px 48px -32px rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(14px) saturate(120%);
-  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  /* glassy ink surface — gradient only between navy tints */
+  background: linear-gradient(180deg, rgba(21, 32, 51, 0.66), rgba(14, 23, 38, 0.78));
+  box-shadow: inset 0 1px 0 rgba(239, 234, 227, 0.04), 0 24px 48px -32px rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(14px) saturate(110%);
+  -webkit-backdrop-filter: blur(14px) saturate(110%);
 }
-/* a single lit edge, used sparingly for the focal panel of a page */
+/* a single lit edge (sun), used only on the focal panel of a page */
 .panel-glow { border-color: var(--line-strong); }
 .panel-glow::before {
   content: "";
   position: absolute;
   inset: -1px -1px auto -1px;
   height: 1px;
-  border-radius: 10px 10px 0 0;
-  background: linear-gradient(90deg, transparent, rgba(25, 201, 255, 0.55), transparent);
+  border-radius: 14px 14px 0 0;
+  background: linear-gradient(90deg, transparent, var(--sun-ring), transparent);
   pointer-events: none;
 }
 .well {
-  border-radius: 8px;
-  border: 1px solid rgba(72, 150, 255, 0.1);
-  background: rgba(3, 8, 20, 0.45);
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(10, 17, 29, 0.5);
 }
 
 .label {
@@ -138,11 +173,24 @@ body {
   color: var(--color-mute);
 }
 
+/* logo flame only (whitelisted sun role 6) */
 .flame-text {
-  background: linear-gradient(90deg, #ffc15b, #ff8b32 65%, #e2552b);
+  background: linear-gradient(90deg, var(--sun-light), var(--sun-500) 60%, var(--sun-deep));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* soft yellow glow behind every yellow element — light bleeding, not a hard shadow */
+.sun-glow { box-shadow: 0 0 0 1px var(--sun-ring), 0 8px 28px -6px var(--sun-glow); }
+@keyframes sun-breathe { 0%, 100% { box-shadow: 0 0 0 1px var(--sun-ring), 0 8px 26px -8px rgba(255, 210, 63, 0.22); } 50% { box-shadow: 0 0 0 1px var(--sun-ring), 0 10px 32px -6px rgba(255, 210, 63, 0.32); } }
+.sun-glow-breathe { animation: sun-breathe 5s ease-in-out infinite; }
+
+/* keyboard focus ring (whitelisted sun role 5) */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--sun-500);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 /* ───────────── controls ───────────── */
@@ -157,19 +205,19 @@ input[type="range"].fp-range {
 input[type="range"].fp-range::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 9999px;
-  background: linear-gradient(90deg, var(--fill, #19c9ff) var(--pct, 50%), rgba(120, 160, 210, 0.16) var(--pct, 50%));
+  background: linear-gradient(90deg, var(--fill, var(--dust-300)) var(--pct, 50%), rgba(138, 129, 120, 0.2) var(--pct, 50%));
 }
-input[type="range"].fp-range::-moz-range-track { height: 4px; border-radius: 9999px; background: rgba(120, 160, 210, 0.16); }
-input[type="range"].fp-range::-moz-range-progress { height: 4px; border-radius: 9999px; background: var(--fill, #19c9ff); }
+input[type="range"].fp-range::-moz-range-track { height: 4px; border-radius: 9999px; background: rgba(138, 129, 120, 0.2); }
+input[type="range"].fp-range::-moz-range-progress { height: 4px; border-radius: 9999px; background: var(--fill, var(--dust-300)); }
 input[type="range"].fp-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   margin-top: -6px;
   width: 16px;
   height: 16px;
   border-radius: 9999px;
-  background: #f2f7ff;
-  border: 3px solid var(--fill, #19c9ff);
-  box-shadow: 0 0 0 4px rgba(25, 201, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.5);
+  background: var(--dust-100);
+  border: 3px solid var(--fill, var(--dust-300));
+  box-shadow: 0 0 0 4px rgba(138, 129, 120, 0.14), 0 2px 8px rgba(0, 0, 0, 0.5);
   transition: transform 0.15s ease;
 }
 input[type="range"].fp-range:active::-webkit-slider-thumb { transform: scale(1.15); }
@@ -177,10 +225,9 @@ input[type="range"].fp-range::-moz-range-thumb {
   width: 12px;
   height: 12px;
   border-radius: 9999px;
-  background: #f2f7ff;
-  border: 3px solid var(--fill, #19c9ff);
+  background: var(--dust-100);
+  border: 3px solid var(--fill, var(--dust-300));
 }
-input[type="range"].fp-range:focus-visible { outline: 2px solid #19c9ff; outline-offset: 2px; border-radius: 6px; }
 
 .btn {
   display: inline-flex;
@@ -192,28 +239,29 @@ input[type="range"].fp-range:focus-visible { outline: 2px solid #19c9ff; outline
   font-weight: 500;
   transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
 }
-.btn-primary { background: #087bff; color: #fff; box-shadow: 0 8px 24px -12px rgba(8, 123, 255, 0.8); }
-.btn-primary:hover { background: #1f8bff; }
-.btn-outline { border: 1px solid rgba(25, 201, 255, 0.55); color: #f2f7ff; background: rgba(8, 123, 255, 0.08); }
-.btn-outline:hover { background: rgba(8, 123, 255, 0.18); border-color: #19c9ff; }
+/* the single primary CTA per view (whitelisted sun role 1) */
+.btn-primary { background: var(--sun-500); color: var(--ink-900); font-weight: 600; box-shadow: 0 0 0 1px var(--sun-ring), 0 8px 28px -6px var(--sun-glow); }
+.btn-primary:hover { background: var(--sun-light); }
+.btn-outline { border: 1px solid var(--line-strong); color: var(--dust-100); background: rgba(138, 129, 120, 0.08); }
+.btn-outline:hover { background: rgba(138, 129, 120, 0.16); border-color: var(--dust-400); }
 .btn-ghost { color: var(--color-mute); }
-.btn-ghost:hover { color: #f2f7ff; background: rgba(120, 170, 255, 0.06); }
+.btn-ghost:hover { color: var(--dust-100); background: rgba(138, 129, 120, 0.08); }
 .chip-link {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   border-radius: 9999px;
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--line);
   padding: 0.3rem 0.75rem;
   font-size: 12px;
-  color: #f2f7ff;
-  background: rgba(8, 123, 255, 0.08);
+  color: var(--dust-100);
+  background: rgba(138, 129, 120, 0.08);
   transition: background-color 0.2s, border-color 0.2s;
 }
-.chip-link:hover { background: rgba(8, 123, 255, 0.2); border-color: #19c9ff; }
+.chip-link:hover { background: rgba(138, 129, 120, 0.16); border-color: var(--dust-400); }
 
 .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(120, 160, 210, 0.22); border-radius: 9999px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(138, 129, 120, 0.28); border-radius: 9999px; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 
@@ -223,11 +271,11 @@ input[type="range"].fp-range:focus-visible { outline: 2px solid #19c9ff; outline
   font-size: 1.05rem;
   font-weight: 600;
   margin: 1.4rem 0 0.5rem;
-  color: #f2f7ff;
+  color: var(--dust-100);
 }
 .prose-brief h2:first-child { margin-top: 0; }
 .prose-brief ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.55rem; }
-.prose-brief li { position: relative; padding-left: 1.1rem; color: #c3d3e8; line-height: 1.65; font-size: 0.93rem; }
+.prose-brief li { position: relative; padding-left: 1.1rem; color: var(--dust-300); line-height: 1.65; font-size: 0.93rem; }
 .prose-brief li::before {
   content: "";
   position: absolute;
@@ -236,35 +284,23 @@ input[type="range"].fp-range:focus-visible { outline: 2px solid #19c9ff; outline
   width: 5px;
   height: 5px;
   border-radius: 1px;
-  background: var(--bullet, #48bfff);
+  background: var(--bullet, var(--dust-500));
 }
-.prose-brief strong { color: #f7faff; font-weight: 600; }
-.prose-brief em { color: #a5b8d2; }
-.prose-brief p { color: #c3d3e8; line-height: 1.65; font-size: 0.93rem; margin: 0.5rem 0; }
+.prose-brief strong { color: var(--dust-100); font-weight: 600; }
+.prose-brief em { color: var(--dust-400); }
+.prose-brief p { color: var(--dust-300); line-height: 1.65; font-size: 0.93rem; margin: 0.5rem 0; }
 
 .caret::after {
   content: "▍";
   margin-left: 2px;
-  color: #19c9ff;
+  color: var(--dust-400);
   animation: blink 1s steps(2, start) infinite;
 }
 @keyframes blink { to { visibility: hidden; } }
 
 /* ───────────── evidence & data primitives ───────────── */
-.hatch { background-image: repeating-linear-gradient(135deg, rgba(72, 191, 255, 0.3) 0 2px, transparent 2px 5px); }
-
-.holo { position: relative; overflow: hidden; isolation: isolate; }
-.holo::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(115deg, transparent 32%, rgba(25, 201, 255, 0.05) 46%, rgba(255, 255, 255, 0.03) 50%, transparent 62%);
-  background-size: 250% 100%;
-  animation: holo-sweep 10s ease-in-out infinite;
-  pointer-events: none;
-}
-@keyframes holo-sweep { 0% { background-position: 120% 0; } 60%, 100% { background-position: -120% 0; } }
+/* "untested" hatch — dust, never a hue */
+.hatch { background-image: repeating-linear-gradient(135deg, rgba(138, 129, 120, 0.45) 0 2px, transparent 2px 5px); }
 
 /* viewport for scientific canvases */
 .hud-frame {
@@ -272,28 +308,28 @@ input[type="range"].fp-range:focus-visible { outline: 2px solid #19c9ff; outline
   border: 1px solid var(--line);
   border-radius: 10px;
   background:
-    linear-gradient(rgba(72, 150, 255, 0.04) 1px, transparent 1px) 0 0 / 36px 36px,
-    linear-gradient(90deg, rgba(72, 150, 255, 0.04) 1px, transparent 1px) 0 0 / 36px 36px,
-    radial-gradient(ellipse at 50% 0%, rgba(8, 123, 255, 0.08), transparent 70%),
-    #040b19;
+    linear-gradient(rgba(138, 129, 120, 0.05) 1px, transparent 1px) 0 0 / 36px 36px,
+    linear-gradient(90deg, rgba(138, 129, 120, 0.05) 1px, transparent 1px) 0 0 / 36px 36px,
+    radial-gradient(ellipse at 50% 0%, rgba(38, 52, 74, 0.5), transparent 70%),
+    #0a111d;
 }
 
-.skeleton { position: relative; overflow: hidden; border-radius: 8px; background: rgba(18, 36, 63, 0.6); }
+.skeleton { position: relative; overflow: hidden; border-radius: 8px; background: rgba(21, 32, 51, 0.6); }
 .skeleton::after {
   content: "";
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(25, 201, 255, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(194, 186, 176, 0.1), transparent);
   animation: shimmer 1.4s ease-in-out infinite;
 }
 @keyframes shimmer { to { transform: translateX(100%); } }
 
 .led { width: 7px; height: 7px; border-radius: 9999px; background: currentColor; box-shadow: 0 0 8px currentColor; }
-.rule { height: 1px; background: linear-gradient(90deg, rgba(72, 170, 255, 0.25), rgba(72, 170, 255, 0.03)); }
+.rule { height: 1px; background: linear-gradient(90deg, rgba(138, 129, 120, 0.3), rgba(138, 129, 120, 0.04)); }
 
 .font-mono, .tabular { font-variant-numeric: tabular-nums; }
-::selection { background: rgba(25, 201, 255, 0.3); color: #fff; }
+::selection { background: var(--sun-glow); color: var(--ink-900); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }

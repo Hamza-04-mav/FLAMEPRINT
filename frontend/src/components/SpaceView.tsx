@@ -5,7 +5,7 @@ import { Box, ChevronDown, Crosshair, FileSearch, FlaskConical, Pause, Play, Rot
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
-import { fmtRange, OUTCOME_COLOR, PHASE_COLOR, scoreColor, SEVERITY_COLOR, toPsi } from "@/lib/format";
+import { fmtRange, OUTCOME_COLOR, PHASE_COLOR, plural, scoreColor, SEVERITY_COLOR, toPsi } from "@/lib/format";
 import { useMission } from "@/lib/mission";
 import { effectiveFlow, scenarioInVoid } from "@/lib/space";
 import type { ConditionSpace, NextExperiment } from "@/lib/types";
@@ -203,13 +203,13 @@ export function SpaceView() {
                   {space ? (inVoid ? "No investigation jointly covers this O₂, pressure and airflow. Risk here is unknown, not low." : "At least one investigation's tested range covers this point.") : "Locating…"}
                 </div>
                 <div className="mt-3 divide-y divide-[var(--line)]">
-                  <Row k="O₂" v={`${scenario.o2Pct} %`} tone="#19C9FF" />
+                  <Row k="O₂" v={`${scenario.o2Pct} %`} />
                   <Row k="Pressure" v={`${toPsi(scenario.pressureKpa)} psi · ${scenario.pressureKpa.toFixed(1)} kPa`} />
                   <Row k="Airflow felt" v={`${uEff.toFixed(1)} cm/s`} />
-                  {cov && <Row k="O₂ bracketed by" v={`${cov.o2Hits.length} investigations`} />}
-                  {cov && <Row k="Pressure bracketed by" v={`${cov.pressureHits.length}`} />}
-                  {cov && <Row k="Flow bracketed by" v={`${cov.flowHits.length}`} />}
-                  {cov && <Row k="All three jointly" v={`${cov.jointHits.length}`} tone={cov.jointHits.length ? "#34D399" : "#FF8B32"} />}
+                  {cov && <Row k="O₂ bracketed by" v={plural(cov.o2Hits.length, "investigation")} />}
+                  {cov && <Row k="Pressure bracketed by" v={plural(cov.pressureHits.length, "investigation")} />}
+                  {cov && <Row k="Flow bracketed by" v={plural(cov.flowHits.length, "investigation")} />}
+                  {cov && <Row k="All three jointly" v={plural(cov.jointHits.length, "investigation")} tone={cov.jointHits.length ? undefined : "#FFD23F"} />}
                 </div>
                 <div className="label mb-2 mt-5">Highest relevance</div>
                 <div className="space-y-1.5">

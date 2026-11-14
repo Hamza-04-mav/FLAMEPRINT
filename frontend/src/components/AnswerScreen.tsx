@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { buildVerdict, fmtPressure, LEVEL_STYLE, levelRose } from "@/lib/answer";
 import { environmentFor } from "@/lib/environment";
-import { toKpa, toPsi } from "@/lib/format";
+import { fmtGravity, toKpa, toPsi } from "@/lib/format";
 import { useMission } from "@/lib/mission";
 import type { MaterialVerdict, RiskLevel } from "@/lib/types";
 import { useInView, useWebGL } from "@/lib/webgl";
@@ -39,7 +39,7 @@ function Verdict() {
   return (
     <section className="panel flex min-w-0 flex-col p-6 sm:p-8">
       <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-mute">
-        {name} <span className="normal-case tracking-normal text-slate-500">· {Math.round(scenario.o2Pct)}% O₂ · {p.psi} <span className="text-[10px]">({Math.round(scenario.pressureKpa)} kPa)</span> · {+scenario.gravityG.toFixed(2)} g</span>
+        {name} <span className="normal-case tracking-normal text-slate-500">· {Math.round(scenario.o2Pct)}% O₂ · {p.psi} <span className="text-[10px]">({Math.round(scenario.pressureKpa)} kPa)</span> · {fmtGravity(scenario.gravityG)} g</span>
         {hab?.assumed && <span className="ml-2 align-middle"><Evidence kind="estimate" label="assumed" /></span>}
       </div>
 
@@ -48,7 +48,7 @@ function Verdict() {
           <motion.h1 key={v.headline} initial={{ opacity: 0.4, y: 4 }} animate={{ opacity: analyzing ? 0.8 : 1, y: 0 }} transition={{ duration: 0.25, ease: EASE }}
             className="font-display text-[28px] font-semibold leading-[1.12] tracking-tight text-ink sm:text-[38px]">
             {v.high > 0
-              ? <><span className="text-[#FF6F63]">{v.high} of {v.total}</span>{v.headline.slice(`${v.high} of ${v.total}`.length)}</>
+              ? <><span className="text-sun">{v.high} of {v.total}</span>{v.headline.slice(`${v.high} of ${v.total}`.length)}</>
               : v.headline}
           </motion.h1>
         ) : <><Skeleton className="h-10 w-[85%]" /><Skeleton className="mt-2 h-10 w-[50%]" /></>}
@@ -71,10 +71,10 @@ function Verdict() {
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: EASE }} className="overflow-hidden">
             <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-6 md:grid-cols-4">
-              <Slider label="Oxygen" value={scenario.o2Pct} min={15} max={100} step={0.5} unit="%" color="#19C9FF" onChange={(x) => set({ o2Pct: x })} />
-              <Slider label="Pressure" value={toPsi(scenario.pressureKpa)} min={3} max={15} step={0.1} unit=" psi" color="#087BFF" onChange={(x) => set({ pressureKpa: toKpa(x) })} />
-              <Slider label="Gravity" value={scenario.gravityG} min={0} max={1} step={0.005} display={scenario.gravityG.toFixed(3)} unit=" g" color="#FF8B32" onChange={(x) => set({ gravityG: x })} />
-              <Slider label="Airflow" value={scenario.flowCmS} min={0} max={60} step={0.5} unit=" cm/s" color="#48BFFF" onChange={(x) => set({ flowCmS: x })} />
+              <Slider label="Oxygen" value={scenario.o2Pct} min={15} max={100} step={0.5} unit="%" onChange={(x) => set({ o2Pct: x })} />
+              <Slider label="Pressure" value={toPsi(scenario.pressureKpa)} min={3} max={15} step={0.1} unit=" psi" onChange={(x) => set({ pressureKpa: toKpa(x) })} />
+              <Slider label="Gravity" value={scenario.gravityG} min={0} max={1} step={0.005} display={fmtGravity(scenario.gravityG)} unit=" g" onChange={(x) => set({ gravityG: x })} />
+              <Slider label="Airflow" value={scenario.flowCmS} min={0} max={60} step={0.5} unit=" cm/s" onChange={(x) => set({ flowCmS: x })} />
             </div>
           </motion.div>
         )}
@@ -93,7 +93,7 @@ function HeroFlame() {
   const g = scenario.gravityG;
   return (
     <section ref={ref} aria-label="Gravity flame"
-      className="panel relative h-[240px] overflow-hidden bg-[radial-gradient(ellipse_at_50%_70%,#0d1d38,#030814_72%)] lg:h-auto lg:min-h-[340px]">
+      className="panel relative h-[240px] overflow-hidden bg-[radial-gradient(ellipse_at_50%_70%,#152033,#0a111d_72%)] lg:h-auto lg:min-h-[340px]">
       <div className="absolute inset-0">
         {webgl === false
           ? <div className="grid h-full place-items-center"><FlameCanvas g={g} level={worst} width={140} height={180} /></div>
@@ -101,7 +101,7 @@ function HeroFlame() {
       </div>
       <div className="absolute left-4 top-4"><Evidence kind="illustrative" label="illustrative" /></div>
       <div className="absolute inset-x-4 bottom-4 text-[13px] text-slate-300">
-        {g === 0 ? "No gravity: a dim blue sphere" : g >= 1 ? "Earth gravity: a tall teardrop" : `${+g.toFixed(2)} g: between sphere and teardrop`}
+        {g === 0 ? "No gravity: a dim sphere" : g >= 1 ? "Earth gravity: a tall teardrop" : `${fmtGravity(g)} g: between sphere and teardrop`}
       </div>
     </section>
   );
@@ -114,7 +114,7 @@ function MaterialCard({ m, g, rose }: { m: MaterialVerdict; g: number; rose: boo
     <motion.li layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       transition={{ duration: 0.28, ease: EASE }}
       className="relative flex min-h-[76px] items-center gap-3 overflow-hidden rounded-[14px] bg-space-900/70 py-3 pl-4 pr-3"
-      style={{ boxShadow: rose ? "0 0 0 1.5px #FF5A4E, 0 0 24px -8px #FF5A4E" : undefined }}>
+      style={{ boxShadow: rose ? "0 0 0 1.5px #FFD23F, 0 0 24px -6px var(--sun-glow)" : undefined }}>
       <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: lv.color }} />
       <FlameCanvas g={g} level={m.level} width={34} height={44} />
       <div className="min-w-0 flex-1">

@@ -3,8 +3,13 @@
 > **Read this first.** It is the single source of truth for the project's goal, current state and next steps.
 > Claude (or a person) **must update it at the end of every working session**. See [How to update this file](#how-to-update-this-file).
 >
-> Last updated: **2026-11-14** · `main` includes PR #1 (v2 + declutter) and PR #2 (NASA SVG assets, Windows lockfile fix) · Repo: `github.com/Hamza-04-mav/FLAMEPRINT` (private)
-> Working tree (not yet committed): real-data pass — **24 investigations** (added SoFIE, FLARE; FM2 upgraded to the real Moon experiment), **all 8 material LOI thresholds sourced**, a full-text NASA source corpus (9 .txt files) in `data/psi/docs/`, **862 real PSI test records** in `data/psi/psi-downloads/` (envelopes now `confidence=data`, ISS grades → B), and the **LLM layer migrated to Groq** (`openai/gpt-oss-120b`, live-tested). See `data/psi/docs/_SOURCES_AND_ACCESS.md`.
+> Last updated: **2026-11-14** · `main` includes PR #1, PR #2, the real-data/Groq pass, and the start of the **UI/UX "Ink sun" upgrade**
+> (Phase 0 audit + Phase 1 token foundation — committed directly to `main` per owner request) · Repo: `github.com/Hamza-04-mav/FLAMEPRINT` (private)
+>
+> **UI/UX upgrade in progress** (presentation-layer only — no scoring math/data/logic changed). Spec: 3-colour "Ink sun" palette
+> (Ink navy / Dust taupe / Solar yellow), visual-language-over-text, 5-second read, 375→1920px. Plan & defects: `docs/ui-audit.md`.
+> Data layers unchanged: **24 investigations**, all 8 material LOI thresholds sourced, 9-file NASA corpus in `data/psi/docs/`,
+> **862 real PSI test records** in `data/psi/psi-downloads/` (envelopes `confidence=data`), LLM on **Groq** (`openai/gpt-oss-120b`).
 
 ---
 
@@ -159,14 +164,28 @@ Shared: `lib/mission.tsx` (state, tabs, `resolveTab` legacy-hash map, debounced 
 pass `inert` inside another button), `InvestigationDrawer.tsx` (dossier). `Overview.tsx` and `CoveragePreview.tsx` are the old v1
 home, unused and kept until v2 is accepted.
 
-**Design system** (`globals.css`): deep-space navy. Colour carries meaning only: orange/amber = fire and risk, blue/cyan = science
-and microgravity, green = verified PSI data, grey = unknown or modeled. Grade colours fixed: **A green `#34D399`, B blue `#3D9BFF`,
-C amber `#FFC15B`, M grey `#7E94B4`**. Two type weights (semibold + normal). The intro (`Boot.tsx`) shows on the first visit only
-(`localStorage`).
+**Design system** — **"Ink sun"** (UI/UX upgrade, in progress). **Exactly three colours**, all tokens derived as tints/shades/alpha:
+**Ink navy `#0E1726`** (surfaces, ~60%), **Dust taupe `#8A8178`** (text/borders/structure, ~35%), **Solar yellow `#FFD23F`**
+(≤5%, six whitelisted roles only: the single primary CTA per view, the "you are here" habitat marker, fire/risk intensity, the active
+habitat in the stepper, the keyboard focus ring, the logo flame). **No other hues** — no blue CTA, no cyan, no red/green status.
+Single source of truth: **`lib/theme.ts`** (JS, for three.js + charts) mirrored by CSS tokens in `globals.css` (`@theme` + `:root`);
+legacy token names (`space-*`, `blue`, `ox`, `flame-*`, `ink`, `mute`, `ok`, `danger`, `slate-*`) are remapped onto the three colours.
+**Risk** = yellow intensity **+ shape** (high: solid flame + glow · elevated: 65% outline flame · low: taupe, no flame · unknown:
+dashed taupe + hatch + "?"), never colour alone. **Grades A/B/C/M** = neutral dust brightness ramp (not on the yellow whitelist).
+Font: SF system on Apple, Inter fallback. The intro (`Boot.tsx`) shows on the first visit only (`localStorage`).
 
 ---
 
 ## 7. What's left (priority order)
+
+0. **UI/UX "Ink sun" upgrade (in progress).** Presentation-layer only; commit per phase to `main`; see `docs/ui-audit.md` for the full
+   plan and the 9 confirmed defects. Done: **Phase 0** (audit) · **Phase 1** (token foundation: `lib/theme.ts` + rewritten
+   `globals.css`, shared TS colour maps repointed, buttons/focus/glow, legacy tokens remapped; also fixed defect #5 gravity formatting
+   and #6 pluralization). Next: **Phase 3** shell & chrome (sidebar tablet rail + footer safe-area, `Header` status/planet colours to
+   tokens, retire stray loops) → **Phase 4** Answer home (lead with the visual answer; designed "not rated" state; grade scale + inline
+   legend) → **Phase 5** Evidence/Gaps charts (per-row coverage strips, 3D label collision, ≤4-item Gaps legend) → **Phase 6**
+   Brief/Compare/Tools/Passport + 3D scene colours (`MissionScene3D`, `ConditionSpace3D` still hold raw hex) → **Phase 7** a11y/perf
+   verify + before/after screenshots in `docs/screenshots/`. Risk is yellow+shape (no red/green); grades are a dust ramp.
 
 1. **[Team] Review the 6 sourced material LOI thresholds** in `data/seed/materials.json` (cotton 18, pu-foam 18, pmma 17,
    nomex 28, ptfe 95, velcro 24 — each with `source`+`url`). Confirm the cited values, and decide a value (or keep `null`)
@@ -213,6 +232,7 @@ C amber `#FFC15B`, M grey `#7E94B4`**. Two type weights (semibold + normal). The
 | 2026-11-14 | Claude Code (with Zaki)    | **Real PSI test records imported + live Groq verified.** Ingested 862 real test records from 10 PSI Experimental Tables (`data/psi/psi-downloads/`); fixed ingest column-mapping for real PSI headers (BASS-II "Calibrated O₂ % by vol", "Percent O₂", "Air Rate", and a fuel-vs-sample-id guard). Envelopes now `confidence=data`; ISS grades → **B** from real data; Moon base honestly M/C (real data max ~22% O₂). Tested live Groq end-to-end (`openai/gpt-oss-120b`, since the key lacked llama-3.3): RAG chatbot, brief, and stowage all work with citations validated. 55 tests pass. |
 | 2026-11-14 | Claude Code (with Zaki)    | **Full-fidelity corpus + Groq.** Re-extracted all 9 accessible NASA sources as full **txt** (dropped the PDF, no duplication): full 56-pg Researcher's Guide (~110k chars), Glenn combustion page, Apollo 1/13, Mir, 3 spinoffs, and the ScienceCasts video transcript. All 8 material LOI thresholds now sourced (added paper 19, silicone 32). **Migrated the LLM layer from Anthropic to Groq** (`openai/gpt-oss-120b`): `llm.py` streaming + JSON-mode extraction/stowage, `GROQ_API_KEY`, updated requirements/docs/render.yaml/.env.example. 55 backend tests pass; live Groq path untested (needs key). |
 | 2026-11-14 | Claude Code (with Cerelva) | Added `CONTEXT.md` (this file) and `CLAUDE.md` (session instructions), linked from the README                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 2026-11-14 | Claude Code (with Zaki)    | **UI/UX "Ink sun" upgrade — Phase 0 + 1.** Wrote `docs/ui-audit.md` (stack, token map, ~240 hard-coded colours across 26 files, a11y/perf risks, 9 confirmed defects, phase plan). Phase 1 token foundation: new `lib/theme.ts` (single source of truth) + rewritten `globals.css` to the **3-colour palette** (Ink navy / Dust taupe / Solar yellow; legacy tokens remapped so existing classes recolour); repointed `answer.ts`/`format.ts`/`ui.tsx` colour maps; sun CTA + yellow focus ring + `.sun-glow`; retired unused `.holo`. Also fixed defect #5 (shared `fmtGravity`) and #6 (`plural()`). Typecheck, lint, 8 vitest, `next build` all green; scoring untouched. Direct to `main` per owner request. |
 
 ---
 
