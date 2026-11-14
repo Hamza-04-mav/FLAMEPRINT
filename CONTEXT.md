@@ -209,10 +209,15 @@ Font: SF system on Apple, Inter fallback. The intro (`Boot.tsx`) shows on the fi
    lights = soft **sun** as the only yellow; Earth limb, glass, solar arrays, beacon desaturated to navy — no red/blue); `BriefPanel`
    got a one-click **Export Fire Passport** + dust/sun recolour; `CompareHabitats` delta arrows, `Genome`, `EarthPanel`, `CitedMarkdown`,
    `Boot`, `ScenarioBuilder`, `InvestigationDrawer` recoloured to tokens; `fmtGravity` applied in Brief/ScenarioBuilder. Remaining active
-   files on-token (dead `Overview`/`CoveragePreview` left as-is until v2 accepted; neutral metal greys in the 3D scene kept). **Next:**
-   deeper redesigns — Brief-as-checklist with priority meters, Compare overlaid two-marker chart, Tools-as-visual-cards; sidebar footer
-   safe-area; a11y/perf sweep; before/after screenshots. **Deferred Norman items:** psi/kPa unit toggle, stowage combobox, undo,
-   disabling impossible slider combos.
+   files on-token (dead `Overview`/`CoveragePreview` left as-is until v2 accepted; neutral metal greys in the 3D scene kept) · **Phase 7**
+   motion & transitions: new `lib/motion.ts` (one vocabulary — spring 260/30, durations micro 150/standard 280/page 450, ease
+   `cubic-bezier(0.22,1,0.36,1)`); page/tab transitions now fade + slide 12px at page timing with a global spring default (`MotionConfig`);
+   habitat stepper has a **sliding active ring** (`layoutId`, sun); list items **stagger 30 ms** (pipeline, Evidence rows); gauge tested
+   segments + material risk bars **grow once on first view** (`whileInView` + `viewport once`); the background tint already cross-fades
+   (Phase 4). `prefers-reduced-motion` keeps opacity fades and disables parallax/tilt/camera/slide/glow-breathe (framer `reducedMotion="user"`
+   + the global CSS reduce block). **Next:** deeper redesigns — Brief-as-checklist with priority meters, Compare overlaid two-marker chart,
+   Tools-as-visual-cards; sidebar footer safe-area; **Phase 8** a11y/perf sweep + before/after screenshots + the single full `next build`.
+   **Deferred Norman items:** psi/kPa unit toggle, stowage combobox, undo, disabling impossible slider combos.
 
 1. **[Team] Review the 6 sourced material LOI thresholds** in `data/seed/materials.json` (cotton 18, pu-foam 18, pmma 17,
    nomex 28, ptfe 95, velcro 24 — each with `source`+`url`). Confirm the cited values, and decide a value (or keep `null`)
@@ -266,6 +271,7 @@ Font: SF system on Apple, Inter fallback. The intro (`Boot.tsx`) shows on the fi
 | 2026-11-14 | Claude Code (with Zaki)    | **UI/UX Phase 5 — Norman's principles (partial).** New `AnswerPipeline` (Habitat ‣ Evidence ‣ Gaps ‣ Brief, each a live-visual click-through) atop Answer; `Slider` gains preset **tick marks** (sun when on a preset) + a gravity label row (µg/Moon/Mars/Earth); Answer sliders reordered to chart axis order O₂·pressure·airflow·gravity; **Reset to {preset}** when custom; new `RankingToast` ("Ranking updated · N investigations", dust) on settle. Deferred: psi/kPa unit toggle, stowage combobox, undo, impossible-combo disabling. Typecheck, lint, 8 vitest pass (build deferred to final phase). Committed locally. |
 | 2026-11-14 | Claude Code (with Zaki)    | **UI/UX Phase 6 (part 1) — visual language: Answer + Evidence.** New `ConditionReadout`/`ConditionGauges` (O₂ gauge + pressure/airflow/gravity mini-gauges: tested span = taupe segment, habitat = glowing yellow dot, from `ranked[].envelope`). `GradeBadge` showReason gains a 4-segment meter (A4/B3/C2/M1) + inline meaning. Material tiles get a flame icon + risk bar (shape per level); all-unknown shows one banner + Unknown-styled tiles (dashed+hatch+"?") not per-card "Not rated". `FlameCanvas` recoloured dust→sun. Evidence rows: four coverage strips + relevance ring replace the repeated sentence; factor bars → dust. Typecheck, lint, 8 vitest pass (build deferred to final phase). Committed locally. |
 | 2026-11-14 | Claude Code (with Zaki)    | **UI/UX Phase 6 (part 2) — recolour + 3D sweep.** `Header`/`Sidebar` planet glyphs + status LEDs → dust (no red/green; "Groq"). Gaps 2D `FlammabilityMap`: taupe tested boxes, sun habitat dot, **legend ≤4 + "More" popover** (fixes defect #8), fixed truncated curve label. Gaps 3D `ConditionSpace3D`: dust boxes, **sun emissive marker**, dust axes/grid, ink bg. Habitat 3D `MissionScene3D` **relit** (cool taupe-navy ambient + single warm key; interior/dome/rover lights = soft sun only; Earth limb/glass/arrays/beacon desaturated to navy). `BriefPanel` one-click **Export Fire Passport** + recolour; Compare/Genome/Earth/CitedMarkdown/Boot/ScenarioBuilder/InvestigationDrawer recoloured; `fmtGravity` in Brief/ScenarioBuilder. All active components on-token (dead Overview/CoveragePreview left; neutral metal greys kept). Typecheck, lint, 8 vitest pass (build deferred to final phase). Committed locally. |
+| 2026-11-14 | Claude Code (with Zaki)    | **UI/UX Phase 7 — motion & transitions.** New `lib/motion.ts` (spring 260/30; durations micro 150/standard 280/page 450; ease cubic-bezier(0.22,1,0.36,1)). Page/tab transitions fade + slide 12px at page timing with a global `MotionConfig` spring default; habitat stepper gains a sliding active ring (`layoutId`, sun); list items stagger 30 ms (pipeline, Evidence rows); gauge tested segments + material risk bars grow once on first view (`whileInView`/`viewport once`). `prefers-reduced-motion` keeps opacity fades, disables parallax/tilt/camera/slide/glow-breathe. Typecheck, lint, 8 vitest pass (build deferred to final phase). Committed locally. |
 
 ---
 

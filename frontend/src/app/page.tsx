@@ -19,6 +19,7 @@ import { SpaceView } from "@/components/SpaceView";
 import { StowageInspector } from "@/components/StowageInspector";
 import { ErrorNote } from "@/components/ui";
 import { MissionProvider, useMission } from "@/lib/mission";
+import { pageT, pageVariants, SPRING } from "@/lib/motion";
 
 function Dashboard() {
   const { tab, error, refreshData, ready } = useMission();
@@ -32,8 +33,7 @@ function Dashboard() {
           {error && tab !== "answer" && <div className="mb-4"><ErrorNote message={error} onRetry={refreshData} /></div>}
           <AnimatePresence mode="wait">
             {ready && <motion.div key={tab}
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }} transition={{ duration: 0.2, ease: [0.2, 0.7, 0.2, 1] }}>
+              variants={pageVariants} initial="initial" animate="animate" exit="exit" transition={pageT}>
               {tab === "answer" && <AnswerScreen />}
               {tab === "stowage" && <StowageInspector />}
               {tab === "habitats" && <CompareHabitats />}
@@ -61,7 +61,7 @@ function Dashboard() {
 
 export default function Page() {
   return (
-    <MotionConfig reducedMotion="user">
+    <MotionConfig reducedMotion="user" transition={SPRING}>
       <MissionProvider>
         <Boot />
         <Dashboard />

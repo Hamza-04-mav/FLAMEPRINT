@@ -1,9 +1,11 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { ChevronRight, FileText, LayoutGrid, Sliders } from "lucide-react";
 import { environmentFor } from "@/lib/environment";
 import { plural } from "@/lib/format";
 import { useMission } from "@/lib/mission";
+import { stagger, standardT } from "@/lib/motion";
 import { DUST, SUN } from "@/lib/theme";
 import { GradeBadge } from "./GradeBadge";
 import { PlanetGlyph } from "./Header";
@@ -55,7 +57,8 @@ export function AnswerPipeline() {
   return (
     <nav aria-label="Answer pipeline" className="flex items-stretch gap-1.5 overflow-x-auto no-scrollbar">
       {nodes.map((n, i) => (
-        <div key={n.key} className="flex items-center gap-1.5">
+        <motion.div key={n.key} className="flex items-center gap-1.5"
+          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ ...standardT, delay: stagger(i) }}>
           <button onClick={n.onClick}
             className="group flex min-w-0 items-center gap-2.5 rounded-[14px] border border-[var(--line)] bg-ink-800/40 px-3 py-2 text-left transition duration-150 hover:-translate-y-0.5 hover:border-[var(--line-strong)] hover:bg-ink-800/70">
             <span className="shrink-0">{n.visual}</span>
@@ -66,7 +69,7 @@ export function AnswerPipeline() {
             {i === 0 && <Sliders className="ml-1 h-3.5 w-3.5 shrink-0 text-dust-500 group-hover:text-dust-300" />}
           </button>
           {i < nodes.length - 1 && <ChevronRight className="h-4 w-4 shrink-0 text-dust-500" aria-hidden />}
-        </div>
+        </motion.div>
       ))}
     </nav>
   );

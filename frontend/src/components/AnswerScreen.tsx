@@ -8,6 +8,7 @@ import { buildVerdict, fmtPressure, LEVEL_STYLE, levelRose } from "@/lib/answer"
 import { environmentFor } from "@/lib/environment";
 import { fmtGravity, toKpa, toPsi } from "@/lib/format";
 import { useMission } from "@/lib/mission";
+import { standardT } from "@/lib/motion";
 import type { MaterialVerdict, RiskLevel } from "@/lib/types";
 import { useInView, useWebGL } from "@/lib/webgl";
 import { AnswerPipeline } from "./AnswerPipeline";
@@ -153,7 +154,8 @@ function MaterialCard({ m, g, rose }: { m: MaterialVerdict; g: number; rose: boo
         </div>
         {!unknown && (
           <div className="mt-1.5 h-1.5 w-full max-w-[120px] overflow-hidden rounded-full" style={{ background: "rgba(138,129,120,0.2)" }}>
-            <div className="h-full rounded-full" style={{ width: `${RISK_FILL[m.level]}%`, background: lv.color, boxShadow: lv.glow ? "0 0 10px var(--sun-glow)" : undefined }} />
+            <motion.div className="h-full origin-left rounded-full" style={{ width: `${RISK_FILL[m.level]}%`, background: lv.color, boxShadow: lv.glow ? "0 0 10px var(--sun-glow)" : undefined }}
+              initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={standardT} />
           </div>
         )}
       </div>

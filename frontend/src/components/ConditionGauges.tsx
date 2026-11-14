@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { clamp, fmtGravity, toPsi } from "@/lib/format";
+import { standardT } from "@/lib/motion";
 import { useMission } from "@/lib/mission";
 import { DUST } from "@/lib/theme";
 import type { Envelope, Range } from "@/lib/types";
@@ -29,7 +30,8 @@ function AxisGauge({ label, value, min, max, tested, valueText, size = "sm", not
         <span className={`font-mono tabular-nums text-dust-100 ${size === "lg" ? "text-[14px] font-semibold" : "text-[12px]"}`}>{valueText}</span>
       </div>
       <div className={`relative ${h} rounded-full`} style={{ background: "rgba(138,129,120,0.16)" }}>
-        {tested && <div className="absolute inset-y-0 rounded-full" style={{ left: `${t0}%`, width: `${Math.max(1.5, t1 - t0)}%`, background: "rgba(163,154,144,0.42)" }} />}
+        {tested && <motion.div className="absolute inset-y-0 origin-left rounded-full" style={{ left: `${t0}%`, width: `${Math.max(1.5, t1 - t0)}%`, background: "rgba(163,154,144,0.42)" }}
+          initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={standardT} />}
         <motion.span aria-hidden className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
           style={{ width: size === "lg" ? 15 : 12, height: size === "lg" ? 15 : 12, background: "var(--sun-500)", boxShadow: "0 0 0 1px var(--sun-ring), 0 0 16px 2px var(--sun-glow)" }}
           initial={false} animate={{ left: `${dot}%` }} transition={{ type: "spring", stiffness: 240, damping: 26 }} />

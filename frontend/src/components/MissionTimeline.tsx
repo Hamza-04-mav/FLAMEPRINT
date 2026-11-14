@@ -4,8 +4,9 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Pause, Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { environmentFor } from "@/lib/environment";
-import { toPsi } from "@/lib/format";
+import { fmtGravity, toPsi } from "@/lib/format";
 import { useMission } from "@/lib/mission";
+import { SPRING } from "@/lib/motion";
 import { PlanetGlyph } from "./Header";
 
 const STEP_MS = 4000;
@@ -79,9 +80,11 @@ export function MissionTimeline() {
             return (
               <li key={h.id} className="flex justify-center">
                 <button onClick={() => { stop(); applyHabitat(h); }} aria-current={on ? "step" : undefined}
-                  title={`${h.name}: ${h.o2Pct}% O₂ · ${toPsi(h.pressureKpa)} psi · ${h.gravityG} g${h.assumed ? " (assumed)" : ""}`}
+                  title={`${h.name}: ${h.o2Pct}% O₂ · ${toPsi(h.pressureKpa)} psi · ${fmtGravity(h.gravityG)} g${h.assumed ? " (assumed)" : ""}`}
                   className="group flex flex-col items-center gap-0.5">
-                  <span className={`grid h-9 w-9 place-items-center rounded-full border bg-space-950 transition-all ${on ? "scale-110 border-flame-2 shadow-[0_0_18px_-2px_rgba(255,139,50,0.8)]" : i < idx ? "border-ox/60" : "border-[var(--line-strong)] group-hover:border-ox/60"}`}>
+                  <span className={`relative grid h-9 w-9 place-items-center rounded-full border bg-space-950 transition-all ${on ? "scale-110 border-transparent" : i < idx ? "border-dust-400/60" : "border-[var(--line-strong)] group-hover:border-dust-400/60"}`}>
+                    {on && <motion.span layoutId="step-ring" transition={SPRING}
+                      className="absolute -inset-px rounded-full border-2 border-sun shadow-[0_0_18px_-2px_var(--sun-glow)]" />}
                     <PlanetGlyph env={environmentFor(h.id, h.gravityG)} size={26} />
                   </span>
                   <span className={`text-[12px] sm:text-[13px] ${on ? "whitespace-nowrap text-ink" : "hidden max-w-full truncate text-mute group-hover:text-ink sm:block"}`}>{h.short}</span>

@@ -109,7 +109,8 @@ function Breakdown({ r, onOpen }: { r: Ranked; onOpen: () => void }) {
 function Row({ r, i, open, onToggle, planned }: { r: Ranked; i: number; open: boolean; onToggle: () => void; planned: boolean }) {
   const { openInvestigation } = useMission();
   return (
-    <motion.li layout="position" transition={{ duration: 0.28, ease: EASE }} className={open ? "bg-white/[0.025]" : ""}>
+    <motion.li layout="position" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, ease: EASE, delay: Math.min(i, 6) * 0.03 }} className={open ? "bg-white/[0.025]" : ""}>
       <button onClick={onToggle} aria-expanded={open}
         className="grid w-full grid-cols-[28px_minmax(0,1fr)_auto_20px] items-center gap-4 px-5 py-4 text-left transition-colors duration-150 hover:bg-white/[0.02] sm:px-6">
         <span className={`font-mono text-[13px] ${i < 3 ? "text-dust-200" : "text-slate-500"}`}>{i + 1}</span>
