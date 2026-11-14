@@ -49,7 +49,7 @@ export function CoveragePreview({ space, scenario, uEff, missionName, highlight,
   const pLabel = proj(0.5, 0, 0), fLabel = proj(1, 0, 0.5);
 
   return (
-    <button onClick={onOpen} className="group block w-full text-left" aria-label="Open the 3D coverage map">
+    <button onClick={onOpen} className="group block w-full text-left" aria-label="Open where data exists">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img">
         <defs>
           <pattern id="gap-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">

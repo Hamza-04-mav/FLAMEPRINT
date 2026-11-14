@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 
-from .engine import coverage, envelope_for, rank
+from .engine import coverage, envelope_for, grade, rank
 from .habitats import habitat
 from .models import Dataset, Scenario, Weights
 from .physics import readout
@@ -22,6 +22,10 @@ def build_context(ds: Dataset, sc: Scenario, w: Weights, top_n: int = 8) -> dict
     r = readout(sc)
     cov = coverage(ds, sc)
     hab = habitat(sc.habitatId)
+    g = grade(ds, sc)
+    from .materials import assess_all  # local import: materials imports engine
+    mats = [{"name": v.name, "level": v.level, "grade": v.grade.letter, "label": v.label}
+            for v in assess_all(ds, sc)]
     invs = []
     for x in ranked[:top_n]:
         inv = ds.inv(x.id)
@@ -42,12 +46,14 @@ def build_context(ds: Dataset, sc: Scenario, w: Weights, top_n: int = 8) -> dict
         "physicsEstimates": {"o2PartialPressureKpa": r["ppO2Kpa"], "o2IncreaseVsEarthPct": r["o2IncreasePct"],
                              "buoyantFlowCmS": r["buoyantFlowCmS"], "effectiveFlowCmS": r["effectiveFlowCmS"],
                              "flowRegime": r["regime"]["label"]},
+        "evidenceGrade": {"letter": g.letter, "reason": g.reason},
+        "materials": mats,
         "coverage": {"index": cov["index"], "gaps": cov["gaps"], "highestO2AnyFuel": cov["maxO2Tested"],
                      "highestO2AnyFuelBy": cov["maxO2TestedBy"], "highestO2Solids": cov["solidO2Max"]},
         "investigations": invs,
         "dataNote": (f"{len(ds.tests)} imported PSI test records are loaded." if ds.tests else
                      "No PSI test-level data has been imported yet. Only the investigation-level seed catalog is "
-                     "loaded, and its condition envelopes are approximate."),
+                     "loaded, and its tested ranges are approximate."),
     }
 
 
@@ -82,9 +88,18 @@ def local_brief(ctx: dict) -> str:
                    f"rises strongly with O₂ concentration, so materials that pass in air may not pass here.")
     out.append(f"- A flame here would feel about **{p['effectiveFlowCmS']:g} cm/s** of flow (ventilation {s['ventilationCmS']:g} cm/s, "
                f"buoyancy about {p['buoyantFlowCmS']:g} cm/s). Regime: **{p['flowRegime']}**. *(Order-of-magnitude estimate.)*")
-    verdict = ("Mostly outside the tested envelope, so treat conclusions as extrapolation." if c["index"] < 40 else
+    verdict = ("Mostly outside the tested ranges, so treat conclusions as extrapolation." if c["index"] < 40 else
                "Partly covered, with the gaps listed below." if c["index"] < 70 else "Well bracketed by PSI investigations.")
-    out.append(f"- Evidence coverage index: **{c['index']}/100**. {verdict}")
+    eg = ctx.get("evidenceGrade")
+    if eg:
+        out.append(f"- Evidence grade: **{eg['letter']}**. {eg['reason']}. {verdict}")
+    else:
+        out.append(f"- Evidence coverage index: **{c['index']}/100**. {verdict}")
+    rated = [m for m in ctx.get("materials", []) if m["level"] != "unknown"]
+    if rated:
+        hi = [m["name"] for m in rated if m["level"] == "high"]
+        out.append(f"- Materials: **{len(hi)} of {len(ctx['materials'])} high risk**"
+                   + (f" ({', '.join(hi[:4])})" if hi else "") + ". *(Illustrative model.)*")
 
     for pl in PILLARS:
         out.append(f"\n## {pl.capitalize()}")
@@ -101,7 +116,7 @@ def local_brief(ctx: dict) -> str:
                 fit = "tested at your O₂" if lo - 1 <= s["o2Pct"] <= hi + 1 else f"tested at {lo:g}–{hi:g}% O₂"
             else:
                 fit = "O₂ range not characterized"
-            approx = ", approximate envelope" if env["confidence"] == "approx" else ""
+            approx = ", approximate tested range" if env["confidence"] == "approx" else ""
             out.append(f"- {txt} [{i['id']}] *(relevance {i['relevance']}, {fit}{approx})*")
         if pl == "prevention" and "solid" in s["fuelPhases"] and s["o2Pct"] > c["highestO2Solids"] + 1:
             out.append(f"- ⚠ **Insufficient evidence: no microgravity solid-material data at {s['o2Pct']:g}% O₂** "
@@ -131,7 +146,7 @@ def local_brief(ctx: dict) -> str:
     out.append(f"- Run flammability tests on the actual cabin materials at {s['o2Pct']:g}% O₂ / {s['pressurePsi']:g} psi "
                f"across {lo}–{hi} cm/s flows.")
     if not any(i["importedTests"] for i in invs):
-        out.append("- Import PSI test matrices in the Data Lab to replace the approximate envelopes with measured test points.")
+        out.append("- Import PSI test matrices in the Data Lab to replace the approximate tested ranges with measured test points.")
 
     earth = [(e, i["id"]) for i in invs for e in i["earthApplications"]][:4]
     if earth:

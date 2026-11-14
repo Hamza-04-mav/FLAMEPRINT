@@ -12,7 +12,7 @@ export function fmtRange(r: Range | null | undefined, unit: string) {
 
 export const CONF_LABEL: Record<Confidence, string> = {
   data: "Derived from imported PSI test records",
-  approx: "Approximate catalog envelope (verify against PSI)",
+  approx: "Approximate catalog tested range (verify against PSI)",
   unknown: "Not characterized",
 };
 

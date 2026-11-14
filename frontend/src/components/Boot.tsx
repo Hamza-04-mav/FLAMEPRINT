@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const LINES = [
-  "FLAMEPRINT · ORBITAL COMMAND v1.0",
+  "FLAMEPRINT · v2",
   "› linking NASA PSI combustion archive",
   "› loading investigation catalog: BASS · SAFFIRE · FLEX · CFI · ACME · SAME",
   "› calibrating relevance engine (deterministic, explainable)",
@@ -12,7 +12,7 @@ const LINES = [
   "SYSTEMS NOMINAL",
 ];
 
-/** ~1.6 s skippable boot sequence; shown once per browser session. */
+/** ~1.6 s skippable boot sequence; shown on the first visit only (?noboot skips it). */
 export function Boot() {
   const [show, setShow] = useState(false);
   const [n, setN] = useState(0);
@@ -20,9 +20,9 @@ export function Boot() {
   useEffect(() => {
     if (new URLSearchParams(window.location.search).has("noboot")) return;
     try {
-      if (sessionStorage.getItem("fp-booted")) return;
-      sessionStorage.setItem("fp-booted", "1");
-    } catch { /* storage blocked: still show once */ }
+      if (localStorage.getItem("fp-booted")) return;
+      localStorage.setItem("fp-booted", "1");
+    } catch { return; /* storage blocked: skip rather than replay on every load */ }
     setShow(true);
   }, []);
 

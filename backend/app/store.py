@@ -22,7 +22,7 @@ from typing import Optional
 
 from . import embed
 from .ingest import SUPPORTED_EXT, chunk_text, parse_file
-from .models import DataSource, Dataset, Investigation, Relation, Spinoff, TestRecord
+from .models import DataSource, Dataset, Investigation, Material, Relation, Spinoff, TestRecord
 
 log = logging.getLogger("flameprint.store")
 SCHEMA_SQL = Path(__file__).with_name("schema.sql")
@@ -56,6 +56,7 @@ class Store:
     def __init__(self, root: Path, database_url: Optional[str] = None):
         self.root = root
         self.seed_path = root / "seed" / "investigations.json"
+        self.materials_path = root / "seed" / "materials.json"
         self.psi_dir = root / "psi"
         self.upload_dir = root / "imported"
         self.upload_dir.mkdir(parents=True, exist_ok=True)
@@ -167,7 +168,17 @@ class Store:
             investigations.append(Investigation(id=iid, name=iid, objective="Imported test data without catalog metadata.",
                                                 provenance="Imported test file (no metadata)"))
 
-        ds = Dataset(investigations=investigations, tests=tests,
+        materials: list[Material] = []
+        try:
+            raw_mats = json.loads(self.materials_path.read_text("utf-8")).get("materials", [])
+            materials = [Material.model_validate(m) for m in raw_mats]
+            sources.append(DataSource(name="seed/materials.json", origin="seed", kind="investigations", count=len(materials)))
+        except FileNotFoundError:
+            log.info("No materials.json: material verdicts disabled")
+        except Exception as e:  # noqa: BLE001
+            reports.append({"file": "seed/materials.json", "kind": "error", "records": 0, "warnings": [str(e)[:300]]})
+
+        ds = Dataset(investigations=investigations, tests=tests, materials=materials,
                      relations=[Relation.model_validate(r) for r in relations],
                      spinoffs=[Spinoff.model_validate(s) for s in seed.get("earthSpinoffs", [])],
                      sources=sources)

@@ -1,0 +1,211 @@
+{
+  "_about": "FLAMEPRINT material catalog. oxygenThreshold.o2Pct must come from a cited source; null means 'not sourced yet' and the material is shown as unknown risk with grade M. testedIn is taken from the seed catalog fuel lists and must be verified against PSI test records. See docs/OPEN_QUESTIONS.md.",
+  "materials": [
+    {
+      "id": "cotton",
+      "name": "Cotton fabric",
+      "usedFor": "clothing, towels, wipes",
+      "phase": "solid",
+      "aliases": [
+        "cotton",
+        "t-shirt",
+        "tshirt",
+        "shirt",
+        "towel",
+        "sock",
+        "socks",
+        "cloth",
+        "clothing",
+        "wipe",
+        "wipes",
+        "fabric"
+      ],
+      "testedIn": [
+        "BASS",
+        "BASS-II",
+        "SAFFIRE-I",
+        "SAFFIRE-III"
+      ],
+      "testedInBasis": "Seed catalog fuel list (investigation-level metadata). Verify against PSI test records.",
+      "oxygenThreshold": {
+        "o2Pct": null,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
+        "source": null,
+        "url": null
+      },
+      "notes": "Catalog lists cotton-fiberglass fabric (SIBAL), a cotton blend, not pure cotton."
+    },
+    {
+      "id": "pu-foam",
+      "name": "Polyurethane foam",
+      "usedFor": "pillows, seat cushions, packing foam",
+      "phase": "solid",
+      "aliases": [
+        "foam",
+        "pillow",
+        "cushion",
+        "polyurethane",
+        "sponge",
+        "mattress",
+        "padding",
+        "packing foam"
+      ],
+      "testedIn": [],
+      "testedInBasis": null,
+      "oxygenThreshold": {
+        "o2Pct": null,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
+        "source": null,
+        "url": null
+      },
+      "notes": ""
+    },
+    {
+      "id": "pmma",
+      "name": "PMMA (acrylic)",
+      "usedFor": "windows, covers, display panels",
+      "phase": "solid",
+      "aliases": [
+        "pmma",
+        "acrylic",
+        "plexiglass",
+        "plexiglas",
+        "perspex",
+        "window",
+        "visor",
+        "display cover"
+      ],
+      "testedIn": [
+        "BASS",
+        "BASS-II"
+      ],
+      "testedInBasis": "Seed catalog fuel list (investigation-level metadata). Verify against PSI test records.",
+      "oxygenThreshold": {
+        "o2Pct": null,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
+        "source": null,
+        "url": null
+      },
+      "notes": ""
+    },
+    {
+      "id": "nomex",
+      "name": "Nomex",
+      "usedFor": "flight suits, protective covers",
+      "phase": "solid",
+      "aliases": [
+        "nomex",
+        "aramid",
+        "flight suit",
+        "coverall"
+      ],
+      "testedIn": [],
+      "testedInBasis": null,
+      "oxygenThreshold": {
+        "o2Pct": null,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
+        "source": null,
+        "url": null
+      },
+      "notes": ""
+    },
+    {
+      "id": "ptfe",
+      "name": "PTFE (Teflon) wire insulation",
+      "usedFor": "wire and cable insulation",
+      "phase": "solid",
+      "aliases": [
+        "ptfe",
+        "teflon",
+        "wire",
+        "cable",
+        "insulation",
+        "wire insulation"
+      ],
+      "testedIn": [],
+      "testedInBasis": null,
+      "oxygenThreshold": {
+        "o2Pct": null,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
+        "source": null,
+        "url": null
+      },
+      "notes": ""
+    },
+    {
+      "id": "velcro",
+      "name": "Velcro (nylon hook and loop)",
+      "usedFor": "straps, fasteners, wall attachment",
+      "phase": "solid",
+      "aliases": [
+        "velcro",
+        "hook and loop",
+        "strap",
+        "straps",
+        "fastener",
+        "nylon"
+      ],
+      "testedIn": [],
+      "testedInBasis": null,
+      "oxygenThreshold": {
+        "o2Pct": null,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
+        "source": null,
+        "url": null
+      },
+      "notes": ""
+    },
+    {
+      "id": "paper",
+      "name": "Paper",
+      "usedFor": "notebooks, checklists, labels",
+      "phase": "solid",
+      "aliases": [
+        "paper",
+        "notebook",
+        "checklist",
+        "book",
+        "label",
+        "labels",
+        "cardboard",
+        "tissue"
+      ],
+      "testedIn": [
+        "BASS-II"
+      ],
+      "testedInBasis": "Seed catalog fuel list (investigation-level metadata). Verify against PSI test records.",
+      "oxygenThreshold": {
+        "o2Pct": null,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
+        "source": null,
+        "url": null
+      },
+      "notes": "Catalog lists thin cellulose, which is close to, but not the same as, paper."
+    },
+    {
+      "id": "silicone",
+      "name": "Silicone rubber",
+      "usedFor": "seals, gaskets, tubing",
+      "phase": "solid",
+      "aliases": [
+        "silicone",
+        "rubber",
+        "seal",
+        "gasket",
+        "tubing",
+        "o-ring"
+      ],
+      "testedIn": [
+        "SAFFIRE-II"
+      ],
+      "testedInBasis": "Seed catalog fuel list (investigation-level metadata). Verify against PSI test records.",
+      "oxygenThreshold": {
+        "o2Pct": null,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
+        "source": null,
+        "url": null
+      },
+      "notes": "Catalog lists silicone among multiple spacecraft materials."
+    }
+  ]
+}

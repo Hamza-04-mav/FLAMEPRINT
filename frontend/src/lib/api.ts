@@ -1,9 +1,9 @@
 import type {
-  Analysis, CompareResult, ConditionSpace, DatasetResponse, GenomeEdge, GenomeNode, Habitat, Health,
+  Analysis, CompareHabitatsResult, CompareResult, NextExperiment, StowageResult, ConditionSpace, DatasetResponse, GenomeEdge, GenomeNode, Habitat, Health,
   IngestReport, Investigation, Relation, Scenario, TestRecord, Weights,
 } from "./types";
 
-/** All requests go through Next.js rewrites (/api → FastAPI), so there are no CORS issues in dev or prod. */
+/** Empty BASE → same-origin /api (Next.js rewrite to FastAPI). In production set NEXT_PUBLIC_API_BASE to call the API directly (CORS) so SSE streams unbuffered. */
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "";
 
 export class ApiError extends Error {
@@ -17,7 +17,7 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     res = await fetch(`${BASE}${path}`, init);
   } catch {
-    throw new ApiError(0, "Backend unreachable. Is the FastAPI server running on :8000?");
+    throw new ApiError(0, "Backend unreachable. It may be waking up; try again in a moment.");
   }
   if (!res.ok) {
     let msg = res.statusText;
@@ -40,6 +40,11 @@ export const api = {
   dataset: () => req<DatasetResponse>("/api/dataset"),
   analyze: (scenario: Scenario, weights: Weights, signal?: AbortSignal) =>
     req<Analysis>("/api/analyze", { ...json({ scenario, weights }), signal }),
+  stowage: (item: string, scenario: Scenario, signal?: AbortSignal) =>
+    req<StowageResult>("/api/stowage", { ...json({ item, scenario }), signal }),
+  compareHabitats: (a: Scenario, b: Scenario, weights: Weights) =>
+    req<CompareHabitatsResult>("/api/compare-habitats", json({ a, b, weights })),
+  nextExperiments: () => req<NextExperiment[]>("/api/next-experiments"),
   investigation: (id: string) =>
     req<{ investigation: Investigation; tests: TestRecord[]; totalTests: number; relations: Relation[] }>(
       `/api/investigations/${encodeURIComponent(id)}`),
@@ -82,7 +87,7 @@ export async function streamSSE(path: string, body: unknown, h: StreamHandlers, 
     res = await fetch(`${BASE}${path}`, { ...json(body), signal });
   } catch (e) {
     if ((e as Error).name === "AbortError") return;
-    throw new ApiError(0, "Backend unreachable. Is the FastAPI server running on :8000?");
+    throw new ApiError(0, "Backend unreachable. It may be waking up; try again in a moment.");
   }
   if (!res.ok || !res.body) throw new ApiError(res.status, `Stream failed (${res.status})`);
   const reader = res.body.getReader();

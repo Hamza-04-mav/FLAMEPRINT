@@ -11,8 +11,11 @@ export const FALLBACK_SCENARIO: Scenario = {
   phases: ["solid", "gas"], pillarFocus: { prevention: 1, detection: 0.8, suppression: 0.8 },
 };
 
-export const TABS = ["overview", "space", "ranking", "brief", "genome", "earth", "ask", "data"] as const;
+export const TABS = ["answer", "stowage", "ranking", "space", "genome", "brief", "habitats", "data", "ask", "earth"] as const;
 export type Tab = (typeof TABS)[number];
+/** Old deep links keep working. */
+const LEGACY: Record<string, Tab> = { overview: "answer", coverage: "space", control: "answer" };
+export const resolveTab = (h: string): Tab | null => (TABS as readonly string[]).includes(h) ? (h as Tab) : LEGACY[h] ?? null;
 
 interface MissionCtx {
   habitats: Habitat[];
@@ -48,7 +51,7 @@ export function MissionProvider({ children }: { children: React.ReactNode }) {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTabState] = useState<Tab>("overview");
+  const [tab, setTabState] = useState<Tab>("answer");
   const [focusId, setFocusId] = useState<string | null>(null);
   const [dataVersion, setDataVersion] = useState(0);
   const [configOpen, setConfigOpen] = useState(false);
@@ -73,8 +76,11 @@ export function MissionProvider({ children }: { children: React.ReactNode }) {
   // Deep-linkable tabs (#ranking, #brief, ...) for demos and sharing
   useEffect(() => {
     const read = () => {
-      const h = window.location.hash.slice(1) as Tab;
-      if (TABS.includes(h)) setTabState(h);
+      const t = resolveTab(window.location.hash.slice(1));
+      if (t) {
+        setTabState(t);
+        if (t !== window.location.hash.slice(1)) history.replaceState(null, "", `${window.location.search}#${t}`);
+      }
     };
     read();
     setReady(true);
@@ -83,7 +89,7 @@ export function MissionProvider({ children }: { children: React.ReactNode }) {
   }, []);
   const setTab = useCallback((t: Tab) => {
     setTabState(t);
-    history.replaceState(null, "", `#${t}`);
+    history.replaceState(null, "", `${window.location.search}#${t}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 

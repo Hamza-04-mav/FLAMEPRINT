@@ -8,7 +8,7 @@ $py = Join-Path $root "backend\.venv\Scripts\python.exe"
 if (-not (Test-Path $py)) {
     Write-Host "Creating Python venv + installing backend deps..." -ForegroundColor Cyan
     python -m venv (Join-Path $root "backend\.venv")
-    & $py -m pip install -q -r (Join-Path $root "backend\requirements.txt")
+    & $py -m pip install -q -r (Join-Path $root "backend\requirements-dev.txt")
 }
 if (-not (Test-Path (Join-Path $root "backend\.env"))) {
     Copy-Item (Join-Path $root "backend\.env.example") (Join-Path $root "backend\.env")

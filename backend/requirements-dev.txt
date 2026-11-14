@@ -1,0 +1,4 @@
+-r requirements.txt
+# dev / test only (not installed on the server)
+pytest>=8.0
+httpx>=0.27

@@ -86,3 +86,32 @@ def test_extract_requires_key(client):
 def test_template_download(client):
     assert client.get("/api/templates/tests_template.csv").status_code == 200
     assert client.get("/api/templates/..%2F..%2Fsecret").status_code == 404
+
+
+def _body(client, hid):
+    hab = next(h for h in client.get("/api/habitats").json() if h["id"] == hid)
+    return {k: hab[k] for k in ("o2Pct", "pressureKpa", "flowCmS", "gravityG", "phases", "pillarFocus")} | {"habitatId": hid}
+
+
+def test_analyze_v2_fields(client):
+    r = client.post("/api/analyze", json={"scenario": _body(client, "lunar-base")}).json()
+    assert r["coverage"]["grade"]["letter"] in "ABCM" and "index" in r["coverage"]
+    assert len(r["materials"]) == 8 and all("grade" in m for m in r["materials"])
+    assert all(x["grade"]["letter"] for x in r["ranked"])
+    assert r["nextExperiments"][0]["plannedBy"]
+    assert len(r["briefPreview"]) == 3 and r["dataMode"] == "seed"
+
+
+def test_compare_habitats_diff(client):
+    r = client.post("/api/compare-habitats", json={"a": _body(client, "iss"), "b": _body(client, "lunar-base")}).json()
+    d = r["diff"]
+    assert {"materials", "gapsOnlyInB", "grade", "rankMoves"} <= set(d)
+    assert any("g combustion data" in g["title"] for g in d["gapsOnlyInB"])
+
+
+def test_health_reports_seed_loaded_from_default_dir():
+    from fastapi.testclient import TestClient
+    from app import main
+    h = TestClient(main.app).get("/api/health").json()
+    assert h["ok"] and h["stats"]["investigations"] == 22
+    assert main.DATA_DIR.name == "data"

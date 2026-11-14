@@ -167,7 +167,7 @@ export function BriefPanel() {
             <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 text-[12.5px] sm:grid-cols-3 lg:grid-cols-6">
               {[
                 ["O₂", `${scenario.o2Pct} %`], ["Pressure", `${toPsi(scenario.pressureKpa)} psi`], ["Gravity", `${scenario.gravityG} g`],
-                ["Ventilation", `${scenario.flowCmS} cm/s`], ["Coverage", meta.coverageIndex !== undefined ? `${meta.coverageIndex}/100` : analysis ? `${Math.round(analysis.coverage.index)}/100` : "–"], ["Status", status],
+                ["Ventilation", `${scenario.flowCmS} cm/s`], ["Evidence grade", analysis ? `${analysis.coverage.grade.letter} · ${analysis.coverage.grade.reason.split(";")[0]}` : "–"], ["Status", status],
               ].map(([k, v]) => (
                 <div key={k}><dt className="label !text-[9.5px]">{k}</dt><dd className="mt-0.5 font-mono text-[13px] text-ink">{v}</dd></div>
               ))}
@@ -203,7 +203,7 @@ export function BriefPanel() {
 
             {state === "waiting" && (
               <div className="space-y-3 py-4">
-                {["Ranking investigations for this atmosphere", "Bracketing gravity and oxygen envelopes", "Composing the cited brief"].map((s, i) => (
+                {["Ranking investigations for this atmosphere", "Bracketing gravity and oxygen tested ranges", "Composing the cited brief"].map((s, i) => (
                   <motion.div key={s} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.45 }}
                     className="flex items-center gap-3 font-mono text-[12px] text-slate-400">
                     <span className="w-6 text-[10px] text-ox/70">{String(i + 1).padStart(2, "0")}</span>

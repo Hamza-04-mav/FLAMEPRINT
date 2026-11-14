@@ -126,7 +126,7 @@ export function Genome() {
 
   return (
     <div>
-      <PageHeader index="05" kicker="Investigation genome" title="Hardware lineage & scientific ancestry">
+      <PageHeader index="05" kicker="Compare experiments" title="Hardware lineage & scientific ancestry">
         Facilities host apparatus, and apparatus host investigations. Experiments on the same hardware differ only in conditions and fuels, so they compare directly.
         Select any node to inspect it.
       </PageHeader>

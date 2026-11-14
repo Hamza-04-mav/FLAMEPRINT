@@ -2,20 +2,26 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  BarChart3, Boxes, Database, FileText, Globe2, Home, MessageSquareText, Network, X,
+  BarChart3, Boxes, Database, FileText, GitCompareArrows, Globe2, Home, Luggage, MessageSquareText, Network, X,
 } from "lucide-react";
 import { useId } from "react";
 import { type Tab, useMission } from "@/lib/mission";
 
-export const NAV: { id: Tab; label: string; short: string; icon: React.ReactNode; group: "main" | "tools" }[] = [
-  { id: "overview", label: "Mission Control", short: "Control", icon: <Home className="h-[18px] w-[18px]" />, group: "main" },
-  { id: "space", label: "Coverage Map", short: "Coverage", icon: <Boxes className="h-[18px] w-[18px]" />, group: "main" },
-  { id: "ranking", label: "Investigation Rankings", short: "Rankings", icon: <BarChart3 className="h-[18px] w-[18px]" />, group: "main" },
-  { id: "brief", label: "Fire Safety Brief", short: "Brief", icon: <FileText className="h-[18px] w-[18px]" />, group: "main" },
-  { id: "genome", label: "Investigation Genome", short: "Genome", icon: <Network className="h-[18px] w-[18px]" />, group: "main" },
-  { id: "earth", label: "Down to Earth", short: "Earth", icon: <Globe2 className="h-[18px] w-[18px]" />, group: "main" },
-  { id: "ask", label: "Ask the Archive", short: "Ask", icon: <MessageSquareText className="h-[18px] w-[18px]" />, group: "tools" },
+export type NavGroup = "answer" | "evidence" | "tools";
+export const NAV: { id: Tab; label: string; short: string; icon: React.ReactNode; group: NavGroup }[] = [
+  { id: "answer", label: "Habitat passport", short: "Answer", icon: <Home className="h-[18px] w-[18px]" />, group: "answer" },
+  { id: "stowage", label: "Can I bring this aboard?", short: "Stowage", icon: <Luggage className="h-[18px] w-[18px]" />, group: "answer" },
+  { id: "ranking", label: "Investigation rankings", short: "Rankings", icon: <BarChart3 className="h-[18px] w-[18px]" />, group: "evidence" },
+  { id: "space", label: "Where data exists", short: "Data map", icon: <Boxes className="h-[18px] w-[18px]" />, group: "evidence" },
+  { id: "genome", label: "Compare experiments", short: "Compare", icon: <Network className="h-[18px] w-[18px]" />, group: "evidence" },
+  { id: "habitats", label: "Compare habitats", short: "Habitats", icon: <GitCompareArrows className="h-[18px] w-[18px]" />, group: "evidence" },
+  { id: "brief", label: "Fire safety brief", short: "Brief", icon: <FileText className="h-[18px] w-[18px]" />, group: "evidence" },
   { id: "data", label: "Data Lab", short: "Data", icon: <Database className="h-[18px] w-[18px]" />, group: "tools" },
+  { id: "ask", label: "Ask the archive", short: "Ask", icon: <MessageSquareText className="h-[18px] w-[18px]" />, group: "tools" },
+  { id: "earth", label: "Down to Earth", short: "Earth", icon: <Globe2 className="h-[18px] w-[18px]" />, group: "tools" },
+];
+const GROUPS: { id: NavGroup; label: string }[] = [
+  { id: "answer", label: "Answer" }, { id: "evidence", label: "Evidence" }, { id: "tools", label: "Tools" },
 ];
 
 /** FLAMEPRINT mark: a flame held inside an orbital ring. */
@@ -116,20 +122,19 @@ function Attribution() {
 }
 
 function Panel({ rail, onNavigate }: { rail: boolean; onNavigate?: () => void }) {
-  const main = NAV.filter((n) => n.group === "main");
-  const tools = NAV.filter((n) => n.group === "tools");
   return (
     <div className={`flex h-full flex-col ${rail ? "items-stretch px-3 py-5" : "px-4 py-6"}`}>
       <div className={rail ? "" : "px-1"}><Logo compact={rail} /></div>
-      <nav aria-label="Pages" className={`flex flex-col gap-1 ${rail ? "mt-8" : "mt-9"}`}>
-        {main.map((n) => <NavItem key={n.id} id={n.id} label={n.label} icon={n.icon} rail={rail} onNavigate={onNavigate} />)}
-      </nav>
-      <div className={`mt-6 ${rail ? "mx-auto w-6" : "px-3.5"}`}>
-        {rail ? <div className="rule" /> : <div className="label !text-[9.5px] !tracking-[0.22em] text-slate-500">Tools</div>}
-      </div>
-      <nav aria-label="Tools" className="mt-2 flex flex-col gap-1">
-        {tools.map((n) => <NavItem key={n.id} id={n.id} label={n.label} icon={n.icon} rail={rail} onNavigate={onNavigate} />)}
-      </nav>
+      {GROUPS.map((g, gi) => (
+        <div key={g.id} className={gi === 0 ? (rail ? "mt-7" : "mt-8") : "mt-5"}>
+          <div className={`mb-1.5 ${rail ? "mx-auto w-6" : "px-3.5"}`}>
+            {rail ? (gi > 0 && <div className="rule" />) : <div className="label !text-[9.5px] !tracking-[0.22em] text-slate-500">{g.label}</div>}
+          </div>
+          <nav aria-label={g.label} className="flex flex-col gap-0.5">
+            {NAV.filter((n) => n.group === g.id).map((n) => <NavItem key={n.id} id={n.id} label={n.label} icon={n.icon} rail={rail} onNavigate={onNavigate} />)}
+          </nav>
+        </div>
+      ))}
       <div className="mt-auto space-y-3 pt-6">
         {!rail && <Attribution />}
         <SystemCard compact={rail} />

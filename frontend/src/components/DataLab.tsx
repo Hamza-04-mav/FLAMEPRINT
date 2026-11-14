@@ -215,7 +215,7 @@ export function DataLab() {
           <div className="grid grid-cols-3 gap-3 text-center">
             <Stat n={s?.inPsi ?? 0} label="investigations" />
             <Stat n={s?.tests ?? 0} label="PSI test records" />
-            <Stat n={s?.withDataEnvelope ?? 0} label="data-derived envelopes" />
+            <Stat n={s?.withDataEnvelope ?? 0} label="data-derived tested ranges" />
           </div>
           {s && s.tests === 0 && (
             <p className="mt-3 rounded-[4px] border border-amber-400/30 bg-amber-400/5 p-3 text-[12px] leading-relaxed text-amber-100/90">
@@ -258,7 +258,7 @@ export function DataLab() {
           <ol className="list-decimal space-y-1 pl-4">
             <li>Drop official PSI files into <code className="text-slate-200">data/psi/</code> (server) or upload them here.</li>
             <li>Columns are matched automatically (O₂, pressure, flow, gravity, fuel, outcome) and units are converted.</li>
-            <li>Envelopes become <span className="text-emerald-300">data-derived</span>. Ranking, coverage, the 3D map and briefs update.</li>
+            <li>Tested ranges become <span className="text-emerald-300">data-derived</span>. Ranking, coverage, the 3D map and briefs update.</li>
             <li>PDFs and text are indexed for retrieval and, with Claude, can be turned into structured metadata.</li>
           </ol>
         </div>

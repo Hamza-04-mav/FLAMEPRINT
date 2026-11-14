@@ -91,8 +91,8 @@ export function FlammabilityMap({ space }: { space: ConditionSpace | null }) {
         </motion.g>
       </svg>
       <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-400">
-        <span className="flex items-center gap-1.5"><EvidenceMark kind="catalog" />catalog envelope (approx)</span>
-        <span className="flex items-center gap-1.5"><EvidenceMark kind="psi" />envelope from PSI tests</span>
+        <span className="flex items-center gap-1.5"><EvidenceMark kind="catalog" />catalog tested range (approx)</span>
+        <span className="flex items-center gap-1.5"><EvidenceMark kind="psi" />tested range from PSI tests</span>
         {Object.entries(OUTCOME_COLOR).map(([k, c]) => (
           <span key={k}><span className="mr-1 inline-block h-2 w-2 rounded-full align-middle" style={{ background: c }} />{k}</span>
         ))}

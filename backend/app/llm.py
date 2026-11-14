@@ -156,3 +156,34 @@ async def extract_investigation(text: str, source: str) -> tuple[dict, list[str]
     }
     log.info("Extracted %s from %s", inv["id"], source)
     return json.loads(json.dumps(inv)), warnings
+
+
+# ------------------------------------------------------------------ stowage: item → material id
+class MaterialPick(BaseModel):
+    material_id: str = Field(description="Exactly one id from the allowed list, or 'none'")
+
+
+PICK_SYSTEM = """You map a household or spacecraft item to the material it is mostly made of.
+Answer with exactly one id from the allowed list, or "none" if no listed material is a good match.
+Never invent an id. Never give a risk, number or advice."""
+
+
+def validate_pick(raw: Optional[str], allowed: list[str]) -> Optional[str]:
+    """Only ids from the fixed list survive. Anything else (including hallucinations) becomes None."""
+    if not raw:
+        return None
+    v = raw.strip().strip('"').lower()
+    return v if v in allowed else None
+
+
+async def pick_material(item: str, materials: list[dict]) -> Optional[str]:
+    allowed = [m["id"] for m in materials]
+    listing = "\n".join(f"- {m['id']}: {m['name']} (used for {m['usedFor']})" for m in materials)
+    resp = await client().messages.parse(
+        model=MODEL, max_tokens=200, system=PICK_SYSTEM,
+        messages=[{"role": "user", "content": f"Allowed ids:\n{listing}\n\nItem: {item[:200]}"}],
+        output_format=MaterialPick,
+    )
+    if resp.stop_reason == "refusal" or resp.parsed_output is None:
+        return None
+    return validate_pick(resp.parsed_output.material_id, allowed)

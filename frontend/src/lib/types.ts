@@ -51,6 +51,7 @@ export interface TestRecord {
 
 export interface Habitat {
   id: string;
+  order: number | null;
   name: string;
   short: string;
   o2Pct: number;
@@ -91,10 +92,62 @@ export interface Factor {
   confidence: Confidence;
 }
 
+export type GradeLetter = "A" | "B" | "C" | "M";
+export interface Grade { letter: GradeLetter; reason: string; basis: string[] }
+
+export type RiskLevel = "high" | "elevated" | "low" | "unknown";
+export interface MaterialVerdict {
+  id: string;
+  name: string;
+  usedFor: string;
+  level: RiskLevel;
+  margin: number | null;
+  threshold1g: number | null;
+  effectiveThreshold: number | null;
+  grade: Grade;
+  label: string;
+  why: string;
+  source?: string | null;
+  url?: string | null;
+}
+
+export interface NextExperiment {
+  id: string;
+  title: string;
+  phase: FuelPhase;
+  gravity: string;
+  habitatsAffected: string[];
+  severity: Gap["severity"];
+  score: number;
+  plannedBy: string[];
+  why: string;
+}
+
+export interface StowageResult {
+  item: string;
+  materialId: string | null;
+  materialName: string | null;
+  matchedBy: "keyword" | "claude" | "none";
+  verdict: MaterialVerdict | null;
+  advice: string;
+}
+
+export interface CompareHabitatsResult {
+  a: Analysis;
+  b: Analysis;
+  diff: {
+    materials: { id: string; name: string; from: RiskLevel; to: RiskLevel }[];
+    gapsOnlyInB: Gap[];
+    grade: { from: GradeLetter; to: GradeLetter };
+    rankMoves: { id: string; from: number; to: number }[];
+  };
+}
+
 export interface Ranked {
   id: string;
   name: string;
   score: number;
+  grade?: Grade | null;
   factors: Factor[];
   nearbyTests: number;
   totalTests: number;
@@ -109,6 +162,7 @@ export interface Gap {
 
 export interface Coverage {
   index: number;
+  grade: Grade;
   o2Hits: string[];
   pressureHits: string[];
   flowHits: string[];
@@ -137,6 +191,10 @@ export interface Analysis {
   ranked: Ranked[];
   coverage: Coverage;
   readout: Readout;
+  materials: MaterialVerdict[];
+  nextExperiments: NextExperiment[];
+  briefPreview: string[];
+  dataMode: "seed" | "psi";
 }
 
 export interface Relation { from: string; to: string; type: string; note: string }

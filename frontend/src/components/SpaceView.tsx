@@ -1,14 +1,14 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Crosshair, FileSearch, Pause, Play, RotateCcw, X } from "lucide-react";
+import { Box, Crosshair, FileSearch, FlaskConical, Map as MapIcon, Pause, Play, RotateCcw, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
-import { fmtRange, OUTCOME_COLOR, PHASE_COLOR, scoreColor, toPsi } from "@/lib/format";
+import { fmtRange, OUTCOME_COLOR, PHASE_COLOR, scoreColor, SEVERITY_COLOR, toPsi } from "@/lib/format";
 import { useMission } from "@/lib/mission";
 import { effectiveFlow, scenarioInVoid } from "@/lib/space";
-import type { ConditionSpace } from "@/lib/types";
+import type { ConditionSpace, NextExperiment } from "@/lib/types";
 import { useWebGL } from "@/lib/webgl";
 import type { Selection, ViewPreset } from "./ConditionSpace3D";
 import { FlammabilityMap } from "./FlammabilityMap";
@@ -18,7 +18,7 @@ const ConditionSpace3D = dynamic(() => import("./ConditionSpace3D"), {
   ssr: false, loading: () => (
     <div className="grid h-full place-items-center">
       <div className="text-center font-mono text-[10.5px] tracking-[0.2em] text-ox/70">
-        <div className="mx-auto mb-3 h-9 w-9 animate-spin rounded-full border border-ox/20 border-t-ox" />INITIALIZING CONDITION SPACE
+        <div className="mx-auto mb-3 h-9 w-9 animate-spin rounded-full border border-ox/20 border-t-ox" />LOADING 3D MAP
       </div>
     </div>
   ),
@@ -40,6 +40,39 @@ function Row({ k, v, tone }: { k: string; v: React.ReactNode; tone?: string }) {
   );
 }
 
+function NextExperimentsList() {
+  const { habitats, openInvestigation, dataVersion } = useMission();
+  const [items, setItems] = useState<NextExperiment[] | null>(null);
+  useEffect(() => { api.nextExperiments().then(setItems).catch(() => setItems([])); }, [dataVersion]);
+  const short = (id: string) => habitats.find((h) => h.id === id)?.short ?? id;
+  return (
+    <section className="panel mb-5 p-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="flex items-center gap-2 font-display text-[18px] font-semibold text-ink"><FlaskConical className="h-5 w-5 text-ox" />What NASA should test next</h2>
+        <span className="text-[12px] text-mute">Missing test conditions across all mission presets · score = severity × habitats affected</span>
+      </div>
+      {!items && <Skeleton className="mt-4 h-24" />}
+      <ol className="mt-4 grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3">
+        {items?.map((x, i) => (
+          <li key={x.id} className="relative overflow-hidden rounded-[10px] border border-[var(--line)] bg-space-950/45 p-3 pl-4">
+            <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: SEVERITY_COLOR[x.severity] }} />
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-[13.5px] font-medium leading-snug text-ink"><span className="mr-1.5 font-mono text-[11px] text-flame-2">{String(i + 1).padStart(2, "0")}</span>{x.title}</span>
+              <span className="shrink-0 font-mono text-[11px] text-mute" title="severity weight × habitats affected">{x.score}</span>
+            </div>
+            <p className="mt-1 text-[11.5px] text-slate-500">{x.why}. Affects {x.habitatsAffected.map(short).join(", ")}.</p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-mute">
+              {x.plannedBy.length ? <>planned investigation:{x.plannedBy.map((id) => (
+                <button key={id} onClick={() => openInvestigation(id)} className="rounded-[4px] border border-ox/35 bg-ox/10 px-1.5 font-mono text-[10.5px] text-[#9BE6FF] hover:bg-ox/20">{id}</button>
+              ))}</> : <span className="text-slate-500">no planned investigation in the catalog</span>}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 export function SpaceView() {
   const { scenario, analysis, habitats, openInvestigation, dataVersion, dataset } = useMission();
   const [space, setSpace] = useState<ConditionSpace | null>(null);
@@ -48,6 +81,7 @@ export function SpaceView() {
   const [view, setView] = useState<ViewPreset>("iso");
   const [nonce, setNonce] = useState(0);
   const [spin, setSpin] = useState(true);
+  const [show3d, setShow3d] = useState(false);
   const webgl = useWebGL();
   const load = () => api.space().then((s) => { setSpace(s); setErr(null); }).catch((e) => setErr(e.message));
   useEffect(() => { void load(); }, [dataVersion]);
@@ -68,15 +102,25 @@ export function SpaceView() {
 
   return (
     <div>
-      <PageHeader index="02" kicker="Coverage map" title="Where the evidence stops"
-        actions={<Evidence kind={(space?.totalTests ?? 0) > 0 ? "psi" : "catalog"} label={(space?.totalTests ?? 0) > 0 ? `${space?.totalTests} PSI test points` : "Catalog envelopes · approx"} />}>
-        Every box is an investigation&apos;s tested O₂ × pressure × airflow envelope. Your mission is the beacon. A hatched volume marks conditions
-        no investigation has covered.
+      <PageHeader index="04" kicker="Where data exists" title="Where the evidence stops"
+        actions={<Evidence kind={(space?.totalTests ?? 0) > 0 ? "psi" : "catalog"} label={(space?.totalTests ?? 0) > 0 ? `${space?.totalTests} PSI test points` : "Catalog ranges · approx"} />}>
+        Each region is the range of O₂, pressure and airflow an investigation actually tested. Your habitat is the marker. Anything outside
+        every region has not been tested, so its risk is unknown, not low.
       </PageHeader>
       {err && <div className="mb-4"><ErrorNote message={err} onRetry={load} /></div>}
+      <NextExperimentsList />
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-        {/* viewport */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+        {!show3d ? (
+          <section className="panel p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="flex items-center gap-2 font-display text-[17px] font-semibold text-ink"><MapIcon className="h-4 w-4 text-ox" />O₂ × airflow</h3>
+              {webgl !== false && <button onClick={() => setShow3d(true)} className="btn btn-outline !py-1.5"><Box className="h-4 w-4" />Explore in 3D</button>}
+            </div>
+            <p className="mt-1 text-[12px] text-mute">2D slice with imported PSI test outcomes. Add pressure as a third axis in the 3D view.</p>
+            <div className="mt-3"><FlammabilityMap space={space} /></div>
+          </section>
+        ) : (
         <div className="hud-frame relative h-[62vh] min-h-[420px] overflow-hidden !rounded-[16px] xl:h-[min(72vh,700px)]">
           {webgl === false ? (
             <div className="grid h-full place-items-center p-6 text-center text-[13px] text-mute">
@@ -120,7 +164,9 @@ export function SpaceView() {
           <div className="pointer-events-none absolute bottom-4 left-4 font-mono text-[10px] tracking-[0.16em] text-slate-500">
             DRAG TO ORBIT · SCROLL TO ZOOM · CLICK A REGION OR POINT TO INSPECT
           </div>
+          <button onClick={() => setShow3d(false)} className="chip-link absolute bottom-4 right-4">Back to 2D</button>
         </div>
+        )}
 
         {/* inspector */}
         <aside className="panel flex flex-col p-5">
@@ -140,7 +186,7 @@ export function SpaceView() {
                   <Row k="Facility" v={selEnv.facility} />
                   <Row k="Fuel phase" v={selEnv.fuelPhase.join(", ")} tone={PHASE_COLOR[selEnv.fuelPhase[0]]} />
                   <Row k="O₂" v={fmtRange(selEnv.envelope.o2Pct, " %")} />
-                  <Row k="Pressure" v={fmtRange(selEnv.envelope.pressureKpa, " kPa")} tone={selEnv.envelope.pressureKpa ? undefined : "#7E94B4"} />
+                  <Row k="Pressure" v={selEnv.envelope.pressureKpa ? `${fmtRange([toPsi(selEnv.envelope.pressureKpa[0]), toPsi(selEnv.envelope.pressureKpa[1])], " psi")} · ${fmtRange(selEnv.envelope.pressureKpa, " kPa")}` : fmtRange(null, "")} tone={selEnv.envelope.pressureKpa ? undefined : "#7E94B4"} />
                   <Row k="Flow" v={fmtRange(selEnv.envelope.flowCmS, " cm/s")} tone={selEnv.envelope.flowCmS ? undefined : "#7E94B4"} />
                   {selRanked && <Row k="Relevance" v={`#${selRank + 1} · ${Math.round(selRanked.score)}`} tone={highlight.has(selEnv.id) ? "#FF8B32" : scoreColor(selRanked.score)} />}
                 </div>
@@ -165,7 +211,7 @@ export function SpaceView() {
                 <div className="mt-4 divide-y divide-[var(--line)]">
                   <Row k="Investigation" v={sel.test.investigationId} />
                   <Row k="O₂" v={`${sel.test.o2Pct} %`} />
-                  <Row k="Pressure" v={sel.test.pressureKpa != null ? `${sel.test.pressureKpa} kPa` : "not recorded"} />
+                  <Row k="Pressure" v={sel.test.pressureKpa != null ? `${toPsi(sel.test.pressureKpa)} psi · ${sel.test.pressureKpa} kPa` : "not recorded"} />
                   <Row k="Flow" v={sel.test.flowCmS != null ? `${sel.test.flowCmS} cm/s` : "not recorded"} />
                   <Row k="Outcome" v={sel.test.outcome} tone={OUTCOME_COLOR[sel.test.outcome]} />
                   {sel.test.fuel && <Row k="Fuel" v={sel.test.fuel} />}
@@ -180,11 +226,11 @@ export function SpaceView() {
                   <span className="font-display text-[20px] font-semibold text-ink">{hab?.name ?? "Custom mission"}</span>
                 </div>
                 <div className={`mt-3 rounded-[10px] border px-3 py-2.5 text-[12.5px] ${inVoid ? "border-flame-2/40 bg-flame-2/[0.07] text-orange-100" : "border-emerald-400/30 bg-emerald-400/[0.06] text-emerald-100"}`}>
-                  {space ? (inVoid ? "No investigation jointly covers this O₂, pressure and airflow. Risk here is unknown, not low." : "At least one investigation envelope covers this point.") : "Locating…"}
+                  {space ? (inVoid ? "No investigation jointly covers this O₂, pressure and airflow. Risk here is unknown, not low." : "At least one investigation's tested range covers this point.") : "Locating…"}
                 </div>
                 <div className="mt-3 divide-y divide-[var(--line)]">
                   <Row k="O₂" v={`${scenario.o2Pct} %`} tone="#19C9FF" />
-                  <Row k="Pressure" v={`${scenario.pressureKpa.toFixed(1)} kPa · ${toPsi(scenario.pressureKpa)} psi`} />
+                  <Row k="Pressure" v={`${toPsi(scenario.pressureKpa)} psi · ${scenario.pressureKpa.toFixed(1)} kPa`} />
                   <Row k="Airflow felt" v={`${uEff.toFixed(1)} cm/s`} />
                   {cov && <Row k="O₂ bracketed by" v={`${cov.o2Hits.length} investigations`} />}
                   {cov && <Row k="Pressure bracketed by" v={`${cov.pressureHits.length}`} />}
@@ -207,14 +253,14 @@ export function SpaceView() {
         </aside>
       </div>
 
-      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_1fr]">
-        <section className="panel p-5">
+      <div className={`mt-5 grid grid-cols-1 gap-5 ${show3d ? "xl:grid-cols-[minmax(0,1.3fr)_1fr]" : ""}`}>
+        {show3d && <section className="panel p-5">
           <div className="flex items-baseline justify-between gap-3">
             <h3 className="font-display text-[17px] font-semibold text-ink">O₂ × airflow plane</h3>
             <span className="text-[12px] text-mute">2D slice with imported PSI test outcomes</span>
           </div>
           <div className="mt-3"><FlammabilityMap space={space} /></div>
-        </section>
+        </section>}
         <section className="panel p-5">
           <h3 className="font-display text-[17px] font-semibold text-ink">Not plottable yet</h3>
           <p className="mt-1 text-[12.5px] text-mute">O₂ not characterized in the catalog. Import their PSI test matrices in the Data Lab to place them in the map.</p>
@@ -227,7 +273,7 @@ export function SpaceView() {
           <div className="rule my-5" />
           <div className="label mb-2">Test points</div>
           <p className="text-[13px] text-slate-200">{space?.plottedTests ?? 0} plotted of {space?.totalTests ?? 0} imported</p>
-          {space?.totalTests === 0 && <p className="mt-1 text-[12px] text-mute">No PSI test files imported yet, so envelopes come from the catalog (approx). No points are invented.</p>}
+          {space?.totalTests === 0 && <p className="mt-1 text-[12px] text-mute">No PSI test files imported yet, so tested ranges come from the catalog (approx). No points are invented.</p>}
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
             {Object.entries(OUTCOME_COLOR).map(([k, c]) => (
               <span key={k} className="flex items-center gap-1.5 text-[11.5px] text-mute"><span className="h-2 w-2 rounded-full" style={{ background: c }} />{k}</span>

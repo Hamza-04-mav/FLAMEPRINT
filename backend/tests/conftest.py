@@ -13,6 +13,7 @@ def data_dir(tmp_path, monkeypatch):
     """Isolated copy of the seed catalog; no PSI files, no uploads. LLM forced off."""
     (tmp_path / "seed").mkdir()
     shutil.copy(ROOT / "data" / "seed" / "investigations.json", tmp_path / "seed" / "investigations.json")
+    shutil.copy(ROOT / "data" / "seed" / "materials.json", tmp_path / "seed" / "materials.json")
     shutil.copytree(ROOT / "data" / "templates", tmp_path / "templates")
     monkeypatch.setenv("FLAMEPRINT_LLM", "off")
     return tmp_path

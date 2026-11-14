@@ -1,11 +1,13 @@
 "use client";
 
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import { ChevronDown, FileSearch, RotateCcw } from "lucide-react";
+import { ChevronDown, FileSearch, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
-import { fmtRange, scoreColor } from "@/lib/format";
+import { rankReason } from "@/lib/answer";
+import { fmtRange, scoreColor, toPsi } from "@/lib/format";
 import { DEFAULT_WEIGHTS, useMission } from "@/lib/mission";
 import type { Factor, Ranked, Weights } from "@/lib/types";
+import { GradeBadge } from "./GradeBadge";
 import { ConfidenceBadge, PageHeader, Skeleton, Slider } from "./ui";
 
 export const FACTOR_COLOR: Record<keyof Weights, string> = {
@@ -17,7 +19,8 @@ const FACTOR_NAME: Record<keyof Weights, string> = {
 };
 const FACTOR_SHORT: Record<keyof Weights, string> = { o2: "O₂", pressure: "Pressure", flow: "Flow", material: "Material", gravity: "Gravity", pillar: "Focus" };
 const ORDER: (keyof Weights)[] = ["o2", "pressure", "flow", "material", "gravity", "pillar"];
-const COLS = "md:grid-cols-[40px_minmax(170px,1.5fr)_84px_repeat(6,minmax(52px,1fr))_96px_24px]";
+const COLS = "md:grid-cols-[40px_minmax(0,1fr)_44px_72px_96px_24px]";
+const COLS_FACTORS = "md:grid-cols-[40px_minmax(170px,1.5fr)_44px_72px_repeat(6,minmax(52px,1fr))_96px_24px]";
 
 function FactorCell({ f }: { f?: Factor }) {
   if (!f) return <span className="text-slate-600">–</span>;
@@ -56,12 +59,15 @@ function Breakdown({ r, onOpen }: { r: Ranked; onOpen: () => void }) {
         </div>
       </div>
       <div className="flex flex-col">
-        <div className="label mb-3">Tested envelope</div>
+        <div className="label mb-3">Tested range</div>
         <div className="well divide-y divide-[var(--line)] px-3">
-          {[["O₂", fmtRange(r.envelope.o2Pct, " %")], ["Pressure", fmtRange(r.envelope.pressureKpa, " kPa")], ["Flow", fmtRange(r.envelope.flowCmS, " cm/s")]].map(([k, v]) => (
+          {[["O₂", fmtRange(r.envelope.o2Pct, " %")],
+            ["Pressure", r.envelope.pressureKpa ? `${fmtRange([toPsi(r.envelope.pressureKpa[0]), toPsi(r.envelope.pressureKpa[1])], " psi")} (${fmtRange(r.envelope.pressureKpa, " kPa")})` : fmtRange(null, "")],
+            ["Flow", fmtRange(r.envelope.flowCmS, " cm/s")]].map(([k, v]) => (
             <div key={k} className="flex justify-between py-2 text-[12.5px]"><span className="text-mute">{k}</span><span className="font-mono text-[12px] text-ink">{v}</span></div>
           ))}
-          <div className="flex items-center justify-between py-2 text-[12.5px]"><span className="text-mute">Evidence</span><ConfidenceBadge c={r.envelope.confidence} /></div>
+          <div className="flex items-center justify-between py-2 text-[12.5px]"><span className="text-mute">Evidence</span><span className="flex items-center gap-2"><ConfidenceBadge c={r.envelope.confidence} /><GradeBadge grade={r.grade} size="sm" /></span></div>
+          {r.grade && <div className="py-2 text-[12px] text-mute">Grade {r.grade.letter}: {r.grade.reason}</div>}
           <div className="flex justify-between py-2 text-[12.5px]"><span className="text-mute">Imported tests near you</span><span className="font-mono text-[12px] text-ink">{r.totalTests ? `${r.nearbyTests} / ${r.totalTests}` : "none imported"}</span></div>
         </div>
         <div className="mt-auto flex items-center justify-between pt-4">
@@ -77,6 +83,8 @@ export function Ranking() {
   const { analysis, weights, setWeights, openInvestigation, dataset, habitats, scenario } = useMission();
   const [open, setOpen] = useState<string | null>(null);
   const [showPending, setShowPending] = useState(true);
+  const [tuning, setTuning] = useState(false);
+  const cols = tuning ? COLS_FACTORS : COLS;
   const wsum = Object.values(weights).reduce((a, b) => a + b, 0) || 1;
   const pending = new Set(dataset?.investigations.filter((i) => i.status === "pending").map((i) => i.id));
   const rows = (analysis?.ranked ?? []).filter((r) => showPending || !pending.has(r.id));
@@ -85,17 +93,28 @@ export function Ranking() {
   return (
     <div>
       <PageHeader index="03" kicker="Investigation rankings" title={<>Which experiments matter for <span className="text-ox">{hab?.name ?? "this mission"}</span></>}>
-        A transparent weighted score over six compatibility factors. Change a weight and the leaderboard re-ranks live. Expand any row to audit it.
+        Every row says in one sentence why it ranks where it does, with an evidence grade. Expand a row to audit the score.
       </PageHeader>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <button onClick={() => setTuning((v) => !v)} aria-expanded={tuning} className={`btn ${tuning ? "btn-outline" : "btn-ghost border border-[var(--line)]"} !py-1.5`}>
+          <SlidersHorizontal className="h-4 w-4" />Adjust scoring<ChevronDown className={`h-4 w-4 transition-transform ${tuning ? "rotate-180" : ""}`} />
+        </button>
+        <label className="flex items-center gap-2 text-[12.5px] text-mute">
+          <input type="checkbox" checked={showPending} onChange={(e) => setShowPending(e.target.checked)} className="accent-[#087BFF]" />
+          Include planned investigations (LUCI, FM2)
+        </label>
+      </div>
+
+      <div className={`grid gap-5 ${tuning ? "xl:grid-cols-[minmax(0,1fr)_320px]" : ""}`}>
         <section className="panel overflow-hidden">
           {/* header row */}
-          <div className={`hidden items-end gap-2 border-b border-[var(--line)] px-4 py-3 md:grid ${COLS}`}>
+          <div className={`hidden items-end gap-2 border-b border-[var(--line)] px-4 py-3 md:grid ${cols}`}>
             <span className="label !text-[9.5px]">#</span>
             <span className="label !text-[9.5px]">Investigation</span>
+            <span className="label !text-[9.5px]">Grade</span>
             <span className="label !text-[9.5px]">Relevance</span>
-            {ORDER.map((k) => (
+            {tuning && ORDER.map((k) => (
               <span key={k} className="label flex items-center gap-1.5 !text-[9.5px]"><span className="h-1.5 w-1.5 rounded-[1px]" style={{ background: FACTOR_COLOR[k] }} />{FACTOR_SHORT[k]}</span>
             ))}
             <span className="label !text-[9.5px]">Evidence</span>
@@ -113,23 +132,25 @@ export function Ranking() {
                     className={`relative border-b border-[var(--line)] last:border-0 ${isOpen ? "bg-blue/[0.06]" : "hover:bg-white/[0.02]"}`}>
                     {top && <span className="absolute inset-y-0 left-0 w-[2px] bg-flame-2" />}
                     <button onClick={() => setOpen(isOpen ? null : r.id)} aria-expanded={isOpen}
-                      className={`grid w-full grid-cols-[32px_1fr_auto_20px] items-center gap-2 px-4 py-3 text-left ${COLS}`}>
+                      className={`grid w-full grid-cols-[32px_1fr_auto_auto_20px] items-center gap-2 px-4 py-3 text-left ${cols}`}>
                       <span className={`font-mono text-[12px] ${top ? "text-flame-2" : "text-slate-500"}`}>{String(i + 1).padStart(2, "0")}</span>
                       <span className="min-w-0">
                         <span className="flex items-center gap-2">
                           <span className="font-display text-[15px] font-semibold text-ink">{r.id}</span>
-                          {pending.has(r.id) && <span className="rounded-[4px] border border-ox-2/40 px-1.5 font-mono text-[9.5px] uppercase text-ox-2">expected</span>}
+                          {pending.has(r.id) && <span className="rounded-[4px] border border-ox-2/40 px-1.5 font-mono text-[9.5px] uppercase text-ox-2">planned</span>}
+                          <span className="hidden truncate text-[11.5px] text-slate-500 sm:inline">{r.name}</span>
                         </span>
-                        <span className="block truncate text-[11.5px] text-slate-500">{r.name}</span>
+                        <span className="block text-[12.5px] leading-snug text-slate-300">{rankReason(r, i, scenario)}</span>
                       </span>
+                      <span className="flex justify-start"><GradeBadge grade={r.grade} size="sm" /></span>
                       <span className="flex items-center gap-2">
                         <span className="font-display text-[22px] font-semibold tabular-nums" style={{ color: top ? "#FFC15B" : scoreColor(r.score) }}>{Math.round(r.score)}</span>
                       </span>
-                      {ORDER.map((k) => <span key={k} className="hidden md:block"><FactorCell f={fx.get(k)} /></span>)}
+                      {tuning && ORDER.map((k) => <span key={k} className="hidden md:block"><FactorCell f={fx.get(k)} /></span>)}
                       <span className="hidden md:block"><ConfidenceBadge c={r.envelope.confidence} /></span>
                       <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
                       {/* compact contribution bar on mobile */}
-                      <span className="col-span-4 flex h-1.5 overflow-hidden rounded-full bg-slate-800 md:hidden">
+                      <span className="col-span-5 flex h-1.5 overflow-hidden rounded-full bg-slate-800 md:hidden">
                         {r.factors.map((f) => (
                           <motion.span key={f.key} animate={{ width: `${(f.weight * f.score * 100) / wsum}%` }} style={{ background: FACTOR_COLOR[f.key] }} className="block h-full" />
                         ))}
@@ -149,7 +170,7 @@ export function Ranking() {
           </LayoutGroup>
         </section>
 
-        <aside className="space-y-5 xl:sticky xl:top-[112px] xl:self-start">
+        {tuning && <aside className="space-y-5 xl:sticky xl:top-[112px] xl:self-start">
           <section className="panel p-5">
             <div className="flex items-center justify-between">
               <h3 className="font-display text-[16px] font-semibold text-ink">Factor weights</h3>
@@ -165,10 +186,6 @@ export function Ranking() {
                   display={`${Math.round((weights[k] / wsum) * 100)}`} unit="%" onChange={(v) => setWeights({ ...weights, [k]: v })} />
               ))}
             </div>
-            <label className="mt-5 flex items-center gap-2 text-[12.5px] text-mute">
-              <input type="checkbox" checked={showPending} onChange={(e) => setShowPending(e.target.checked)} className="accent-[#087BFF]" />
-              Include expected investigations (LUCI, FM2)
-            </label>
           </section>
           <section className="panel p-5">
             <div className="label mb-2">Scoring model</div>
@@ -178,11 +195,11 @@ export function Ranking() {
               <span className="text-slate-500">d = distance outside the tested range</span>
             </div>
             <ul className="mt-3 space-y-1 text-[11.5px] text-mute">
-              <li>approx envelopes × 0.92</li><li>uncharacterized axis → 0.3 credit</li><li>expected, not yet in PSI × 0.6</li>
+              <li>approx tested ranges × 0.92</li><li>uncharacterized axis → 0.3 credit</li><li>planned, not yet in PSI × 0.6</li>
             </ul>
             <p className="mt-3 text-[11.5px] leading-snug text-slate-500">Deterministic code. The language model never sets a score.</p>
           </section>
-        </aside>
+        </aside>}
       </div>
     </div>
   );

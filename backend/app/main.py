@@ -14,12 +14,12 @@ from fastapi.responses import FileResponse, StreamingResponse
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
-from . import engine, llm  # noqa: E402
+from . import engine, llm, materials  # noqa: E402
 from .brief import (SYSTEM_ASK, SYSTEM_BRIEF, allowed_ids, build_context, check_citations,  # noqa: E402
                     local_answer, local_brief)
 from .habitats import HABITATS  # noqa: E402
 from .ingest import parse_file  # noqa: E402
-from .models import AskRequest, RankRequest  # noqa: E402
+from .models import AskRequest, CompareHabitatsRequest, RankRequest, Scenario, StowageRequest, Weights  # noqa: E402
 from .physics import readout, schematic_curve  # noqa: E402
 from .store import Store  # noqa: E402
 
@@ -78,13 +78,80 @@ def investigation(inv_id: str, limit: int = Query(200, le=5000)):
 
 
 # ------------------------------------------------------------------ analysis
+_brief_cache: dict[str, list[str]] = {}
+
+
+def brief_preview(ds, sc: Scenario, w: Weights) -> list[str]:
+    """First lines of the deterministic brief, cached per scenario so the Answer screen preview is instant."""
+    key = f"{store.loaded_at}|{sc.model_dump_json()}|{w.model_dump_json()}"
+    if key not in _brief_cache:
+        if len(_brief_cache) > 256:
+            _brief_cache.clear()
+        lines = [ln.strip() for ln in local_brief(build_context(ds, sc, w)).splitlines()]
+        _brief_cache[key] = [ln for ln in lines if ln.startswith("- ")][:3]
+    return _brief_cache[key]
+
+
+def run_analysis(sc: Scenario, w: Weights) -> dict:
+    ds = store.dataset
+    ranked = engine.rank(ds, sc, w)
+    cov = engine.coverage(ds, sc)
+    cov["grade"] = engine.grade(ds, sc).model_dump()
+    nxt = engine.experiments_for(engine.next_experiments(ds, HABITATS, extra=sc, limit=0), sc)
+    return {"ranked": [r.model_dump() for r in ranked], "coverage": cov, "readout": readout(sc),
+            "materials": [v.model_dump() for v in materials.assess_all(ds, sc)],
+            "nextExperiments": nxt[:5], "briefPreview": brief_preview(ds, sc, w),
+            "dataMode": "psi" if ds.tests else "seed"}
+
+
 @app.post("/api/analyze")
 def analyze(req: RankRequest):
-    """One call powers the dashboard: ranking + coverage + physics readout for a scenario."""
+    """One call powers the Answer screen: ranking, grades, materials, gaps, next experiments, physics readout."""
+    return run_analysis(req.scenario, req.weights)
+
+
+@app.get("/api/next-experiments")
+def next_experiments():
+    return engine.next_experiments(store.dataset, HABITATS, limit=0)
+
+
+@app.post("/api/stowage")
+async def stowage(req: StowageRequest):
+    """Can I bring this aboard? Keyword match first (works offline); Claude only picks an id from the list."""
     ds = store.dataset
-    ranked = engine.rank(ds, req.scenario, req.weights)
-    return {"ranked": [r.model_dump() for r in ranked], "coverage": engine.coverage(ds, req.scenario),
-            "readout": readout(req.scenario)}
+    m = materials.keyword_match(req.item, ds.materials)
+    matched_by = "keyword" if m else "none"
+    if m is None and llm.enabled() and ds.materials:
+        try:
+            pid = await llm.pick_material(req.item, [x.model_dump() for x in ds.materials])
+        except Exception as e:  # noqa: BLE001
+            log.warning("Stowage mapping failed: %s", llm.describe_error(e))
+            pid = None
+        m = next((x for x in ds.materials if x.id == pid), None)
+        if m:
+            matched_by = "claude"
+    verdict = materials.assess(m, req.scenario, ds) if m else None
+    level = verdict.level if verdict else "unknown"
+    return {"item": req.item, "materialId": m.id if m else None, "materialName": m.name if m else None,
+            "matchedBy": matched_by, "verdict": verdict.model_dump() if verdict else None,
+            "advice": materials.ADVICE[level]}
+
+
+@app.post("/api/compare-habitats")
+def compare_habitats(req: CompareHabitatsRequest):
+    a, b = run_analysis(req.a, req.weights), run_analysis(req.b, req.weights)
+    lvl_a = {m["id"]: m for m in a["materials"]}
+    changed = [{"id": m["id"], "name": m["name"], "from": lvl_a[m["id"]]["level"], "to": m["level"]}
+               for m in b["materials"] if m["id"] in lvl_a and lvl_a[m["id"]]["level"] != m["level"]]
+    gaps_a = {g["title"] for g in a["coverage"]["gaps"]}
+    rank_a = {r["id"]: i for i, r in enumerate(a["ranked"])}
+    moved = [{"id": r["id"], "from": rank_a[r["id"]] + 1, "to": i + 1}
+             for i, r in enumerate(b["ranked"]) if r["id"] in rank_a and abs(rank_a[r["id"]] - i) >= 3]
+    diff = {"materials": changed,
+            "gapsOnlyInB": [g for g in b["coverage"]["gaps"] if g["title"] not in gaps_a],
+            "grade": {"from": a["coverage"]["grade"]["letter"], "to": b["coverage"]["grade"]["letter"]},
+            "rankMoves": moved}
+    return {"a": a, "b": b, "diff": diff}
 
 
 @app.get("/api/condition-space")

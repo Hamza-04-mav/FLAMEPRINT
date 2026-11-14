@@ -102,7 +102,7 @@ function Target({ scenario, uEff, inVoid, name }: { scenario: Scenario; uEff: nu
         <Html center distanceFactor={12} position={[0, 0.72, 0]} style={{ pointerEvents: "none" }}>
           <div className={`whitespace-nowrap rounded-lg border px-2.5 py-1.5 text-[11px] backdrop-blur ${inVoid ? "border-[#FF8B32]/70 bg-[#1a0d06]/85" : "border-[#34D399]/50 bg-[#05170f]/85"}`}>
             <div className="font-semibold text-slate-50">Your scenario · {name}</div>
-            <div className={inVoid ? "text-orange-200" : "text-emerald-200"}>{inVoid ? "No PSI envelope covers this point" : "Inside a tested envelope"}</div>
+            <div className={inVoid ? "text-orange-200" : "text-emerald-200"}>{inVoid ? "No PSI tested range covers this point" : "Inside a tested range"}</div>
           </div>
         </Html>
       </group>

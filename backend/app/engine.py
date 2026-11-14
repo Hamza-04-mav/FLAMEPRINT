@@ -10,7 +10,7 @@ from collections import Counter
 from typing import Optional
 
 from .models import (
-    ConditionEnvelope, Dataset, FactorScore, Gap, Investigation, RankedInvestigation,
+    ConditionEnvelope, Dataset, FactorScore, Gap, Grade, Investigation, Material, RankedInvestigation,
     Scenario, TestRecord, Weights,
 )
 from .physics import effective_flow_cms
@@ -152,7 +152,8 @@ def rank(ds: Dataset, sc: Scenario, w: Weights) -> list[RankedInvestigation]:
                   if (t.o2Pct is None or abs(t.o2Pct - sc.o2Pct) <= 5)
                   and (t.pressureKpa is None or abs(t.pressureKpa - sc.pressureKpa) <= 20)]
         out.append(RankedInvestigation(id=inv.id, name=inv.name, score=round(score, 2), factors=factors,
-                                       nearbyTests=len(nearby), totalTests=len(own), envelope=env))
+                                       nearbyTests=len(nearby), totalTests=len(own), envelope=env,
+                                       grade=grade(ds, sc, investigation=inv)))
     out.sort(key=lambda r: -r.score)
     return out
 
@@ -189,16 +190,16 @@ def coverage(ds: Dataset, sc: Scenario) -> dict:
                         detail="PSI holds microgravity data only, so the scenario has to be bracketed between μg and 1 g results. ACME E-FIELD Flames is the only partial-gravity proxy (an electric body force). LUCI and FM2 are expected to fill this gap."))
     if "solid" in sc.phases and sc.o2Pct > solid_o2 + 1:
         gaps.append(Gap(severity="critical", title=f"Solid materials untested above {solid_o2:g}% O₂ in microgravity",
-                        detail=f"The scenario is {sc.o2Pct:g}% O₂, {sc.o2Pct - solid_o2:.0f} points above the highest-O₂ solid-fuel microgravity envelope in the loaded data. Material acceptance has to rely on normal-gravity tests or new experiments."))
+                        detail=f"The scenario is {sc.o2Pct:g}% O₂, {sc.o2Pct - solid_o2:.0f} points above the highest O₂ at which solid fuels were tested in microgravity in the loaded data. Material acceptance has to rely on normal-gravity tests or new experiments."))
     if sc.o2Pct > max_o2 + 1:
-        gaps.append(Gap(severity="critical", title=f"{sc.o2Pct:g}% O₂ exceeds every microgravity envelope",
+        gaps.append(Gap(severity="critical", title=f"{sc.o2Pct:g}% O₂ is above every microgravity test",
                         detail=f"The highest O₂ in the loaded data is {max_o2:g}% ({max_o2_by})."))
     elif not o2_hits:
         gaps.append(Gap(severity="high", title="No investigation brackets this O₂ level",
                         detail="Values have to be interpolated between investigations."))
     if min_p is not None and sc.pressureKpa < min_p - 5:
-        gaps.append(Gap(severity="high", title=f"{sc.pressureKpa:g} kPa is below every characterized pressure envelope",
-                        detail=f"The lowest characterized pressure is about {min_p:g} kPa. Reduced pressure changes flame heat losses and oxygen supply. Several investigations have uncharacterized pressure; import their test matrices to check."))
+        gaps.append(Gap(severity="high", title=f"{sc.pressureKpa / 6.89476:.1f} psi ({sc.pressureKpa:g} kPa) is below every tested pressure range",
+                        detail=f"The lowest tested pressure is about {min_p / 6.89476:.1f} psi ({min_p:g} kPa). Reduced pressure changes flame heat losses and oxygen supply. Several investigations have uncharacterized pressure; import their test matrices to check."))
     if not phase_joint:
         gaps.append(Gap(severity="high", title="No joint O₂ + pressure match for your fuel types",
                         detail="No single investigation tested your fuel type at this O₂ and pressure together, so conclusions combine evidence from separate investigations."))
@@ -321,3 +322,221 @@ def stats(ds: Dataset) -> dict:
         "testsByOutcome": dict(by_outcome),
         "withDataEnvelope": sum(1 for i in ds.investigations if by_inv.get(i.id)),
     }
+
+
+# ------------------------------------------------------------------ evidence grades (A/B/C/M)
+# Tolerances for an imported test to count as "at" the scenario (grade A).
+GRADE_TOL = {"o2": 3.0, "pressure": 15.0, "flow": 5.0}
+# Tolerances for an envelope to count as covering an axis (same as coverage()).
+COVER_TOL = {"o2": 1.0, "pressure": 5.0}
+PARTIAL_G_REASON = "No partial-gravity data in PSI; bracketed by microgravity and 1 g"
+_ORDER = {"A": 0, "B": 1, "C": 2, "M": 3}
+
+
+def _cap(letter: str, sc: Scenario) -> tuple[str, bool]:
+    """Partial gravity caps every grade at C (PSI has no partial-g measurements); the reason then says so."""
+    if 0 < sc.gravityG < 1 and letter != "M":
+        return ("C" if _ORDER[letter] < _ORDER["C"] else letter), True
+    return letter, False
+
+
+def material_matches(m: Material, fuel: Optional[str]) -> bool:
+    if not fuel:
+        return False
+    f = fuel.lower()
+    keys = [m.id, m.name.split(" (")[0], *m.aliases]
+    return any(k and k.lower() in f for k in keys)
+
+
+def _near_tests(ds: Dataset, sc: Scenario, inv_ids: Optional[set[str]] = None,
+                material: Optional[Material] = None) -> tuple[list[TestRecord], list[TestRecord]]:
+    """(tests near on every axis, tests near on O2 + pressure but missing/mismatching flow)."""
+    u_eff = effective_flow_cms(sc.flowCmS, sc.gravityG)
+    full, partial = [], []
+    for t in ds.tests:
+        if inv_ids is not None and t.investigationId not in inv_ids:
+            continue
+        if material is not None and not material_matches(material, t.fuel):
+            continue
+        if t.o2Pct is None or abs(t.o2Pct - sc.o2Pct) > GRADE_TOL["o2"]:
+            continue
+        if t.pressureKpa is None or abs(t.pressureKpa - sc.pressureKpa) > GRADE_TOL["pressure"]:
+            continue
+        if t.flowCmS is not None and abs(t.flowCmS - u_eff) <= GRADE_TOL["flow"]:
+            full.append(t)
+        else:
+            partial.append(t)
+    return full, partial
+
+
+def grade(ds: Dataset, sc: Scenario, *, investigation: Optional[Investigation] = None,
+          material: Optional[Material] = None) -> Grade:
+    """How sure are we? One letter, one reason, and the investigation ids it rests on.
+
+    A  imported PSI test records at this O2 (±3), pressure (±15 kPa) and felt airflow (±5 cm/s)
+    B  one tested range jointly covers O2 and pressure for the fuel type (or A-level tests missing one axis)
+    C  only bracketed between separate investigations
+    M  nothing covers the scenario; the value is modeled
+    Partial gravity caps the result at C.
+    """
+    if material is not None:
+        return _grade_material(ds, sc, material)
+
+    phase_ok = lambda inv: any(p in sc.phases for p in inv.fuelPhase)
+    if investigation is not None:
+        pool = [investigation] if investigation.status != "pending" else []
+    else:
+        pool = [i for i in ds.investigations if i.status != "pending" and phase_ok(i)]
+    ids = {i.id for i in pool}
+    full, partial = _near_tests(ds, sc, ids)
+    envs = [(i, envelope_for(i, ds.tests)) for i in pool]
+    o2_cov = [i.id for i, e in envs if _within(sc.o2Pct, e.o2Pct, COVER_TOL["o2"])]
+    p_cov = [i.id for i, e in envs if _within(sc.pressureKpa, e.pressureKpa, COVER_TOL["pressure"])]
+    joint = [i for i in o2_cov if i in p_cov]
+    if investigation is not None and not phase_ok(investigation):
+        joint = []  # covers the atmosphere but not your fuel type
+
+    if full:
+        letter, basis = "A", sorted({t.investigationId for t in full})
+        reason = f"{len(full)} imported PSI test record(s) at this O₂, pressure and airflow"
+    elif joint or partial:
+        letter = "B"
+        basis = joint or sorted({t.investigationId for t in partial})
+        reason = (f"{basis[0]} tested this O₂ and pressure together" if joint
+                  else "Imported PSI tests match O₂ and pressure but not airflow")
+    elif o2_cov or p_cov:
+        letter, basis = "C", (o2_cov + [x for x in p_cov if x not in o2_cov])
+        reason = ("Only bracketed: O₂ and pressure were tested in separate investigations" if investigation is None
+                  else f"Tested range covers {'O₂' if o2_cov else 'pressure'} only")
+    else:
+        letter, basis = "M", []
+        reason = ("No tested range covers this O₂ or pressure; values are modeled" if investigation is None
+                  else "Tested range does not reach this O₂ or pressure")
+    letter, capped = _cap(letter, sc)
+    if capped:
+        reason = PARTIAL_G_REASON
+    return Grade(letter=letter, reason=reason, basis=basis)
+
+
+def _grade_material(ds: Dataset, sc: Scenario, m: Material) -> Grade:
+    if m.oxygenThreshold.o2Pct is None:
+        return Grade(letter="M", reason="No sourced oxygen threshold yet; risk is not rated", basis=m.testedIn)
+    full, _ = _near_tests(ds, sc, material=m)
+    if full:
+        letter, basis = "A", sorted({t.investigationId for t in full})
+        reason = f"{len(full)} imported PSI test(s) of this material near these conditions"
+    elif m.testedIn:
+        letter, basis = "B", list(m.testedIn)
+        reason = f"Burned in {', '.join(m.testedIn[:2])}; threshold shifted by a schematic model"
+    else:
+        letter, basis = "C", []
+        reason = "Not in any PSI investigation; 1 g threshold shifted by a schematic model"
+    letter, capped = _cap(letter, sc)
+    if capped:
+        reason = PARTIAL_G_REASON
+    return Grade(letter=letter, reason=reason, basis=basis)
+
+
+# ------------------------------------------------------------------ next experiments
+SEVERITY_WEIGHT = {"critical": 3, "high": 2, "medium": 1, "info": 0}
+PHASE_NAME = {"solid": "Solid materials", "liquid": "Liquid fuels", "gas": "Gaseous fuels"}
+
+
+def gravity_regime(g: float) -> Optional[str]:
+    if g <= 0:
+        return "microgravity"
+    if g >= 1:
+        return None  # Earth: buoyant flames are well studied, not a missing condition
+    if abs(g - 0.165) < 0.03:
+        return "lunar gravity"
+    if abs(g - 0.38) < 0.04:
+        return "Martian gravity"
+    return f"{g:g} g"
+
+
+def _missing(ds: Dataset, sc: Scenario, phase: str) -> Optional[str]:
+    """Severity of the missing test condition for one fuel phase in one scenario, or None if covered."""
+    if gravity_regime(sc.gravityG) is None:
+        return None
+    if 0 < sc.gravityG < 1:
+        return "critical"
+    active = [(i, envelope_for(i, ds.tests)) for i in ds.investigations if i.status != "pending" and phase in i.fuelPhase]
+    max_o2 = max((e.o2Pct[1] for _, e in active if e.o2Pct), default=0.0)
+    if sc.o2Pct > max_o2 + COVER_TOL["o2"]:
+        return "critical"
+    joint = [i for i, e in active if _within(sc.o2Pct, e.o2Pct, COVER_TOL["o2"])
+             and _within(sc.pressureKpa, e.pressureKpa, COVER_TOL["pressure"])]
+    return None if joint else "high"
+
+
+_REGIME_WORDS = {"lunar gravity": ("lunar", "moon"), "Martian gravity": ("mars", "martian")}
+
+
+def _plans_regime(inv: Investigation, regime: Optional[str]) -> bool:
+    """A planned investigation only fills a gap at the gravity it will actually fly at (LUCI/FM2 are lunar)."""
+    words = _REGIME_WORDS.get(regime or "")
+    if words is None:
+        return regime == "microgravity"
+    text = f"{inv.name} {inv.platform} {inv.objective}".lower()
+    return any(w in text for w in words)
+
+
+def next_experiments(ds: Dataset, habitats: list[dict], extra: Optional[Scenario] = None, limit: int = 5) -> list[dict]:
+    """Missing test conditions, grouped by fuel phase and gravity regime across mission presets.
+    score = severity weight × number of habitats affected. 'plannedBy' lists pending investigations
+    whose tags and fuel phase match. Never claims NASA has decided anything."""
+    groups: dict[tuple[str, str], dict] = {}
+    scen_list: list[tuple[str, Scenario]] = []
+    for h in habitats:
+        scen_list.append((h["id"], Scenario(habitatId=h["id"], o2Pct=h["o2Pct"], pressureKpa=h["pressureKpa"],
+                                            flowCmS=h["flowCmS"], gravityG=h["gravityG"], phases=h["phases"])))
+    if extra is not None and extra.habitatId not in {h["id"] for h in habitats}:
+        scen_list.append(("custom", extra))
+    for hid, sc in scen_list:
+        regime = gravity_regime(sc.gravityG)
+        for phase in sc.phases:
+            sev = _missing(ds, sc, phase)
+            if not sev:
+                continue
+            key = (phase, regime or "")
+            gp = groups.setdefault(key, {"phase": phase, "gravity": regime, "habitats": [], "severity": sev,
+                                         "o2": [], "flow": [], "pressure": []})
+            if SEVERITY_WEIGHT[sev] > SEVERITY_WEIGHT[gp["severity"]]:
+                gp["severity"] = sev
+            if hid not in gp["habitats"]:
+                gp["habitats"].append(hid)
+            gp["o2"].append(sc.o2Pct)
+            gp["flow"].append(sc.flowCmS)
+            gp["pressure"].append(sc.pressureKpa)
+
+    pending = [i for i in ds.investigations if i.status == "pending"]
+    out = []
+    for gp in groups.values():
+        lo, hi = min(gp["o2"]), max(gp["o2"])
+        flo, fhi = min(gp["flow"]), max(gp["flow"])
+        o2s = f"{lo:g}% O₂" if lo == hi else f"{lo:g}–{hi:g}% O₂"
+        fls = f"about {flo:g} cm/s" if flo == fhi else f"about {flo:g}–{fhi:g} cm/s"
+        partial = gp["gravity"] not in ("microgravity", None)
+        planned = [i.id for i in pending if gp["phase"] in i.fuelPhase
+                   and (("partial-gravity" in i.tags) == partial)
+                   and _plans_regime(i, gp["gravity"])]
+        sev_w = SEVERITY_WEIGHT[gp["severity"]]
+        out.append({
+            "id": f"{gp['phase']}:{gp['gravity']}",
+            "title": f"{PHASE_NAME[gp['phase']]} at {o2s}, {fls}, {gp['gravity']}",
+            "phase": gp["phase"], "gravity": gp["gravity"],
+            "habitatsAffected": gp["habitats"], "severity": gp["severity"],
+            "score": sev_w * len(gp["habitats"]),
+            "plannedBy": planned,
+            "why": ("No PSI investigation burned this fuel type at partial gravity" if partial
+                    else "No PSI investigation tested this fuel type at this O₂ and pressure together"),
+        })
+    phase_order = {"solid": 0, "liquid": 1, "gas": 2}
+    out.sort(key=lambda x: (-x["score"], phase_order[x["phase"]], x["id"]))
+    return out[:limit] if limit else out
+
+
+def experiments_for(items: list[dict], sc: Scenario) -> list[dict]:
+    regime = gravity_regime(sc.gravityG)
+    return [x for x in items if x["gravity"] == regime and x["phase"] in sc.phases
+            and (sc.habitatId in x["habitatsAffected"] or "custom" in x["habitatsAffected"])]

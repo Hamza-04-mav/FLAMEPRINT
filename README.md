@@ -3,9 +3,9 @@
 **Fire-safety insights from NASA microgravity combustion data, starting from the mission instead of the database.**
 NASA Space Apps Challenge 2026 · *Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data*
 
-> Choose where your crew will live: a Moon base, a pressurized rover, Mars or the ISS. FLAMEPRINT ranks every PSI combustion
-> investigation for that atmosphere, shows exactly why each one ranks where it does, maps where the evidence stops, and writes a
-> Prevention / Detection / Suppression brief in which every claim is cited.
+> **Is my habitat safe from fire, and how sure are we?** Pick where your crew will live (ISS, Moon base, spacesuit, rover,
+> Mars) and FLAMEPRINT answers on the first screen: which materials are high risk there, with an evidence grade from A to M
+> that says how much NASA PSI data stands behind that answer. Then it shows what NASA should test next.
 
 ---
 
@@ -17,6 +17,20 @@ habitat. Meanwhile the Moon base will run at **≥30 % O₂ and ≤10.2 psi**, m
 gravity level where **PSI has no data at all**.
 
 ## What FLAMEPRINT does
+
+### v2 at a glance
+
+| Feature | What judges see |
+|---|---|
+| **Habitat passport** (home) | One sentence, e.g. *"6 of 8 materials are high risk at the Moon base."*, plus **Confidence C: no partial-gravity data in PSI**. Material cards with a small flame that turns from a blue sphere (0 g) into a teardrop (1 g). |
+| **Evidence grades A / B / C / M** | A = imported PSI tests at these conditions · B = one investigation tested this atmosphere · C = only bracketed · M = modeled. Partial gravity caps everything at C. Click a grade to open the investigation behind it. |
+| **Mission timeline** | Press play: ISS → Moon base → Spacesuit → Rover → Mars. Materials whose risk rises flash red. |
+| **Can I bring this aboard?** | Type "foam pillow" and get the closest tested material, its risk here and storage advice. Works offline; Claude may only pick a material id from a fixed list. |
+| **What NASA should test next** | Missing test conditions ranked by severity × habitats affected, with the planned investigations (LUCI, FM2) that would fill them. |
+| **Compare habitats** | ISS vs Moon base: what got riskier, the new gaps, the grade change. |
+| **Fire Passport** | A one-page printable PDF for any habitat. |
+
+### Every challenge objective
 
 | Challenge objective | FLAMEPRINT feature |
 |---|---|
@@ -147,7 +161,10 @@ The **Preview** step shows the column mapping, unit conversions and warnings bef
 |---|---|---|
 | GET | `/api/health` | DB / LLM / data status |
 | GET | `/api/dataset` · `/api/habitats` | catalog, relations, spin-offs · mission presets |
-| POST | `/api/analyze` | `{scenario, weights}` → ranking + coverage + gaps + physics readout |
+| POST | `/api/analyze` | `{scenario, weights}` → ranking (each with a grade) + coverage (with `grade`) + gaps + `materials` + `nextExperiments` + `briefPreview` + physics readout. One call powers the Answer screen. |
+| POST | `/api/stowage` | `{item, scenario}` → closest material, `matchedBy` (`keyword` · `claude` · `none`), verdict, advice |
+| POST | `/api/compare-habitats` | `{a, b}` → both analyses + `diff` (materials, new gaps, grade change, rank moves) |
+| GET | `/api/next-experiments` | missing test conditions across all presets |
 | POST | `/api/brief` | SSE: `meta` → `delta`… → `citations` → `done` |
 | POST | `/api/ask` | SSE answer with retrieved passages |
 | GET | `/api/condition-space` · `/api/genome` · `/api/compare?a=&b=` | maps & comparisons |
@@ -161,8 +178,8 @@ The **Preview** step shows the column mapping, unit conversions and warnings bef
 ## Tests
 
 ```bash
-cd backend  && .venv\Scripts\python -m pytest -q     # 28 tests: engine, ingestion, API, SSE, citations
-cd frontend && npm test                               # vitest: SSE parser, formatting
+cd backend  && pip install -r requirements-dev.txt && python -m pytest -q   # 51 tests: engine, grades, materials, stowage, next experiments, API
+cd frontend && npm test                               # vitest: SSE parser, formatting, verdict sentence
 cd frontend && npm run typecheck && npm run lint && npm run build
 ```
 
@@ -170,36 +187,47 @@ cd frontend && npm run typecheck && npm run lint && npm run build
 
 ## 3-minute demo script
 
-1. **Hook (0:00).** Mission Control opens on the 3D lunar base under an Earth-rise. Drag the **gravity** slider in the flame card: the mission flame morphs between the 1 g teardrop and the 0 g blue sphere. *"Fire behaves differently up there."*
-2. **Pain (0:25).** Pick **Moon Base** in the mission bar. Coverage reads ~27 %, critical uncertainty *High*, and the gap cards say *no partial-g data* and *solids untested above 21 % O₂*.
-3. **Where the knowledge stops (0:50).** **Explore Mission** opens the **Coverage Map**. The beacon sits inside a hatched data-gap volume: "No PSI envelope covers this point". Click a region to inspect it.
-4. **Explainability (1:15).** In **Investigation Rankings**, drag the *Safety focus* weight. The leaderboard re-orders, and you can expand any row to audit how its score is built.
-5. **SI brief (1:45).** **Generate brief.** It streams into a numbered engineering document with evidence-strength meters, the audit shows every citation verified, and gaps say *Insufficient evidence*.
-6. **Data-ready (2:20).** In the **Data Lab**, drop a PSI CSV. The column mapping and unit conversions appear, you import it, and the envelopes turn into `PSI data`.
-7. **Close (2:45).** *"FLAMEPRINT tells engineers what we know, and what we don't, before the alarm goes off."*
+1. **Question (0:00).** *"If you were packing for the Moon base, would your pillow burn?"* The site opens on the **Habitat passport**.
+2. **Answer (0:15).** Read the verdict aloud: *"6 of 8 materials are high risk at the Moon base. Confidence C: no partial-gravity data in PSI."*
+   Point at the grade: the app says how sure it is, not just what it thinks.
+3. **Journey (0:40).** Press **play** on the mission timeline: ISS → Moon base → Spacesuit. The flame stretches, levels change, risen
+   materials flash red. *"Same pillow, very different risk."*
+4. **Your own item (1:10).** In **Can I bring this aboard?**, click *foam pillow*: closest tested material, risk here, storage advice. Offline.
+5. **What NASA should test next (1:35).** Partial-gravity solid materials come out at #1, affecting three habitats, with LUCI and FM2
+   as the planned investigations. Open **Where data exists** to show the gap on the O₂ × airflow map.
+6. **Trust (2:05).** Click a grade → the investigation dossier opens. **Investigation rankings**: every row says why in one sentence.
+   **Fire safety brief**: every citation verified.
+7. **Take-away (2:30).** **Fire Passport** → a one-page PDF. *"FLAMEPRINT tells engineers what we know, how sure we are, and what to
+   test next, before the alarm goes off."*
 
-**Judge Q&A, "what's real and what's mocked?"** Every number comes from deterministic code or imported PSI files. The catalog envelopes are labelled approximate. The shader is labelled illustrative. Nothing is mocked behind the scenes.
+**Judge Q&A, "what's real and what's mocked?"** Every number comes from deterministic code or imported PSI files. Catalog tested ranges are
+labelled approximate, material verdicts are labelled *illustrative model*, unsourced values are grade **M**, and the flame is
+labelled illustrative. Material thresholds are only shown when they have a cited source (see `docs/OPEN_QUESTIONS.md`).
 
 ---
 
 ## Project structure
 
 ```
-backend/app/        main.py · engine.py · physics.py · ingest.py · store.py · brief.py · llm.py · embed.py · models.py · schema.sql
-backend/tests/      test_engine.py · test_ingest.py · test_api.py
+backend/app/        main.py · engine.py (ranking, grades, next experiments) · materials.py · physics.py · ingest.py · store.py · brief.py · llm.py · embed.py · models.py
+backend/tests/      test_engine · test_grades · test_materials · test_stowage · test_next_experiments · test_ingest · test_api
 frontend/src/app/   layout.tsx · page.tsx · globals.css
 frontend/src/components/  Sidebar · Header (mission status bar) · MissionConfig (scenario sheet) · CosmicBackdrop · Boot · ui
-                          Overview (Mission Control) · MissionScene3D · FlameMorph · CoveragePreview
-                          SpaceView + ConditionSpace3D (Coverage Map) · FlammabilityMap · Ranking · BriefPanel · CitedMarkdown
+                          AnswerScreen (home) · MissionTimeline · GradeBadge · FlameCanvas (2D) · StowageInspector · CompareHabitats
+                          MissionScene3D · FlameMorph · (Overview + CoveragePreview: v1 home, kept until v2 is accepted)
+                          SpaceView + ConditionSpace3D (Where data exists) · FlammabilityMap · Ranking · BriefPanel · CitedMarkdown
                           Genome · EarthPanel · AskPanel · DataLab · InvestigationDrawer · ScenarioBuilder
-frontend/src/lib/   api.ts (REST + SSE) · mission.tsx (state) · space.ts (condition-space math) · environment.ts · webgl.ts · types.ts · format.ts
-data/seed/          curated investigation catalog (no test data)
+frontend/src/app/passport/  printable Fire Passport (?mission=lunar-base)
+frontend/src/lib/   answer.ts (verdict sentence, grades, levels) · api.ts (REST + SSE) · mission.tsx (state) · space.ts (condition-space math) · environment.ts · webgl.ts · types.ts · format.ts
+data/seed/          curated investigation catalog (no test data) · materials.json (thresholds: cited or null)
+docs/               OPEN_QUESTIONS.md (every modeled or unverified value)
+render.yaml · DEPLOY.md   Render (API) + Vercel (web) deployment
 data/psi/           ← drop official PSI files here
 data/templates/     CSV + JSON import templates
 docker-compose.yml  PostgreSQL 16 + pgvector
 ```
 
-Deep links for demos: `?noboot` skips the intro · `#space`, `#ranking`, `#brief`, `#genome`, `#earth`, `#ask`, `#data` open a page ·
+Deep links for demos: `?noboot` skips the intro (it only plays on the first visit anyway) · `#answer`, `#stowage`, `#ranking`, `#space`, `#genome`, `#habitats`, `#brief`, `#earth`, `#ask`, `#data` open a page (old `#overview` still works) ·
 `?mission=mars` (or `iss`, `lunar-base`, `rover`, `suit`, `earth`) preselects a mission · `?generate#brief` issues the brief on arrival.
 
 ## Design system

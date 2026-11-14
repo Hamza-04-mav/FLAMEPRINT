@@ -101,9 +101,56 @@ class DataSource(CamelModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+class OxygenThreshold(CamelModel):
+    o2Pct: Optional[float] = None
+    basis: str = ""
+    source: Optional[str] = None
+    url: Optional[str] = None
+
+
+class Material(CamelModel):
+    id: str
+    name: str
+    usedFor: str = ""
+    phase: FuelPhase = "solid"
+    aliases: list[str] = Field(default_factory=list)
+    testedIn: list[str] = Field(default_factory=list)
+    testedInBasis: Optional[str] = None
+    oxygenThreshold: OxygenThreshold = Field(default_factory=OxygenThreshold)
+    notes: str = ""
+
+
+GradeLetter = Literal["A", "B", "C", "M"]
+
+
+class Grade(CamelModel):
+    letter: GradeLetter
+    reason: str
+    basis: list[str] = Field(default_factory=list)
+
+
+RiskLevel = Literal["high", "elevated", "low", "unknown"]
+
+
+class MaterialVerdict(CamelModel):
+    id: str
+    name: str
+    usedFor: str = ""
+    level: RiskLevel
+    margin: Optional[float] = None
+    threshold1g: Optional[float] = None
+    effectiveThreshold: Optional[float] = None
+    grade: Grade
+    label: str = "illustrative model"
+    why: str
+    source: Optional[str] = None
+    url: Optional[str] = None
+
+
 class Dataset(CamelModel):
     investigations: list[Investigation]
     tests: list[TestRecord]
+    materials: list[Material] = Field(default_factory=list)
     relations: list[Relation] = Field(default_factory=list)
     spinoffs: list[Spinoff] = Field(default_factory=list)
     sources: list[DataSource] = Field(default_factory=list)
@@ -144,6 +191,7 @@ class RankedInvestigation(CamelModel):
     id: str
     name: str
     score: float
+    grade: Optional["Grade"] = None
     factors: list[FactorScore]
     nearbyTests: int
     totalTests: int
@@ -164,3 +212,14 @@ class RankRequest(CamelModel):
 class AskRequest(CamelModel):
     question: str = Field(min_length=2, max_length=2000)
     scenario: Optional[Scenario] = None
+
+
+class StowageRequest(CamelModel):
+    item: str = Field(min_length=1, max_length=200)
+    scenario: Scenario = Field(default_factory=Scenario)
+
+
+class CompareHabitatsRequest(CamelModel):
+    a: Scenario
+    b: Scenario
+    weights: Weights = Field(default_factory=Weights)
