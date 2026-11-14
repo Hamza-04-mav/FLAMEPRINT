@@ -40,7 +40,7 @@ export function InvestigationDrawer() {
           <motion.div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => openInvestigation(null)} />
           <motion.aside role="dialog" aria-label={`${focusId} dossier`}
-            className="fixed inset-y-0 right-0 z-50 w-full max-w-xl overflow-y-auto border-l border-slate-700/60 bg-space-900/95 p-5 shadow-2xl scrollbar-thin sm:p-6"
+            className="panel-float fixed inset-y-0 right-0 z-50 w-full max-w-xl overflow-y-auto !rounded-none border-l p-5 scrollbar-thin sm:p-6"
             initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 300, damping: 34 }}>
             <div className="flex items-start gap-3">
               <div className="min-w-0 flex-1">

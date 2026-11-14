@@ -122,7 +122,7 @@ export function StowageSearch() {
       <AnimatePresence>
         {(s.res || s.err) && (
           <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
-            role="status" className="absolute inset-x-0 top-full z-20 mt-2 rounded-[14px] border border-[var(--line-strong)] bg-space-900/95 p-3.5 shadow-2xl backdrop-blur-xl">
+            role="status" className="panel-float absolute inset-x-0 top-full z-20 mt-2 p-3.5">
             <button onClick={close} aria-label="Close" className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-mute hover:text-ink"><X className="h-3.5 w-3.5" /></button>
             {s.err ? <p className="text-[13px] text-rose-300">{s.err}</p> : s.res && (
               <div className="pr-6">

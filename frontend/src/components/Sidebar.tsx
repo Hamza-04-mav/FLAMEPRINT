@@ -141,7 +141,7 @@ function Panel({ rail, onNavigate }: { rail: boolean; onNavigate?: () => void })
 /** Desktop sidebar: icon rail on lg, full on xl. Mobile uses <MobileNav>. */
 export function Sidebar() {
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden border-r border-[var(--line)] bg-[linear-gradient(180deg,rgba(7,18,37,0.92),rgba(3,8,20,0.94))] backdrop-blur-xl lg:block lg:w-[76px] xl:w-[252px]">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden border-r border-[rgba(239,234,227,0.08)] bg-[rgba(21,32,51,0.55)] [backdrop-filter:blur(24px)_saturate(140%)] lg:block lg:w-[76px] xl:w-[252px]">
       <div className="hidden h-full overflow-y-auto no-scrollbar xl:block"><Panel rail={false} /></div>
       <div className="h-full overflow-y-auto no-scrollbar xl:hidden"><Panel rail /></div>
     </aside>
@@ -155,7 +155,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
         <>
           <motion.div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden" onClick={onClose}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
-          <motion.aside className="fixed inset-y-0 left-0 z-50 w-[272px] max-w-[85vw] overflow-y-auto border-r border-[var(--line)] bg-space-950 lg:hidden"
+          <motion.aside className="panel-float fixed inset-y-0 left-0 z-50 w-[272px] max-w-[85vw] overflow-y-auto !rounded-none border-r lg:hidden"
             initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}>
             <button onClick={onClose} aria-label="Close navigation"
               className="absolute right-3 top-5 z-10 grid h-8 w-8 place-items-center rounded-lg text-mute hover:text-ink">

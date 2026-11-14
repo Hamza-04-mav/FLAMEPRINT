@@ -3,11 +3,12 @@
 > **Read this first.** It is the single source of truth for the project's goal, current state and next steps.
 > Claude (or a person) **must update it at the end of every working session**. See [How to update this file](#how-to-update-this-file).
 >
-> Last updated: **2026-11-14** · `main` includes PR #1, PR #2, the real-data/Groq pass, and the start of the **UI/UX "Ink sun" upgrade**
-> (Phase 0 audit + Phase 1 token foundation — committed directly to `main` per owner request) · Repo: `github.com/Hamza-04-mav/FLAMEPRINT` (private)
+> Last updated: **2026-11-14** · `origin/main` has PR #1, PR #2, the real-data/Groq pass, and UI Phases 0+1 (pushed earlier). UI
+> **Phases 2–3 are committed locally only — the owner pushes.** Repo: `github.com/Hamza-04-mav/FLAMEPRINT` (private)
 >
-> **UI/UX upgrade in progress** (presentation-layer only — no scoring math/data/logic changed). Spec: 3-colour "Ink sun" palette
-> (Ink navy / Dust taupe / Solar yellow), visual-language-over-text, 5-second read, 375→1920px. Plan & defects: `docs/ui-audit.md`.
+> **UI/UX "Ink sun" upgrade in progress** (presentation-layer only — no scoring math/data/logic changed). Spec: 3-colour palette
+> (Ink navy / Dust taupe / Solar yellow), SF typography, iOS glass, visual-language-over-text, 5-second read, 375→1920px.
+> Commit per phase locally; full `next build` only at the final phase. Plan, defects & phase status: `docs/ui-audit.md` + §7.0.
 > Data layers unchanged: **24 investigations**, all 8 material LOI thresholds sourced, 9-file NASA corpus in `data/psi/docs/`,
 > **862 real PSI test records** in `data/psi/psi-downloads/` (envelopes `confidence=data`), LLM on **Groq** (`openai/gpt-oss-120b`).
 
@@ -178,16 +179,18 @@ Font: SF system on Apple, Inter fallback. The intro (`Boot.tsx`) shows on the fi
 
 ## 7. What's left (priority order)
 
-0. **UI/UX "Ink sun" upgrade (in progress).** Presentation-layer only; commit per phase to `main`; see `docs/ui-audit.md` for the full
-   plan and the 9 confirmed defects. Done: **Phase 0** (audit) · **Phase 1** (token foundation: `lib/theme.ts` + rewritten
-   `globals.css`, shared TS colour maps repointed, buttons/focus/glow, legacy tokens remapped; also fixed defect #5 gravity formatting
-   and #6 pluralization) · **Phase 2** (typography: Apple SF system stack + Inter `ss01/cv11` fallback, dropped Space Grotesk, type
-   scale `.t-display/.t-title/.t-headline/.t-body/.t-callout/.t-caption`, glassy text alpha tokens `--text-1/2/3` with opaque
-   fallback, sentence-case eyebrows). Next: **Phase 3** shell & chrome (sidebar tablet rail + footer safe-area, `Header` status/planet colours to
-   tokens, retire stray loops) → **Phase 4** Answer home (lead with the visual answer; designed "not rated" state; grade scale + inline
-   legend) → **Phase 5** Evidence/Gaps charts (per-row coverage strips, 3D label collision, ≤4-item Gaps legend) → **Phase 6**
-   Brief/Compare/Tools/Passport + 3D scene colours (`MissionScene3D`, `ConditionSpace3D` still hold raw hex) → **Phase 7** a11y/perf
-   verify + before/after screenshots in `docs/screenshots/`. Risk is yellow+shape (no red/green); grades are a dust ramp.
+0. **UI/UX "Ink sun" upgrade (in progress).** Presentation-layer only. **Phases follow the owner's brief** (not the audit's old
+   numbering); `docs/ui-audit.md` holds the full audit + the 9 confirmed defects. **Workflow:** commit per phase **locally** — the owner
+   pushes; **run the full `next build` only once, at the final phase (Phase 8)** — per-phase checks are typecheck + lint + vitest only.
+   Done: **Phase 0** audit · **Phase 1** colour tokens (`lib/theme.ts` + rewritten `globals.css`, shared TS maps repointed, legacy
+   tokens remapped; fixed defect #5 gravity + #6 plural) · **Phase 2** typography (Apple SF stack + Inter `ss01/cv11`, dropped Space
+   Grotesk, type scale `.t-display`..`.t-caption`, glassy text `--text-1/2/3`, sentence-case eyebrows) · **Phase 3** glass material
+   (iOS-style: `.panel` base glass [navy-800 @55%, blur 24, 20px radius] + `.panel-float` [blur 32, deeper shadow] for sheets/popovers/
+   nav; `@supports`/`prefers-reduced-transparency` solid fallbacks; converted Header popovers, stowage dropdown, MissionConfig sheet,
+   InvestigationDrawer, sidebar + mobile nav). **Next:** awaiting further phases from the owner (Phase 4+). Still pending from the audit
+   (will fold into those phases): Answer lead-with-visual + designed "not rated" state; grade inline legend; Evidence coverage strips;
+   3D label collision; ≤4-item Gaps legend; **3D scene colours** (`MissionScene3D` ~60, `ConditionSpace3D` ~30 raw hex) + `Header`
+   status/planet glyph hex still off-token; sidebar footer safe-area; a11y/perf sweep; before/after screenshots in `docs/screenshots/`.
 
 1. **[Team] Review the 6 sourced material LOI thresholds** in `data/seed/materials.json` (cotton 18, pu-foam 18, pmma 17,
    nomex 28, ptfe 95, velcro 24 — each with `source`+`url`). Confirm the cited values, and decide a value (or keep `null`)
@@ -236,6 +239,7 @@ Font: SF system on Apple, Inter fallback. The intro (`Boot.tsx`) shows on the fi
 | 2026-11-14 | Claude Code (with Cerelva) | Added `CONTEXT.md` (this file) and `CLAUDE.md` (session instructions), linked from the README                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | 2026-11-14 | Claude Code (with Zaki)    | **UI/UX "Ink sun" upgrade — Phase 0 + 1.** Wrote `docs/ui-audit.md` (stack, token map, ~240 hard-coded colours across 26 files, a11y/perf risks, 9 confirmed defects, phase plan). Phase 1 token foundation: new `lib/theme.ts` (single source of truth) + rewritten `globals.css` to the **3-colour palette** (Ink navy / Dust taupe / Solar yellow; legacy tokens remapped so existing classes recolour); repointed `answer.ts`/`format.ts`/`ui.tsx` colour maps; sun CTA + yellow focus ring + `.sun-glow`; retired unused `.holo`. Also fixed defect #5 (shared `fmtGravity`) and #6 (`plural()`). Typecheck, lint, 8 vitest, `next build` all green; scoring untouched. Direct to `main` per owner request. |
 | 2026-11-14 | Claude Code (with Zaki)    | **UI/UX Phase 2 — typography.** Switched to the Apple SF system stack (real SF Pro on Apple; Inter `ss01`/`cv11` as the cross-platform fallback), dropped Space Grotesk, added the type scale (`.t-display`..`.t-caption`), glassy text vibrancy tokens (`--text-1/2/3`, opaque fallback when no `backdrop-filter`), display-headline vertical fill, and sentence-case eyebrows (retired letter-spaced ALL-CAPS except one `.axis-tag` caption). Applied to the Answer verdict + page headers. Typecheck, lint, 8 vitest, `next build` all green. Committed locally (owner pushes). |
+| 2026-11-14 | Claude Code (with Zaki)    | **UI/UX Phase 3 — iOS glass material.** `.panel` is now base glass (navy-800 @55%, blur 24, 20px radius, 1px specular top highlight) and new `.panel-float` is the floating level (blur 32, deeper shadow) for sheets/popovers/nav; `@supports`/`prefers-reduced-transparency` fall back to solid `--ink-800`; controls → 14px radius. Converted the Header popovers, stowage dropdown, MissionConfig sheet, InvestigationDrawer, desktop sidebar + mobile nav to glass. Typecheck, lint, 8 vitest pass (full `next build` deferred to the final phase per owner). Committed locally. |
 
 ---
 

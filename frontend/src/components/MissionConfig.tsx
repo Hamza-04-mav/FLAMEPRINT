@@ -23,7 +23,7 @@ export function MissionConfig() {
           <motion.div className="fixed inset-0 z-50 bg-[#020610]/55 backdrop-blur-[2px]" onClick={() => setConfigOpen(false)}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
           <motion.aside role="dialog" aria-label="Mission configuration"
-            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[420px] flex-col border-l border-[var(--line-strong)] bg-[linear-gradient(180deg,#0a1830,#050d1d)] shadow-2xl"
+            className="panel-float fixed inset-y-0 right-0 z-50 flex w-full max-w-[420px] flex-col !rounded-none border-l"
             initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 340, damping: 36 }}>
             <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
               <div>

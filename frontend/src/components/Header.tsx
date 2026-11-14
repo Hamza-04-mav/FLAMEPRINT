@@ -66,7 +66,7 @@ function MissionPicker() {
         {open && (
           <motion.div role="listbox" initial={{ opacity: 0, y: -6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.16 }}
-            className="absolute left-0 top-full z-50 mt-2 w-[330px] overflow-hidden rounded-[12px] border border-[var(--line-strong)] bg-space-900/95 p-1.5 shadow-2xl backdrop-blur-xl">
+            className="panel-float absolute left-0 top-full z-50 mt-2 w-[330px] overflow-hidden p-1.5">
             {habitats.map((h) => {
               const on = h.id === scenario.habitatId;
               return (
@@ -116,7 +116,7 @@ function StatusPopover() {
       <AnimatePresence>
         {open && (
           <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.16 }}
-            className="absolute right-0 top-full z-50 mt-2 w-[320px] rounded-[12px] border border-[var(--line-strong)] bg-space-900/95 p-4 shadow-2xl backdrop-blur-xl">
+            className="panel-float absolute right-0 top-full z-50 mt-2 w-[320px] p-4">
             <div className="label mb-2">System status</div>
             <div className="space-y-1.5">
               {rows.map(([k, v, c]) => (
