@@ -53,21 +53,21 @@ export function MissionTimeline() {
     setPlaying(true);
   };
 
-  if (!stops.length) return <div className="h-[68px] skeleton rounded-[14px]" />;
+  if (!stops.length) return <div className="skeleton h-[60px] rounded-[14px]" />;
   const pct = idx < 0 ? 0 : (idx / (stops.length - 1)) * 100;
 
   return (
-    <section aria-label="Mission timeline" className="panel flex items-center gap-3 !rounded-[14px] px-3 py-2 sm:gap-5 sm:px-4">
+    <section aria-label="Mission path" className="flex items-center gap-4 sm:gap-6">
       {!reduce && (
         <button ref={playBtn} onClick={toggle} aria-label={playing ? "Pause mission timeline" : "Play mission timeline"}
-          className={`grid h-9 w-9 shrink-0 place-items-center rounded-full border transition-colors ${playing ? "border-flame-2/70 bg-flame-2/15 text-flame-1" : "border-ox/50 bg-blue/15 text-ox hover:bg-blue/25"}`}>
+          className={`grid h-11 w-11 shrink-0 place-items-center rounded-full border transition-colors ${playing ? "border-flame-2/70 bg-flame-2/15 text-flame-1" : "border-ox/50 bg-blue/15 text-ox hover:bg-blue/25"}`}>
           {playing ? <Pause className="h-4 w-4" /> : <Play className="ml-0.5 h-4 w-4" />}
         </button>
       )}
       <div className="relative min-w-0 flex-1">
         {/* track */}
-        <div className="absolute left-[10%] right-[10%] top-[13px] h-[2px] rounded-full bg-slate-800">
-          <motion.div className="h-full rounded-full bg-gradient-to-r from-ox to-flame-2" animate={{ width: `${pct}%` }} transition={{ duration: 0.6 }} />
+        <div className="absolute left-[10%] right-[10%] top-[17px] h-[2px] rounded-full bg-slate-800">
+          <motion.div className="h-full rounded-full bg-gradient-to-r from-ox to-flame-2" animate={{ width: `${pct}%` }} transition={{ duration: 0.3 }} />
           {playing && (
             <motion.div key={idx} className="absolute top-0 h-full bg-flame-1/60" style={{ left: `${pct}%` }}
               initial={{ width: 0 }} animate={{ width: `${100 / (stops.length - 1)}%` }} transition={{ duration: STEP_MS / 1000, ease: "linear" }} />
@@ -81,10 +81,10 @@ export function MissionTimeline() {
                 <button onClick={() => { stop(); applyHabitat(h); }} aria-current={on ? "step" : undefined}
                   title={`${h.name}: ${h.o2Pct}% O₂ · ${toPsi(h.pressureKpa)} psi · ${h.gravityG} g${h.assumed ? " (assumed)" : ""}`}
                   className="group flex flex-col items-center gap-0.5">
-                  <span className={`grid h-7 w-7 place-items-center rounded-full border bg-space-950 transition-all ${on ? "scale-110 border-flame-2 shadow-[0_0_18px_-2px_rgba(255,139,50,0.8)]" : i < idx ? "border-ox/60" : "border-[var(--line-strong)] group-hover:border-ox/60"}`}>
-                    <PlanetGlyph env={environmentFor(h.id, h.gravityG)} size={22} />
+                  <span className={`grid h-9 w-9 place-items-center rounded-full border bg-space-950 transition-all ${on ? "scale-110 border-flame-2 shadow-[0_0_18px_-2px_rgba(255,139,50,0.8)]" : i < idx ? "border-ox/60" : "border-[var(--line-strong)] group-hover:border-ox/60"}`}>
+                    <PlanetGlyph env={environmentFor(h.id, h.gravityG)} size={26} />
                   </span>
-                  <span className={`max-w-full truncate text-[10.5px] font-medium sm:text-[12.5px] ${on ? "text-ink" : "text-mute group-hover:text-ink"}`}>{h.short}</span>
+                  <span className={`text-[12px] sm:text-[13px] ${on ? "whitespace-nowrap text-ink" : "hidden max-w-full truncate text-mute group-hover:text-ink sm:block"}`}>{h.short}</span>
                 </button>
               </li>
             );
@@ -93,7 +93,7 @@ export function MissionTimeline() {
       </div>
       {earth && (
         <button onClick={() => { stop(); applyHabitat(earth); }}
-          className={`hidden shrink-0 rounded-[9px] border px-2.5 py-1.5 text-[11.5px] sm:block ${scenario.habitatId === "earth" ? "border-ox/60 bg-blue/15 text-ink" : "border-[var(--line)] text-mute hover:text-ink"}`}
+          className={`hidden shrink-0 rounded-full border px-3 py-1.5 text-[12px] sm:block ${scenario.habitatId === "earth" ? "border-ox/60 bg-blue/15 text-ink" : "border-[var(--line)] text-mute hover:text-ink"}`}
           title="Earth sea level, as a reference (not part of the mission)">
           Earth ref.
         </button>

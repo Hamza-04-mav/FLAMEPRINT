@@ -28,12 +28,12 @@ function Dashboard() {
       <Sidebar />
       <div className="relative z-10 lg:pl-[76px] xl:pl-[252px]">
         <Header />
-        <main className="mx-auto max-w-[1720px] px-3 pb-16 pt-5 sm:px-6 sm:pt-6">
+        <main className="mx-auto max-w-[1200px] px-4 pb-16 pt-6 sm:px-6 sm:pt-8">
           {error && tab !== "answer" && <div className="mb-4"><ErrorNote message={error} onRetry={refreshData} /></div>}
           <AnimatePresence mode="wait">
             {ready && <motion.div key={tab}
-              initial={{ opacity: 0, y: 14, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -8, filter: "blur(4px)" }} transition={{ duration: 0.32, ease: [0.2, 0.7, 0.2, 1] }}>
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }} transition={{ duration: 0.2, ease: [0.2, 0.7, 0.2, 1] }}>
               {tab === "answer" && <AnswerScreen />}
               {tab === "stowage" && <StowageInspector />}
               {tab === "habitats" && <CompareHabitats />}
@@ -46,10 +46,9 @@ function Dashboard() {
               {tab === "data" && <DataLab />}
             </motion.div>}
           </AnimatePresence>
-          <footer className="mt-14 flex flex-wrap items-start justify-between gap-x-8 gap-y-2 border-t border-[var(--line)] pt-5 text-[11.5px] leading-relaxed text-slate-500">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em]">FLAMEPRINT · NASA Space Apps 2026 · Flame in Freefall</span>
-            <span className="max-w-3xl">Investigation metadata is curated from the challenge brief and public NASA summaries. Test-level values appear only
-              from imported NASA PSI files. Independent project, not NASA-endorsed. Anything marked approx, estimate, illustrative or modeled must be verified against PSI.</span>
+          <footer className="mt-16 border-t border-[var(--line)] pt-5 text-[11.5px] leading-relaxed text-slate-500">
+            FLAMEPRINT · NASA Space Apps 2026 · Independent project, not NASA-endorsed. Test values come only from imported NASA PSI
+            files; anything marked approx, estimate, illustrative or modeled must be verified against PSI.
           </footer>
         </main>
       </div>

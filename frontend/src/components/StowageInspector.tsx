@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Luggage, Search } from "lucide-react";
+import { ArrowRight, Luggage, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { LEVEL_STYLE, placeName } from "@/lib/answer";
 import { api, ApiError } from "@/lib/api";
@@ -45,7 +45,8 @@ function useStowage() {
   const last = useRef<string | null>(null);
   useEffect(() => { last.current = res?.item ?? null; }, [res]);
   useEffect(() => { if (last.current) void run(last.current); }, [scenario]); // eslint-disable-line react-hooks/exhaustive-deps
-  return { item, setItem, res, busy, err, run };
+  const clear = () => { ac.current?.abort(); setRes(null); setErr(null); };
+  return { item, setItem, res, busy, err, run, clear };
 }
 
 function ResultCard({ res, g, habitatName, compact }: { res: StowageResult; g: number; habitatName: string; compact?: boolean }) {
@@ -102,26 +103,39 @@ function Chips({ s }: { s: ReturnType<typeof useStowage> }) {
   );
 }
 
-/** Compact card for the Answer screen. */
-export function StowageCard() {
+/** One small search box for the Answer screen. The verdict floats under it so the page does not jump. */
+export function StowageSearch() {
   const s = useStowage();
-  const { scenario, habitats, setTab } = useMission();
-  const name = habitats.find((h) => h.id === scenario.habitatId)?.name ?? "Custom mission";
+  const { setTab } = useMission();
+  const v = s.res?.verdict;
+  const lv = LEVEL_STYLE[v?.level ?? "unknown"];
+  const close = () => { s.setItem(""); s.clear(); };
   return (
-    <section className="panel flex flex-col p-4">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h3 className="flex items-center gap-2 font-display text-[16px] font-semibold text-ink"><Luggage className="h-4 w-4 text-flame-1" />Can I bring this aboard?</h3>
-        <button onClick={() => setTab("stowage")} className="chip-link shrink-0">More <ArrowRight className="h-3.5 w-3.5" /></button>
-      </div>
-      <SearchBox s={s} />
-      <div className="mt-2.5"><Chips s={s} /></div>
-      <div className="mt-3">
-        <AnimatePresence mode="wait">
-          {s.err ? <p key="e" className="text-[12.5px] text-rose-300">{s.err}</p>
-            : s.res && <ResultCard res={s.res} g={scenario.gravityG} habitatName={name} compact />}
-        </AnimatePresence>
-      </div>
-    </section>
+    <div className="relative">
+      <form onSubmit={(e) => { e.preventDefault(); void s.run(s.item); }} className="relative">
+        <Luggage className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-flame-1" />
+        <input value={s.item} onChange={(e) => s.setItem(e.target.value)} maxLength={200}
+          onKeyDown={(e) => e.key === "Escape" && close()}
+          placeholder="Can I bring this aboard? e.g. foam pillow" aria-label="Can I bring this aboard? Type an item"
+          className="w-full rounded-full border border-[var(--line-strong)] bg-space-950/70 py-2.5 pl-10 pr-4 text-[14px] text-ink placeholder:text-slate-500 focus:border-ox/60 focus:outline-none" />
+      </form>
+      <AnimatePresence>
+        {(s.res || s.err) && (
+          <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
+            role="status" className="absolute inset-x-0 top-full z-20 mt-2 rounded-[14px] border border-[var(--line-strong)] bg-space-900/95 p-3.5 shadow-2xl backdrop-blur-xl">
+            <button onClick={close} aria-label="Close" className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-mute hover:text-ink"><X className="h-3.5 w-3.5" /></button>
+            {s.err ? <p className="text-[13px] text-rose-300">{s.err}</p> : s.res && (
+              <div className="pr-6">
+                <div className="text-[12.5px] text-mute">{s.res.materialName ? <>Closest tested material: <span className="text-ink">{s.res.materialName}</span></> : "No tested material matches this item."}</div>
+                <div className="mt-1 text-[15px] font-semibold" style={{ color: lv.color }}>{lv.label}</div>
+                <div className="mt-0.5 text-[13px] text-slate-300">{s.res.advice}.</div>
+                <button onClick={() => setTab("stowage")} className="mt-2 inline-flex items-center gap-1 text-[12.5px] text-ox hover:underline">Details <ArrowRight className="h-3.5 w-3.5" /></button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -132,9 +146,8 @@ export function StowageInspector() {
   const name = habitats.find((h) => h.id === scenario.habitatId)?.name ?? "Custom mission";
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader index="02" kicker="Stowage inspector" title={<>Can I bring this <span className="text-flame-1">aboard?</span></>}>
-        Type any item. FLAMEPRINT finds the closest tested material and rates it for the current habitat. The rating always comes from
-        the engine; Claude, when available, only picks a material from a fixed list.
+      <PageHeader kicker="Tools · Stowage check" title="Can I bring this aboard?">
+        Type any item to see the closest tested material and its risk in this habitat.
       </PageHeader>
       <div className="panel p-5">
         <SearchBox s={s} autoFocus />

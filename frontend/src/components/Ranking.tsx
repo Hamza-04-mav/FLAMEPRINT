@@ -142,7 +142,7 @@ export function Ranking() {
                         </span>
                         <span className="block text-[12.5px] leading-snug text-slate-300">{rankReason(r, i, scenario)}</span>
                       </span>
-                      <span className="flex justify-start"><GradeBadge grade={r.grade} size="sm" /></span>
+                      <span className="flex justify-start"><GradeBadge grade={r.grade} size="sm" inert /></span>
                       <span className="flex items-center gap-2">
                         <span className="font-display text-[22px] font-semibold tabular-nums" style={{ color: top ? "#FFC15B" : scoreColor(r.score) }}>{Math.round(r.score)}</span>
                       </span>

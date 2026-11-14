@@ -10,7 +10,7 @@ export const LEVEL_STYLE: Record<RiskLevel, { label: string; color: string }> = 
 
 export const GRADE_STYLE: Record<GradeLetter, { color: string; meaning: string }> = {
   A: { color: "#34D399", meaning: "Imported PSI tests at these conditions" },
-  B: { color: "#19C9FF", meaning: "One investigation tested this atmosphere" },
+  B: { color: "#3D9BFF", meaning: "One investigation tested this atmosphere" },
   C: { color: "#FFC15B", meaning: "Only bracketed between investigations" },
   M: { color: "#7E94B4", meaning: "Modeled: no test covers this" },
 };

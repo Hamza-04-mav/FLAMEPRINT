@@ -5,21 +5,17 @@ import { useEffect } from "react";
 import { CONF_LABEL } from "@/lib/format";
 import type { Confidence } from "@/lib/types";
 
-/** Consistent page header: kicker, title, one-line purpose, actions on the right. */
-export function PageHeader({ index, kicker, title, children, actions }: {
-  index: string; kicker: string; title: React.ReactNode; children?: React.ReactNode; actions?: React.ReactNode;
+/** Page header: a small quiet label, one calm headline, at most one supporting sentence, actions on the right. */
+export function PageHeader({ kicker, title, children, actions }: {
+  index?: string; kicker: string; title: React.ReactNode; children?: React.ReactNode; actions?: React.ReactNode;
 }) {
   return (
-    <motion.header initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.2, 0.7, 0.2, 1] }}
-      className="mb-6 flex flex-wrap items-end justify-between gap-4">
-      <div className="max-w-3xl">
-        <div className="kicker flex items-center gap-3">
-          <span className="text-ox">{index}</span>
-          <span>{kicker}</span>
-          <span className="hidden h-px w-16 bg-gradient-to-r from-[rgba(72,170,255,0.4)] to-transparent sm:block" />
-        </div>
-        <h1 className="mt-2 font-display text-[26px] font-semibold leading-tight tracking-tight text-ink sm:text-[32px]">{title}</h1>
-        {children && <p className="mt-2 text-[14px] leading-relaxed text-mute">{children}</p>}
+    <motion.header initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: [0.2, 0.7, 0.2, 1] }}
+      className="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <div className="max-w-2xl">
+        <div className="font-mono text-[10.5px] uppercase tracking-[0.2em] text-mute">{kicker}</div>
+        <h1 className="mt-2 font-display text-[28px] font-semibold leading-tight tracking-tight text-ink sm:text-[34px]">{title}</h1>
+        {children && <p className="mt-2 text-[15px] leading-relaxed text-mute">{children}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </motion.header>
