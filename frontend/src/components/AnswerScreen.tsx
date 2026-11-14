@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
-import { ArrowUp, Box, ChevronDown, FileDown, RefreshCw, SlidersHorizontal } from "lucide-react";
+import { ArrowUp, Box, ChevronDown, FileDown, RefreshCw, RotateCcw, SlidersHorizontal } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { buildVerdict, fmtPressure, LEVEL_STYLE, levelRose } from "@/lib/answer";
@@ -10,6 +10,7 @@ import { fmtGravity, toKpa, toPsi } from "@/lib/format";
 import { useMission } from "@/lib/mission";
 import type { MaterialVerdict, RiskLevel } from "@/lib/types";
 import { useInView, useWebGL } from "@/lib/webgl";
+import { AnswerPipeline } from "./AnswerPipeline";
 import { FlameCanvas } from "./FlameCanvas";
 import { GradeBadge } from "./GradeBadge";
 import { MissionTimeline } from "./MissionTimeline";
@@ -25,13 +26,24 @@ const EASE = [0.2, 0.7, 0.2, 1] as const;
 
 /* ───────────────────────── verdict ───────────────────────── */
 function Verdict() {
-  const { analysis, analyzing, scenario, setScenario, habitats } = useMission();
+  const { analysis, analyzing, scenario, setScenario, applyHabitat, habitats } = useMission();
   const [adjust, setAdjust] = useState(false);
   const hab = habitats.find((h) => h.id === scenario.habitatId);
   const name = hab?.name ?? "Custom mission";
   const v = analysis ? buildVerdict(analysis.materials, analysis.coverage.grade, name) : null;
   const p = fmtPressure(scenario.pressureKpa);
   const set = (patch: Partial<typeof scenario>) => setScenario((s) => ({ ...s, ...patch, habitatId: "custom" }));
+
+  // remember the last real preset so "Reset" can snap back from a custom scenario
+  const lastPreset = useRef<(typeof habitats)[number] | null>(null);
+  useEffect(() => { if (hab) lastPreset.current = hab; }, [hab]);
+  const custom = scenario.habitatId === "custom" && !!lastPreset.current;
+
+  // preset tick marks on each slider (same axis order as every chart)
+  const o2Ticks = habitats.map((h) => ({ value: h.o2Pct }));
+  const presTicks = habitats.map((h) => ({ value: toPsi(h.pressureKpa) }));
+  const flowTicks = habitats.map((h) => ({ value: h.flowCmS }));
+  const gravTicks = [{ value: 0, label: "µg" }, { value: 0.165, label: "Moon" }, { value: 0.38, label: "Mars" }, { value: 1, label: "Earth" }];
   const passport = `/passport?${hab ? `mission=${hab.id}` : new URLSearchParams({
     o2: String(scenario.o2Pct), kpa: String(scenario.pressureKpa), g: String(scenario.gravityG), flow: String(scenario.flowCmS),
     phases: scenario.phases.join(","),
@@ -65,17 +77,23 @@ function Verdict() {
           <SlidersHorizontal className="h-4 w-4" />Adjust conditions
           <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adjust ? "rotate-180" : ""}`} />
         </button>
+        {custom && (
+          <button onClick={() => applyHabitat(lastPreset.current!)} className="btn btn-ghost" title="Discard custom changes">
+            <RotateCcw className="h-4 w-4" />Reset to {lastPreset.current!.name}
+          </button>
+        )}
       </div>
 
       <AnimatePresence initial={false}>
         {adjust && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: EASE }} className="overflow-hidden">
+            {/* axis order matches every chart: O₂ · pressure · airflow · gravity */}
             <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-6 md:grid-cols-4">
-              <Slider label="Oxygen" value={scenario.o2Pct} min={15} max={100} step={0.5} unit="%" onChange={(x) => set({ o2Pct: x })} />
-              <Slider label="Pressure" value={toPsi(scenario.pressureKpa)} min={3} max={15} step={0.1} unit=" psi" onChange={(x) => set({ pressureKpa: toKpa(x) })} />
-              <Slider label="Gravity" value={scenario.gravityG} min={0} max={1} step={0.005} display={fmtGravity(scenario.gravityG)} unit=" g" onChange={(x) => set({ gravityG: x })} />
-              <Slider label="Airflow" value={scenario.flowCmS} min={0} max={60} step={0.5} unit=" cm/s" onChange={(x) => set({ flowCmS: x })} />
+              <Slider label="Oxygen" value={scenario.o2Pct} min={15} max={100} step={0.5} unit="%" ticks={o2Ticks} onChange={(x) => set({ o2Pct: x })} />
+              <Slider label="Pressure" value={toPsi(scenario.pressureKpa)} min={3} max={15} step={0.1} unit=" psi" ticks={presTicks} onChange={(x) => set({ pressureKpa: toKpa(x) })} />
+              <Slider label="Airflow" value={scenario.flowCmS} min={0} max={60} step={0.5} unit=" cm/s" ticks={flowTicks} onChange={(x) => set({ flowCmS: x })} />
+              <Slider label="Gravity" value={scenario.gravityG} min={0} max={1} step={0.005} display={fmtGravity(scenario.gravityG)} unit=" g" ticks={gravTicks} onChange={(x) => set({ gravityG: x })} />
             </div>
           </motion.div>
         )}
@@ -223,6 +241,8 @@ export function AnswerScreen() {
   }
   return (
     <div className="flex flex-col gap-8">
+      {/* the whole story in one glance, before anything else */}
+      <div className="order-first"><AnswerPipeline /></div>
       {/* mobile: verdict and flame first; desktop: the mission path leads */}
       <div className="order-2 lg:order-1"><MissionTimeline /></div>
       <div className="order-1 grid grid-cols-1 gap-6 lg:order-2 lg:grid-cols-[minmax(0,1fr)_340px]">

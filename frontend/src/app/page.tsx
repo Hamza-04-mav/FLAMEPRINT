@@ -13,6 +13,7 @@ import { Header } from "@/components/Header";
 import { InvestigationDrawer } from "@/components/InvestigationDrawer";
 import { MissionConfig } from "@/components/MissionConfig";
 import { Ranking } from "@/components/Ranking";
+import { RankingToast } from "@/components/RankingToast";
 import { Sidebar } from "@/components/Sidebar";
 import { SpaceView } from "@/components/SpaceView";
 import { StowageInspector } from "@/components/StowageInspector";
@@ -53,6 +54,7 @@ function Dashboard() {
       </div>
       <MissionConfig />
       <InvestigationDrawer />
+      <RankingToast />
     </>
   );
 }

@@ -57,13 +57,17 @@ export function SectionTitle({ kicker, title, children }: { kicker: string; titl
   );
 }
 
+export interface SliderTick { value: number; label?: string }
+
 export function Slider({
-  label, value, min, max, step, onChange, unit, color = DUST[300], hint, display,
+  label, value, min, max, step, onChange, unit, color = DUST[300], hint, display, ticks,
 }: {
   label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void;
-  unit?: string; color?: string; hint?: string; display?: string;
+  unit?: string; color?: string; hint?: string; display?: string; ticks?: SliderTick[];
 }) {
   const pct = ((value - min) / (max - min)) * 100;
+  const posOf = (v: number) => ((Math.max(min, Math.min(max, v)) - min) / (max - min)) * 100;
+  const hasLabels = !!ticks?.some((t) => t.label);
   return (
     <label className="block">
       <div className="mb-1 flex items-baseline justify-between gap-2">
@@ -73,12 +77,31 @@ export function Slider({
           {unit && <span className="ml-0.5 text-slate-500">{unit}</span>}
         </span>
       </div>
-      <input
-        type="range" className="fp-range" min={min} max={max} step={step} value={value}
-        aria-label={label}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        style={{ ["--pct" as string]: `${pct}%`, ["--fill" as string]: color }}
-      />
+      <div className="relative">
+        {/* preset tick marks sit on the track (signifiers) */}
+        {ticks?.map((t, i) => {
+          const p = posOf(t.value);
+          const active = Math.abs(p - pct) < 1.2;
+          return <span key={i} aria-hidden title={t.label}
+            className="pointer-events-none absolute top-[7px] h-2 w-[2px] -translate-x-1/2 rounded-full"
+            style={{ left: `${p}%`, background: active ? "var(--sun-500)" : "rgba(138,129,120,0.6)" }} />;
+        })}
+        <input
+          type="range" className="fp-range" min={min} max={max} step={step} value={value}
+          aria-label={label}
+          onChange={(e) => onChange(parseFloat(e.target.value))}
+          style={{ ["--pct" as string]: `${pct}%`, ["--fill" as string]: color }}
+        />
+      </div>
+      {hasLabels && (
+        <div className="relative mt-1 h-3">
+          {ticks!.filter((t) => t.label).map((t, i) => {
+            const p = posOf(t.value);
+            const align = p <= 4 ? "translate-x-0" : p >= 96 ? "-translate-x-full" : "-translate-x-1/2";
+            return <span key={i} className={`axis-tag absolute whitespace-nowrap ${align}`} style={{ left: `${p}%` }}>{t.label}</span>;
+          })}
+        </div>
+      )}
       {hint && <div className="mt-0.5 text-[11px] leading-snug text-slate-500">{hint}</div>}
     </label>
   );

@@ -191,11 +191,16 @@ Font: SF system on Apple, Inter fallback. The intro (`Boot.tsx`) shows on the fi
    parallax layers + a few twinkles, per-habitat moon/planet horizon arc [Moon/Mars taupe with craters, ISS/Earth lighter-navy limb,
    suit close rim] that crossfades 600ms on habitat switch, removed the blue nebulae; recoloured `ENV_TINT` to navy/taupe; new
    `TiltCard` gives the Answer verdict card pointer tilt ≤4° + a moving specular highlight, desktop-only and off for reduced motion).
-   Kept to the single always-on backdrop — no second WebGL canvas (≤1-canvas rule). **Next:** awaiting further phases from the owner
-   (Phase 5+). Still pending from the audit
-   (will fold into those phases): Answer lead-with-visual + designed "not rated" state; grade inline legend; Evidence coverage strips;
-   3D label collision; ≤4-item Gaps legend; **3D scene colours** (`MissionScene3D` ~60, `ConditionSpace3D` ~30 raw hex) + `Header`
-   status/planet glyph hex still off-token; sidebar footer safe-area; a11y/perf sweep; before/after screenshots in `docs/screenshots/`.
+   Kept to the single always-on backdrop — no second WebGL canvas (≤1-canvas rule) · **Phase 5** Norman's principles (partial):
+   new `AnswerPipeline` (Habitat ‣ Evidence ‣ Gaps ‣ Brief, each a live-visual link) at the top of Answer; `Slider` now shows preset
+   **tick marks** on the track (sun when the value sits on a preset) + a gravity label row (µg/Moon/Mars/Earth); Answer sliders reordered
+   to the chart axis order **O₂ · pressure · airflow · gravity**; **Reset to {preset}** appears when the scenario is custom; new
+   `RankingToast` ("Ranking updated · N investigations", dust, no yellow) on each settle. **Next:** awaiting further phases from the
+   owner (Phase 6+). **Deferred Norman items** (not yet done): psi/kPa **unit toggle**, stowage **combobox** (free-text today), **undo**,
+   disabling impossible slider combinations. Still pending from the audit (fold into later phases): Answer lead-with-visual + designed
+   "not rated" state; grade inline legend; Evidence coverage strips; 3D label collision; ≤4-item Gaps legend; **3D scene colours**
+   (`MissionScene3D` ~60, `ConditionSpace3D` ~30 raw hex) + `Header` status/planet glyph hex still off-token; sidebar footer safe-area;
+   a11y/perf sweep; before/after screenshots in `docs/screenshots/`.
 
 1. **[Team] Review the 6 sourced material LOI thresholds** in `data/seed/materials.json` (cotton 18, pu-foam 18, pmma 17,
    nomex 28, ptfe 95, velcro 24 — each with `source`+`url`). Confirm the cited values, and decide a value (or keep `null`)
@@ -246,6 +251,7 @@ Font: SF system on Apple, Inter fallback. The intro (`Boot.tsx`) shows on the fi
 | 2026-11-14 | Claude Code (with Zaki)    | **UI/UX Phase 2 — typography.** Switched to the Apple SF system stack (real SF Pro on Apple; Inter `ss01`/`cv11` as the cross-platform fallback), dropped Space Grotesk, added the type scale (`.t-display`..`.t-caption`), glassy text vibrancy tokens (`--text-1/2/3`, opaque fallback when no `backdrop-filter`), display-headline vertical fill, and sentence-case eyebrows (retired letter-spaced ALL-CAPS except one `.axis-tag` caption). Applied to the Answer verdict + page headers. Typecheck, lint, 8 vitest, `next build` all green. Committed locally (owner pushes). |
 | 2026-11-14 | Claude Code (with Zaki)    | **UI/UX Phase 3 — iOS glass material.** `.panel` is now base glass (navy-800 @55%, blur 24, 20px radius, 1px specular top highlight) and new `.panel-float` is the floating level (blur 32, deeper shadow) for sheets/popovers/nav; `@supports`/`prefers-reduced-transparency` fall back to solid `--ink-800`; controls → 14px radius. Converted the Header popovers, stowage dropdown, MissionConfig sheet, InvestigationDrawer, desktop sidebar + mobile nav to glass. Typecheck, lint, 8 vitest pass (full `next build` deferred to the final phase per owner). Committed locally. |
 | 2026-11-14 | Claude Code (with Zaki)    | **UI/UX Phase 4 — space background & depth.** Rebuilt `CosmicBackdrop`: dust-100 stars across 3 parallax layers + slow twinkles; a per-habitat moon/planet **horizon arc** (Moon & Mars = taupe with craters, ISS/Earth = lighter-navy limb, suit = close rim) that **crossfades 600 ms** on habitat switch; dropped the blue nebulae; recoloured `ENV_TINT` to navy/taupe. New `TiltCard` adds pointer-tracked tilt (≤4°) + a moving specular highlight to the Answer verdict card (desktop fine-pointer only; off for reduced motion; mounted-gated to avoid SSR mismatch). Still one always-on backdrop, no extra WebGL canvas. Typecheck, lint, 8 vitest pass (build deferred to final phase). Committed locally. |
+| 2026-11-14 | Claude Code (with Zaki)    | **UI/UX Phase 5 — Norman's principles (partial).** New `AnswerPipeline` (Habitat ‣ Evidence ‣ Gaps ‣ Brief, each a live-visual click-through) atop Answer; `Slider` gains preset **tick marks** (sun when on a preset) + a gravity label row (µg/Moon/Mars/Earth); Answer sliders reordered to chart axis order O₂·pressure·airflow·gravity; **Reset to {preset}** when custom; new `RankingToast` ("Ranking updated · N investigations", dust) on settle. Deferred: psi/kPa unit toggle, stowage combobox, undo, impossible-combo disabling. Typecheck, lint, 8 vitest pass (build deferred to final phase). Committed locally. |
 
 ---
 
