@@ -35,7 +35,7 @@ function Row({ k, v, tone }: { k: string; v: React.ReactNode; tone?: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3 py-1.5 text-[12.5px]">
       <span className="text-mute">{k}</span>
-      <span className="text-right font-mono text-[12px]" style={{ color: tone ?? "#F2F7FF" }}>{v}</span>
+      <span className="text-right font-mono text-[12px]" style={{ color: tone ?? "#efeae3" }}>{v}</span>
     </div>
   );
 }
@@ -63,7 +63,7 @@ function NextExperimentsList() {
             <p className="mt-1 text-[11.5px] text-slate-500">{x.why}. Affects {x.habitatsAffected.map(short).join(", ")}.</p>
             <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-mute">
               {x.plannedBy.length ? <>planned investigation:{x.plannedBy.map((id) => (
-                <button key={id} onClick={() => openInvestigation(id)} className="rounded-[4px] border border-ox/35 bg-ox/10 px-1.5 font-mono text-[10.5px] text-[#9BE6FF] hover:bg-ox/20">{id}</button>
+                <button key={id} onClick={() => openInvestigation(id)} className="rounded-[4px] border border-ox/35 bg-ox/10 px-1.5 font-mono text-[10.5px] text-dust-200 hover:bg-ox/20">{id}</button>
               ))}</> : <span className="text-slate-500">no planned investigation in the catalog</span>}
             </div>
           </li>
@@ -132,7 +132,7 @@ export function SpaceView() {
                 <div className="text-[14.5px] font-semibold leading-snug text-ink">{x.title}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[13px] text-mute">
                   {x.plannedBy.length ? <>Planned investigation:{x.plannedBy.map((id) => (
-                    <button key={id} onClick={() => openInvestigation(id)} className="rounded-[4px] border border-ox/35 bg-ox/10 px-1.5 font-mono text-[11px] text-[#9BE6FF] hover:bg-ox/20">{id}</button>
+                    <button key={id} onClick={() => openInvestigation(id)} className="rounded-[4px] border border-ox/35 bg-ox/10 px-1.5 font-mono text-[11px] text-dust-200 hover:bg-ox/20">{id}</button>
                   ))}</> : <>No planned investigation yet · affects {x.habitatsAffected.map(short).join(", ")}</>}
                 </div>
               </li>
@@ -160,9 +160,9 @@ export function SpaceView() {
                   <Row k="Facility" v={selEnv.facility} />
                   <Row k="Fuel phase" v={selEnv.fuelPhase.join(", ")} tone={PHASE_COLOR[selEnv.fuelPhase[0]]} />
                   <Row k="O₂" v={fmtRange(selEnv.envelope.o2Pct, " %")} />
-                  <Row k="Pressure" v={selEnv.envelope.pressureKpa ? `${fmtRange([toPsi(selEnv.envelope.pressureKpa[0]), toPsi(selEnv.envelope.pressureKpa[1])], " psi")} · ${fmtRange(selEnv.envelope.pressureKpa, " kPa")}` : fmtRange(null, "")} tone={selEnv.envelope.pressureKpa ? undefined : "#7E94B4"} />
-                  <Row k="Flow" v={fmtRange(selEnv.envelope.flowCmS, " cm/s")} tone={selEnv.envelope.flowCmS ? undefined : "#7E94B4"} />
-                  {selRanked && <Row k="Relevance" v={`#${selRank + 1} · ${Math.round(selRanked.score)}`} tone={highlight.has(selEnv.id) ? "#FF8B32" : scoreColor(selRanked.score)} />}
+                  <Row k="Pressure" v={selEnv.envelope.pressureKpa ? `${fmtRange([toPsi(selEnv.envelope.pressureKpa[0]), toPsi(selEnv.envelope.pressureKpa[1])], " psi")} · ${fmtRange(selEnv.envelope.pressureKpa, " kPa")}` : fmtRange(null, "")} tone={selEnv.envelope.pressureKpa ? undefined : "#8a8178"} />
+                  <Row k="Flow" v={fmtRange(selEnv.envelope.flowCmS, " cm/s")} tone={selEnv.envelope.flowCmS ? undefined : "#8a8178"} />
+                  {selRanked && <Row k="Relevance" v={`#${selRank + 1} · ${Math.round(selRanked.score)}`} tone={highlight.has(selEnv.id) ? "#FFD23F" : scoreColor(selRanked.score)} />}
                 </div>
                 {selRanked && (
                   <ul className="mt-4 space-y-2">
@@ -263,8 +263,8 @@ export function SpaceView() {
           {/* overlays */}
           <div className="pointer-events-none absolute left-4 top-4 flex flex-wrap gap-2">
             {[
-              [<span key="a" className="led" style={{ color: "#087BFF" }} />, "Tested region"],
-              [<span key="b" className="led" style={{ color: "#FF8B32" }} />, "High relevance"],
+              [<span key="a" className="led" style={{ color: "#8a8178" }} />, "Tested region"],
+              [<span key="b" className="led" style={{ color: "#FFD23F" }} />, "High relevance"],
               [<span key="c" className="hatch h-3 w-3.5 rounded-[2px] border border-dashed border-ox-2" />, "Data gap"],
               [<span key="d" className="h-2.5 w-2.5 rotate-45 bg-slate-300" />, "Mission presets"],
             ].map(([icon, label]) => (

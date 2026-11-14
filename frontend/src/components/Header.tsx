@@ -13,7 +13,8 @@ import { EVIDENCE, type EvidenceKind, EvidenceMark } from "./ui";
 
 export function PlanetGlyph({ env, size = 40 }: { env: Environment; size?: number }) {
   const gid = `pg${useId().replace(/:/g, "")}`;
-  const body = { lunar: ["#c9d2df", "#5d6878"], mars: ["#e08a5a", "#6e2d17"], orbit: ["#5fb2ff", "#0a3a8c"], earth: ["#5fb2ff", "#0a3a8c"] }[env];
+  // navy / taupe only — moon = taupe grey, mars = warm taupe, orbit/earth = lighter navy
+  const body = { lunar: ["#c2bab0", "#5a5650"], mars: ["#b89a82", "#5a4436"], orbit: ["#5a6e94", "#182a44"], earth: ["#5a6e94", "#182a44"] }[env];
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden>
       <defs>
@@ -23,10 +24,10 @@ export function PlanetGlyph({ env, size = 40 }: { env: Environment; size?: numbe
         </radialGradient>
       </defs>
       <circle cx="20" cy="20" r="11" fill={`url(#${gid})`} />
-      {env === "lunar" && (<><circle cx="16" cy="17" r="2.2" fill="#8d97a6" opacity=".7" /><circle cx="23" cy="24" r="1.6" fill="#8d97a6" opacity=".6" /><circle cx="24" cy="15" r="1" fill="#8d97a6" opacity=".6" /></>)}
-      {(env === "orbit" || env === "earth") && <path d="M12 18c3-2 5 1 8-1s4-3 7-1M13 24c3 1 6-2 9 0" stroke="#7fe0b0" strokeWidth="1.3" fill="none" opacity=".7" />}
-      {env === "mars" && <path d="M11 20c4-1 6 2 10 1s5-2 8-1" stroke="#ffc9a8" strokeWidth="1" fill="none" opacity=".5" />}
-      <ellipse cx="20" cy="20" rx="18" ry="5.5" fill="none" stroke="#19C9FF" strokeWidth="1.2" transform="rotate(-20 20 20)" opacity=".85" />
+      {env === "lunar" && (<><circle cx="16" cy="17" r="2.2" fill="#8a8178" opacity=".7" /><circle cx="23" cy="24" r="1.6" fill="#8a8178" opacity=".6" /><circle cx="24" cy="15" r="1" fill="#8a8178" opacity=".6" /></>)}
+      {(env === "orbit" || env === "earth") && <path d="M12 18c3-2 5 1 8-1s4-3 7-1M13 24c3 1 6-2 9 0" stroke="#a7b4cc" strokeWidth="1.3" fill="none" opacity=".6" />}
+      {env === "mars" && <path d="M11 20c4-1 6 2 10 1s5-2 8-1" stroke="#c2b4a2" strokeWidth="1" fill="none" opacity=".5" />}
+      <ellipse cx="20" cy="20" rx="18" ry="5.5" fill="none" stroke="#a39a90" strokeWidth="1.2" transform="rotate(-20 20 20)" opacity=".8" />
     </svg>
   );
 }
@@ -99,11 +100,13 @@ function StatusPopover() {
   const [open, setOpen] = useState(false);
   const ref = useOutside<HTMLDivElement>(open, () => setOpen(false));
   const tests = health?.stats.tests ?? 0;
+  // status LEDs: dust only (no red/green). bright dust = nominal, dim dust = degraded
+  const OK = "#efeae3", WARN = "#8a8178", WAIT = "#a39a90";
   const rows: [string, string, string][] = [
-    ["Backend", error ? "Offline" : health ? "Online" : "Connecting", error ? "#FF5A4E" : health ? "#34D399" : "#7E94B4"],
-    ["Data mode", tests ? `PSI · ${tests} tests` : "Catalog (no PSI files yet)", tests ? "#34D399" : "#FFC15B"],
-    ["SI engine", health?.llm.enabled ? `Claude · ${health.llm.model}` : "Offline writer", health?.llm.enabled ? "#19C9FF" : "#FFC15B"],
-    ["Search index", health?.db.backend === "postgres" ? "PostgreSQL + pgvector" : "In-memory", health?.db.ok ? "#34D399" : "#FFC15B"],
+    ["Backend", error ? "Offline" : health ? "Online" : "Connecting", error ? WARN : health ? OK : WAIT],
+    ["Data mode", tests ? `PSI · ${tests} tests` : "Catalog (no PSI files yet)", tests ? OK : WAIT],
+    ["SI engine", health?.llm.enabled ? `Groq · ${health.llm.model}` : "Offline writer", health?.llm.enabled ? OK : WAIT],
+    ["Search index", health?.db.backend === "postgres" ? "PostgreSQL + pgvector" : "In-memory", health?.db.ok ? OK : WAIT],
   ];
   const kinds: EvidenceKind[] = ["psi", "catalog", "estimate", "illustrative"];
   return (

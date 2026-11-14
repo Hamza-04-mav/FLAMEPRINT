@@ -88,8 +88,8 @@ function NavItem({ item, rail, onNavigate, small = false }: { item: (typeof NAV)
 function Status({ rail }: { rail: boolean }) {
   const { health, error } = useMission();
   const online = !!health && !error;
-  const tone = error ? "#FF5A4E" : online ? "#34D399" : "#7E94B4";
-  const text = error ? "Engine offline" : online ? (health.llm.enabled ? "Online · Claude" : "Online · offline writer") : "Connecting…";
+  const tone = error ? "#8a8178" : online ? "#efeae3" : "#a39a90";
+  const text = error ? "Engine offline" : online ? (health.llm.enabled ? "Online · Groq" : "Online · offline writer") : "Connecting…";
   if (rail) return <span title={text} className="led mx-auto block" style={{ color: tone }} />;
   return (
     <div className="px-3 text-[11.5px] leading-relaxed text-slate-500">

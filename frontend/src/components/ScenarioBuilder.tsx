@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Car, Globe2, Moon, Orbit, Rocket, Shirt } from "lucide-react";
 import { useMission } from "@/lib/mission";
-import { PHASE_COLOR, PILLAR_COLOR, toPsi } from "@/lib/format";
+import { fmtGravity, PHASE_COLOR, PILLAR_COLOR, toPsi } from "@/lib/format";
 import type { FuelPhase, Pillar, Scenario } from "@/lib/types";
 import { Slider, Toggle } from "./ui";
 
@@ -57,16 +57,16 @@ export function ScenarioBuilder({ bare = false }: { bare?: boolean }) {
 
       <div className="mt-4 space-y-4">
         <Slider label="Oxygen concentration" value={scenario.o2Pct} min={10} max={100} step={0.5} unit="%"
-          color="#19C9FF" onChange={(v) => set({ o2Pct: v })}
+          color="#c2bab0" onChange={(v) => set({ o2Pct: v })}
           hint={scenario.o2Pct > 21 ? `+${Math.round((scenario.o2Pct / 20.9 - 1) * 100)}% vs Earth air` : undefined} />
         <Slider label="Cabin pressure" value={scenario.pressureKpa} min={20} max={110} step={0.5}
           display={`${toPsi(scenario.pressureKpa)} psi`} unit={` · ${scenario.pressureKpa.toFixed(1)} kPa`}
-          color="#087BFF" onChange={(v) => set({ pressureKpa: v })} />
+          color="#a39a90" onChange={(v) => set({ pressureKpa: v })} />
         <Slider label="Ventilation flow" value={scenario.flowCmS} min={0} max={60} step={0.5} unit=" cm/s"
-          color="#48BFFF" onChange={(v) => set({ flowCmS: v })} />
+          color="#a39a90" onChange={(v) => set({ flowCmS: v })} />
         <div>
           <Slider label="Gravity" value={scenario.gravityG} min={0} max={1} step={0.005}
-            display={scenario.gravityG.toFixed(3)} unit=" g" color="#FF8B32" onChange={(v) => set({ gravityG: v })} />
+            display={fmtGravity(scenario.gravityG)} unit=" g" color="#c2bab0" onChange={(v) => set({ gravityG: v })} />
           <div className="relative mt-1 h-4">
             {G_MARKS.map((m) => (
               <button key={m.label} type="button" onClick={() => set({ gravityG: m.g })}

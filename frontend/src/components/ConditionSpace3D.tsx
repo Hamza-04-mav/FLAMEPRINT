@@ -20,7 +20,8 @@ export const VIEW_POS: Record<ViewPreset, [number, number, number]> = {
   iso: [10, 7.5, 12], front: [0, 3.2, 16], top: [0, 17, 0.01], side: [17, 3.4, 0],
 };
 
-const BLUE = "#087BFF", BLUE_EDGE = "#48BFFF", ORANGE = "#FF8B32";
+// tested boxes = taupe; highlighted / high-relevance + the habitat marker = sun
+const BLUE = "#8a8178", BLUE_EDGE = "#c2bab0", ORANGE = "#FFD23F";
 
 function EnvelopeBox({ e, hovered, selected, highlighted, setHovered, onSelect }: {
   e: ConditionSpace["envelopes"][number]; hovered: boolean; selected: boolean; highlighted: boolean;
@@ -49,7 +50,7 @@ function EnvelopeBox({ e, hovered, selected, highlighted, setHovered, onSelect }
       </lineSegments>
       {(lit || highlighted) && (
         <Html center distanceFactor={14} position={[0, h / 2 + 0.38, 0]} style={{ pointerEvents: "none" }}>
-          <div className={`whitespace-nowrap rounded-md border px-2 py-1 text-[11px] backdrop-blur ${highlighted ? "border-[#FF8B32]/60 bg-[#1a0f06]/85 text-orange-100" : "border-[#48BFFF]/50 bg-[#061226]/85 text-slate-100"}`}>
+          <div className={`whitespace-nowrap rounded-md border px-2 py-1 text-[11px] backdrop-blur ${highlighted ? "border-[#FFD23F]/60 bg-[#1a140a]/85 text-dust-100" : "border-[#8a8178]/50 bg-[#0e1726]/85 text-dust-200"}`}>
             <b>{e.id}</b> · {env.confidence === "data" ? "PSI data" : env.confidence}{partial ? " · axis uncharacterized" : ""}
           </div>
         </Html>
@@ -70,9 +71,9 @@ function GapVolume({ scenario, uEff }: { scenario: Scenario; uEff: number }) {
   const E = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
   return (
     <group position={[cx, Math.max(hy, cy), cz]}>
-      <mesh><boxGeometry args={[hx * 2, hy * 2, hz * 2]} /><meshBasicMaterial ref={ref} color="#48BFFF" transparent opacity={0.06} depthWrite={false} /></mesh>
+      <mesh><boxGeometry args={[hx * 2, hy * 2, hz * 2]} /><meshBasicMaterial ref={ref} color="#a39a90" transparent opacity={0.06} depthWrite={false} /></mesh>
       {E.map(([a, b], i) => (
-        <Line key={i} points={[c[a] as unknown as [number, number, number], c[b] as unknown as [number, number, number]]} color="#48BFFF" lineWidth={1.2} dashed dashSize={0.12} gapSize={0.09} transparent opacity={0.85} />
+        <Line key={i} points={[c[a] as unknown as [number, number, number], c[b] as unknown as [number, number, number]]} color="#a39a90" lineWidth={1.2} dashed dashSize={0.12} gapSize={0.09} transparent opacity={0.85} />
       ))}
     </group>
   );
@@ -95,14 +96,14 @@ function Target({ scenario, uEff, inVoid, name }: { scenario: Scenario; uEff: nu
   return (
     <>
       <group ref={ref} position={[x, y, z]}>
-        <mesh><sphereGeometry args={[0.15, 24, 24]} /><meshBasicMaterial color="#FFC15B" toneMapped={false} /></mesh>
+        <mesh><sphereGeometry args={[0.15, 24, 24]} /><meshBasicMaterial color="#FFD23F" toneMapped={false} /></mesh>
         <mesh><sphereGeometry args={[0.32, 24, 24]} /><meshBasicMaterial color={ORANGE} transparent opacity={0.25} depthWrite={false} /></mesh>
         <mesh ref={ring} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[0.24, 0.28, 48]} /><meshBasicMaterial color={ORANGE} transparent side={THREE.DoubleSide} depthWrite={false} /></mesh>
         <pointLight color={ORANGE} intensity={6} distance={4} />
         <Html center distanceFactor={12} position={[0, 0.72, 0]} style={{ pointerEvents: "none" }}>
-          <div className={`whitespace-nowrap rounded-lg border px-2.5 py-1.5 text-[11px] backdrop-blur ${inVoid ? "border-[#FF8B32]/70 bg-[#1a0d06]/85" : "border-[#34D399]/50 bg-[#05170f]/85"}`}>
-            <div className="font-semibold text-slate-50">Your scenario · {name}</div>
-            <div className={inVoid ? "text-orange-200" : "text-emerald-200"}>{inVoid ? "No PSI tested range covers this point" : "Inside a tested range"}</div>
+          <div className={`whitespace-nowrap rounded-lg border px-2.5 py-1.5 text-[11px] backdrop-blur ${inVoid ? "border-[#FFD23F]/70 bg-[#1a140a]/85" : "border-[#8a8178]/55 bg-[#0e1726]/85"}`}>
+            <div className="font-semibold text-dust-100">Your scenario · {name}</div>
+            <div className="text-dust-300">{inVoid ? "No PSI tested range covers this point" : "Inside a tested range"}</div>
           </div>
         </Html>
       </group>
@@ -120,16 +121,16 @@ function Axes() {
   const zf = mz(F_RANGE[1]) + 0.3;
   return (
     <group>
-      <gridHelper args={[SX + 2, 14, "#17345e", "#0c1c36"]} scale={[1, 1, (SZ + 2) / (SX + 2)]} />
-      <Line points={[[-SX / 2, 0, zf], [SX / 2, 0, zf]]} color="#19C9FF" lineWidth={1.6} />
-      <Line points={[[-SX / 2, 0, zf], [-SX / 2, SY, zf]]} color="#087BFF" lineWidth={1.6} />
-      <Line points={[[SX / 2 + 0.3, 0, -SZ / 2], [SX / 2 + 0.3, 0, SZ / 2]]} color="#8FD8FF" lineWidth={1.6} />
+      <gridHelper args={[SX + 2, 14, "#2a3240", "#1d2a40"]} scale={[1, 1, (SZ + 2) / (SX + 2)]} />
+      <Line points={[[-SX / 2, 0, zf], [SX / 2, 0, zf]]} color="#c2bab0" lineWidth={1.6} />
+      <Line points={[[-SX / 2, 0, zf], [-SX / 2, SY, zf]]} color="#a39a90" lineWidth={1.6} />
+      <Line points={[[SX / 2 + 0.3, 0, -SZ / 2], [SX / 2 + 0.3, 0, SZ / 2]]} color="#8a8178" lineWidth={1.6} />
       {[15, 21, 30, 50, 85].map((v) => tick(`o${v}`, [mx(v), -0.35, zf], `${v}%`))}
       {[30, 70, 101].map((v) => tick(`p${v}`, [-SX / 2 - 0.65, my(v), zf], `${v} kPa`))}
       {[0, 20, 40, 60].map((v) => tick(`f${v}`, [SX / 2 + 1, 0, mz(v)], `${v} cm/s`))}
-      <Html position={[0, -0.95, zf]} center distanceFactor={14}><span className="label !text-ox">O₂ % (log)</span></Html>
-      <Html position={[-SX / 2 - 0.4, SY + 0.5, zf]} center distanceFactor={14}><span className="label !text-[#5aa8ff]">pressure</span></Html>
-      <Html position={[SX / 2 + 1.6, 0, 0]} center distanceFactor={14}><span className="label !text-[#8FD8FF]">airflow</span></Html>
+      <Html position={[0, -0.95, zf]} center distanceFactor={14}><span className="label !text-dust-300">O₂ % (log)</span></Html>
+      <Html position={[-SX / 2 - 0.4, SY + 0.5, zf]} center distanceFactor={14}><span className="label !text-dust-400">pressure</span></Html>
+      <Html position={[SX / 2 + 1.6, 0, 0]} center distanceFactor={14}><span className="label !text-dust-500">airflow</span></Html>
     </group>
   );
 }
@@ -137,7 +138,7 @@ function Axes() {
 function HabitatMarker({ h }: { h: Habitat }) {
   return (
     <group position={[mx(h.o2Pct), my(h.pressureKpa), mz(habitatFlow(h))]}>
-      <mesh><octahedronGeometry args={[0.08]} /><meshBasicMaterial color="#DCE7F5" /></mesh>
+      <mesh><octahedronGeometry args={[0.08]} /><meshBasicMaterial color="#c2bab0" /></mesh>
       <Html center distanceFactor={16} position={[0, 0.28, 0]} style={{ pointerEvents: "none" }}>
         <span className="whitespace-nowrap font-mono text-[10px] text-slate-400">{h.short}</span>
       </Html>
@@ -158,7 +159,7 @@ function TestPoints({ space, onSelect, selectedId }: { space: ConditionSpace; on
       o.scale.setScalar(t.id === selectedId ? 2.2 : 1);
       o.updateMatrix();
       m.setMatrixAt(i, o.matrix);
-      m.setColorAt(i, c.set(OUTCOME_COLOR[t.outcome] ?? "#DCE7F5"));
+      m.setColorAt(i, c.set(OUTCOME_COLOR[t.outcome] ?? "#d8d1c7"));
     });
     m.instanceMatrix.needsUpdate = true;
     if (m.instanceColor) m.instanceColor.needsUpdate = true;
@@ -198,10 +199,10 @@ export default function ConditionSpace3D({ space, scenario, uEff, habitats, high
   const selId = selection?.kind === "envelope" ? selection.id : null;
   return (
     <Canvas camera={{ position: VIEW_POS.iso, fov: 42 }} dpr={[1, 1.75]} gl={{ antialias: true }} onPointerMissed={() => onSelect(null)}>
-      <color attach="background" args={["#030a18"]} />
-      <fog attach="fog" args={["#030a18", 20, 42]} />
+      <color attach="background" args={["#0a111d"]} />
+      <fog attach="fog" args={["#0a111d", 20, 42]} />
       <ambientLight intensity={0.7} />
-      <pointLight position={[6, 10, 6]} intensity={40} color="#9BD8FF" />
+      <pointLight position={[6, 10, 6]} intensity={40} color="#efeae3" />
       <Axes />
       {boxes.map((e) => (
         <EnvelopeBox key={e.id} e={e} hovered={hovered === e.id} selected={selId === e.id} highlighted={highlight.has(e.id)}

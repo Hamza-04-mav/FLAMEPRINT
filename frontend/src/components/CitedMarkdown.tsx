@@ -28,7 +28,7 @@ export function CitedMarkdown({ text, valid, streaming }: { text: string; valid?
                 className={`mx-0.5 inline-flex translate-y-[-1px] items-center rounded-md border px-1.5 py-[1px] font-mono text-[10.5px] transition-colors ${
                   !verified ? "border-rose-400/50 bg-rose-500/10 text-rose-200 line-through"
                   : isDoc ? "border-violet-400/40 bg-violet-400/10 text-violet-200"
-                  : "border-ox/40 bg-ox/10 text-[#9BEBFF] hover:bg-ox/25"}`}>
+                  : "border-ox/40 bg-ox/10 text-dust-200 hover:bg-ox/25"}`}>
                 {isDoc ? `📄 ${id.slice(4).split("/").pop()}` : id}
               </button>
             );

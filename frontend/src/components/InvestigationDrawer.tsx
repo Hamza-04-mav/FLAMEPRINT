@@ -80,7 +80,7 @@ export function InvestigationDrawer() {
                 <div className="rounded-md border border-slate-700/60 bg-space-950/50 p-3">
                   <div className="mb-2 flex items-center justify-between"><span className="label">Tested range</span><ConfidenceBadge c={env.confidence} /></div>
                   <div className="grid grid-cols-3 gap-2 font-mono text-[12px]">
-                    <div><div className="text-slate-500">O₂</div><div className="text-[#9BEBFF]">{fmtRange(env.o2Pct, "%")}</div></div>
+                    <div><div className="text-slate-500">O₂</div><div className="text-dust-200">{fmtRange(env.o2Pct, "%")}</div></div>
                     <div><div className="text-slate-500">pressure</div><div className="text-indigo-200">{fmtRange(env.pressureKpa, " kPa")}</div></div>
                     <div><div className="text-slate-500">flow</div><div className="text-emerald-200">{fmtRange(env.flowCmS, " cm/s")}</div></div>
                   </div>

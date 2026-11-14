@@ -47,12 +47,12 @@ export function Boot() {
           <div className="panel w-[min(560px,90vw)] p-6 font-mono text-[12.5px]">
             {LINES.slice(0, n).map((l, i) => (
               <motion.div key={l} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
-                className={i === 0 ? "mb-3 text-ox" : i === LINES.length - 1 ? "mt-3 tracking-[0.2em] text-[#3DDC97]" : "text-slate-400"}>
+                className={i === 0 ? "mb-3 text-ox" : i === LINES.length - 1 ? "mt-3 tracking-[0.2em] text-dust-200" : "text-slate-400"}>
                 {l}
               </motion.div>
             ))}
             <div className="mt-6 h-[2px] w-full overflow-hidden rounded bg-slate-800">
-              <motion.div className="h-full bg-ox shadow-[0_0_8px_#19C9FF]"
+              <motion.div className="h-full bg-ox shadow-[0_0_8px_#8a8178]"
                 animate={{ width: `${(n / LINES.length) * 100}%` }} />
             </div>
             <div className="mt-3 flex justify-between text-[10px] tracking-[0.14em] text-slate-600"><span>CLICK TO SKIP</span><span className="tabular-nums">{Math.round((n / LINES.length) * 100)}%</span></div>

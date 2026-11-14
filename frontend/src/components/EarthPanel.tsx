@@ -12,7 +12,7 @@ import { PageHeader } from "./ui";
 const S = { fill: "none", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 
 function Art({ kind }: { kind: string }) {
-  const c = "#48BFFF", o = "#FF8B32", a = "#FFC15B";
+  const c = "#a39a90", o = "#FFD23F", a = "#c2bab0";
   const body = {
     mist: (<>
       <path d="M22 66h22v-8H22z" stroke={c} {...S} /><path d="M30 58V44h6v14M36 48h10l4 4" stroke={c} {...S} />
@@ -22,7 +22,7 @@ function Art({ kind }: { kind: string }) {
     smoke: (<>
       <path d="M22 26h64" stroke={c} {...S} /><path d="M32 26v8a22 8 0 0 0 44 0v-8" stroke={c} {...S} />
       <circle cx="54" cy="36" r="3" fill={a} /><path d="M46 36h-6M68 36h-6" stroke={c} {...S} opacity=".6" />
-      <path d="M40 74c-6-6 4-8-2-15M54 78c-6-7 5-9-1-17M68 74c-6-6 4-8-2-15" stroke="#A5B8D2" {...S} opacity=".7" />
+      <path d="M40 74c-6-6 4-8-2-15M54 78c-6-7 5-9-1-17M68 74c-6-6 4-8-2-15" stroke="#a39a90" {...S} opacity=".7" />
     </>),
     gear: (<>
       <path d="M26 62c0-20 12-32 28-32s28 12 28 32" stroke={c} {...S} /><path d="M20 62h68v6H20z" stroke={c} {...S} />
@@ -32,11 +32,11 @@ function Art({ kind }: { kind: string }) {
     material: (<>
       <rect x="44" y="36" width="20" height="44" rx="2" stroke={c} {...S} />
       <path d="M54 36c-8-6 0-12-3-20 8 5 12 12 7 20" stroke={o} {...S} /><path d="M54 36c-3-3 1-6 0-10 3 3 4 6 2 10" stroke={a} {...S} />
-      <path d="M30 80h48" stroke="#A5B8D2" {...S} /><path d="M70 50h10M70 58h7M70 66h10" stroke={c} {...S} opacity=".6" />
+      <path d="M30 80h48" stroke="#a39a90" {...S} /><path d="M70 50h10M70 58h7M70 66h10" stroke={c} {...S} opacity=".6" />
     </>),
     combustion: (<>
       <circle cx="54" cy="54" r="22" stroke={c} {...S} /><circle cx="54" cy="54" r="12" stroke={c} {...S} opacity=".6" />
-      <path d="M54 62c-6-4 0-9-2-14 6 3 9 9 4 14" stroke="#19C9FF" {...S} />
+      <path d="M54 62c-6-4 0-9-2-14 6 3 9 9 4 14" stroke="#5a6e94" {...S} />
       <path d="M22 54h10M76 54h10M54 22v10M54 76v10" stroke={a} {...S} opacity=".7" />
     </>),
     confined: (<>
@@ -68,15 +68,15 @@ function EarthHero({ apps, links }: { apps: number; links: number }) {
     <section className="relative mb-6 overflow-hidden rounded-[18px] border border-[var(--line)] bg-space-950">
       <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice" aria-hidden>
         <defs>
-          <radialGradient id="eh-planet" cx="38%" cy="30%" r="80%"><stop offset="0" stopColor="#2f86ff" /><stop offset="0.55" stopColor="#0b3a8c" /><stop offset="1" stopColor="#04112a" /></radialGradient>
-          <radialGradient id="eh-atmo" cx="50%" cy="50%" r="50%"><stop offset="0.86" stopColor="#19C9FF" stopOpacity="0" /><stop offset="0.93" stopColor="#19C9FF" stopOpacity="0.35" /><stop offset="1" stopColor="#19C9FF" stopOpacity="0" /></radialGradient>
+          <radialGradient id="eh-planet" cx="38%" cy="30%" r="80%"><stop offset="0" stopColor="#3a4b6e" /><stop offset="0.55" stopColor="#1d2a40" /><stop offset="1" stopColor="#0a111d" /></radialGradient>
+          <radialGradient id="eh-atmo" cx="50%" cy="50%" r="50%"><stop offset="0.86" stopColor="#5a6e94" stopOpacity="0" /><stop offset="0.93" stopColor="#5a6e94" stopOpacity="0.35" /><stop offset="1" stopColor="#5a6e94" stopOpacity="0" /></radialGradient>
         </defs>
         <circle cx="930" cy="560" r="470" fill="url(#eh-atmo)" />
         <circle cx="930" cy="560" r="430" fill="url(#eh-planet)" />
-        <path d="M640 330c80-40 160-20 230-60s170-30 240 0" stroke="#5fd39a" strokeOpacity=".22" strokeWidth="18" fill="none" />
-        <ellipse cx="930" cy="560" rx="540" ry="150" fill="none" stroke="#48BFFF" strokeOpacity=".35" strokeDasharray="3 7" transform="rotate(-8 930 560)" />
+        <path d="M640 330c80-40 160-20 230-60s170-30 240 0" stroke="#a39a90" strokeOpacity=".22" strokeWidth="18" fill="none" />
+        <ellipse cx="930" cy="560" rx="540" ry="150" fill="none" stroke="#a39a90" strokeOpacity=".35" strokeDasharray="3 7" transform="rotate(-8 930 560)" />
         <g transform="translate(560 128) rotate(-8)">
-          <rect x="-16" y="-2" width="32" height="4" fill="#DCE7F5" /><rect x="-26" y="-7" width="8" height="14" fill="#c79a3a" /><rect x="18" y="-7" width="8" height="14" fill="#c79a3a" />
+          <rect x="-16" y="-2" width="32" height="4" fill="#d8d1c7" /><rect x="-26" y="-7" width="8" height="14" fill="#8a8178" /><rect x="18" y="-7" width="8" height="14" fill="#8a8178" />
         </g>
       </svg>
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,8,20,0.95),rgba(3,8,20,0.6)_45%,transparent_75%)]" />
@@ -118,7 +118,7 @@ function AppRow({ s, i }: { s: Spinoff; i: number }) {
           <ul className="space-y-2">
             {invs.slice(0, 3).map((inv) => (
               <li key={inv!.id} className="text-[12.5px] leading-snug">
-                <button onClick={() => openInvestigation(inv!.id)} className="font-mono text-[11.5px] text-[#9BE6FF] hover:underline">{inv!.id}</button>
+                <button onClick={() => openInvestigation(inv!.id)} className="font-mono text-[11.5px] text-[#c2bab0] hover:underline">{inv!.id}</button>
                 <span className="text-slate-400"> · {inv!.objective.length > 110 ? inv!.objective.slice(0, 108) + "…" : inv!.objective}</span>
               </li>
             ))}

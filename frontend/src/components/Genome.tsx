@@ -11,7 +11,7 @@ import { ConfidenceBadge, ErrorNote, PageHeader, Skeleton } from "./ui";
 
 const W = 1100, H = 680;
 export const REL_COLOR: Record<string, string> = {
-  "follow-on": "#19C9FF", discovery: "#FF8B32", "shared-instrument": "#FFC15B", "proxy-for": "#48BFFF", informs: "#DCE7F5",
+  "follow-on": "#c2bab0", discovery: "#FFD23F", "shared-instrument": "#ffe08a", "proxy-for": "#8a8178", informs: "#d8d1c7",
 };
 const DEPTH: Record<GenomeNode["kind"], number> = { facility: 0.25, apparatus: 0.6, investigation: 1 };
 type P = GenomeNode & { x: number; y: number; r: number; lw: number };
@@ -145,9 +145,9 @@ export function Genome({ embedded = false }: { embedded?: boolean }) {
               <svg viewBox={`0 0 ${W} ${H}`} className="block w-full min-w-[760px]" onMouseMove={onMove} onMouseLeave={() => setM({ x: 0, y: 0 })}
                 onClick={() => setSel(null)} role="img" aria-label="Investigation lineage graph">
                 <defs>
-                  <radialGradient id="g-fac" cx="40%" cy="35%"><stop offset="0" stopColor="#1b3354" /><stop offset="1" stopColor="#071225" /></radialGradient>
-                  <radialGradient id="g-sel"><stop offset="0" stopColor="#FF8B32" stopOpacity="0.45" /><stop offset="1" stopColor="#FF8B32" stopOpacity="0" /></radialGradient>
-                  <radialGradient id="g-hot"><stop offset="0" stopColor="#19C9FF" stopOpacity="0.35" /><stop offset="1" stopColor="#19C9FF" stopOpacity="0" /></radialGradient>
+                  <radialGradient id="g-fac" cx="40%" cy="35%"><stop offset="0" stopColor="#26344a" /><stop offset="1" stopColor="#0e1726" /></radialGradient>
+                  <radialGradient id="g-sel"><stop offset="0" stopColor="#FFD23F" stopOpacity="0.45" /><stop offset="1" stopColor="#FFD23F" stopOpacity="0" /></radialGradient>
+                  <radialGradient id="g-hot"><stop offset="0" stopColor="#c2bab0" stopOpacity="0.35" /><stop offset="1" stopColor="#c2bab0" stopOpacity="0" /></radialGradient>
                 </defs>
                 <style>{`.flow{animation:dash 2.2s linear infinite}@keyframes dash{to{stroke-dashoffset:-18}}`}</style>
                 {/* edges */}
@@ -159,7 +159,7 @@ export function Genome({ embedded = false }: { embedded?: boolean }) {
                   const mx = (a.x + b.x) / 2 + (rel ? (b.y - a.y) * 0.2 : 0), my = (a.y + b.y) / 2 - (rel ? (b.x - a.x) * 0.2 : 0);
                   return (
                     <path key={i} d={`M${a.x},${a.y} Q${mx},${my} ${b.x},${b.y}`} fill="none" className={rel && on ? "flow" : undefined}
-                      stroke={rel ?? "#2a3e5e"} strokeWidth={rel ? 1.7 : 1} strokeDasharray={rel ? "6 3" : undefined}
+                      stroke={rel ?? "#2a3240"} strokeWidth={rel ? 1.7 : 1} strokeDasharray={rel ? "6 3" : undefined}
                       style={{ opacity: on ? (rel ? 0.95 : 0.6) : hover ? 0.06 : rel ? 0.45 : 0.3, transition: "opacity .25s" }}>
                       {e.note && <title>{`${e.source} → ${e.target}: ${e.type} · ${e.note}`}</title>}
                     </path>
@@ -170,8 +170,8 @@ export function Genome({ embedded = false }: { embedded?: boolean }) {
                   const n = pos.get(p0.id)!;
                   const chosen = sel === n.id;
                   const inPair = pair?.includes(n.id);
-                  const color = n.kind === "facility" ? "#A5B8D2" : n.kind === "apparatus" ? "#48BFFF"
-                    : n.status === "pending" ? "#8FD8FF" : PHASE_COLOR[n.fuelPhase?.[0] ?? ""] ?? "#A5B8D2";
+                  const color = n.kind === "facility" ? "#a39a90" : n.kind === "apparatus" ? "#8a8178"
+                    : n.status === "pending" ? "#c2bab0" : PHASE_COLOR[n.fuelPhase?.[0] ?? ""] ?? "#a39a90";
                   return (
                     <motion.g key={n.id} initial={{ opacity: 0 }} animate={{ opacity: nodeOpacity(n.id) }}
                       transition={{ delay: graph ? 0.1 + i * 0.01 : 0, duration: 0.3 }}
@@ -182,18 +182,18 @@ export function Genome({ embedded = false }: { embedded?: boolean }) {
                       {!chosen && hover === n.id && <circle cx={n.x} cy={n.y} r={n.r + 14} fill="url(#g-hot)" />}
                       {n.kind === "facility" ? (
                         <>
-                          <circle cx={n.x} cy={n.y} r={n.r + 7} fill="none" stroke="#2a3e5e" strokeDasharray="2 4" />
-                          <circle cx={n.x} cy={n.y} r={n.r} fill="url(#g-fac)" stroke={chosen ? "#FF8B32" : "#566C8E"} strokeWidth={chosen ? 2 : 1.2} />
+                          <circle cx={n.x} cy={n.y} r={n.r + 7} fill="none" stroke="#2a3240" strokeDasharray="2 4" />
+                          <circle cx={n.x} cy={n.y} r={n.r} fill="url(#g-fac)" stroke={chosen ? "#FFD23F" : "#8a8178"} strokeWidth={chosen ? 2 : 1.2} />
                           <text x={n.x} y={n.label.length <= 5 ? n.y + 4 : n.y + n.r + 15} textAnchor="middle" className="fill-slate-200 font-mono text-[10.5px] font-semibold">{labelOf(n)}</text>
                         </>
                       ) : (
                         <>
-                          <circle cx={n.x} cy={n.y} r={n.r} fill={n.kind === "investigation" ? `${color}2e` : "#0B1930"}
-                            stroke={chosen ? "#FF8B32" : inPair ? "#FFC15B" : color} strokeWidth={chosen ? 2.4 : inPair ? 2 : 1.4}
+                          <circle cx={n.x} cy={n.y} r={n.r} fill={n.kind === "investigation" ? `${color}2e` : "#0e1726"}
+                            stroke={chosen ? "#FFD23F" : inPair ? "#ffe08a" : color} strokeWidth={chosen ? 2.4 : inPair ? 2 : 1.4}
                             strokeDasharray={n.status === "pending" ? "3 2" : undefined} />
                           {n.kind === "investigation" && <circle cx={n.x} cy={n.y} r={2.4} fill={color} />}
                           <text x={n.x} y={n.y + n.r + 13} textAnchor="middle"
-                            className={n.kind === "apparatus" ? "fill-[#8fc3ff] text-[10.5px]" : "fill-slate-200 font-mono text-[11px]"}>{labelOf(n)}</text>
+                            className={n.kind === "apparatus" ? "fill-[#c2bab0] text-[10.5px]" : "fill-slate-200 font-mono text-[11px]"}>{labelOf(n)}</text>
                         </>
                       )}
                       <title>{n.name ?? n.label}</title>
@@ -228,7 +228,7 @@ export function Genome({ embedded = false }: { embedded?: boolean }) {
                     <div className="mt-4 flex flex-wrap items-center gap-1.5 text-[11.5px]">
                       <span className="rounded-[6px] border border-[var(--line)] px-2 py-0.5 text-slate-300">{inv.facility}</span>
                       <span className="text-slate-600">→</span>
-                      <span className="rounded-[6px] border border-[var(--line)] px-2 py-0.5 text-[#8fc3ff]">{inv.apparatus ?? "apparatus n/a"}</span>
+                      <span className="rounded-[6px] border border-[var(--line)] px-2 py-0.5 text-[#c2bab0]">{inv.apparatus ?? "apparatus n/a"}</span>
                       <span className="text-slate-600">→</span>
                       <span className="rounded-[6px] border border-ox/40 px-2 py-0.5 text-ink">{inv.id}</span>
                     </div>
@@ -292,7 +292,7 @@ export function Genome({ embedded = false }: { embedded?: boolean }) {
             <div className="mb-4 flex flex-wrap items-center gap-3">
               <ArrowLeftRight className="h-4 w-4 text-ox" />
               <h3 className="font-display text-[18px] font-semibold text-ink">{cmp.a.id} <span className="text-slate-500">vs</span> {cmp.b.id}</h3>
-              {cmp.sharedHardware.length > 0 && <span className="rounded-[6px] border border-ox/30 bg-ox/[0.06] px-2 py-0.5 text-[11.5px] text-[#9BE6FF]">shared: {cmp.sharedHardware.join(", ")}</span>}
+              {cmp.sharedHardware.length > 0 && <span className="rounded-[6px] border border-ox/30 bg-ox/[0.06] px-2 py-0.5 text-[11.5px] text-[#c2bab0]">shared: {cmp.sharedHardware.join(", ")}</span>}
               <button onClick={() => setPair(null)} className="ml-auto grid h-8 w-8 place-items-center rounded-lg text-mute hover:bg-white/5 hover:text-ink" aria-label="Clear comparison"><X className="h-4 w-4" /></button>
             </div>
             <ul className="mb-4 space-y-1 text-[13px] text-slate-300">{cmp.summary.map((s) => <li key={s}>› {s}</li>)}</ul>

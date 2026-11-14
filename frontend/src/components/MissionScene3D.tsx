@@ -131,7 +131,7 @@ void main(){
 function Planet({ position, radius, sun, spin = 0.01 }: { position: [number, number, number]; radius: number; sun: THREE.Vector3; spin?: number }) {
   const ref = useRef<THREE.Mesh>(null);
   const u = useMemo(() => ({ uSun: { value: sun.clone() }, uTime: { value: 0 } }), [sun]);
-  const ua = useMemo(() => ({ uSun: { value: sun.clone() }, uColor: { value: new THREE.Color("#4aa3ff") } }), [sun]);
+  const ua = useMemo(() => ({ uSun: { value: sun.clone() }, uColor: { value: new THREE.Color("#5a6e94") } }), [sun]); // desaturated navy limb
   useFrame((_, dt) => {
     u.uTime.value += dt;
     if (ref.current) ref.current.rotation.y += dt * spin;
@@ -166,7 +166,7 @@ function StarDome({ count = 2400 }: { count?: number }) {
   }, [count]);
   return (
     <points geometry={geo}>
-      <pointsMaterial size={1.3} sizeAttenuation={false} color="#dbe8ff" transparent opacity={0.8} depthWrite={false} />
+      <pointsMaterial size={1.3} sizeAttenuation={false} color="#d8d1c7" transparent opacity={0.8} depthWrite={false} />
     </points>
   );
 }
@@ -184,7 +184,7 @@ function Module({ length, angle, radius = 0.55 }: { length: number; angle: numbe
       {[-0.35, 0, 0.35].map((o) => (
         <mesh key={o} position={[radius * 0.98, o * length, 0]}>
           <boxGeometry args={[0.04, length * 0.18, 0.16]} />
-          <meshStandardMaterial color="#ffcf8a" emissive="#ffb35c" emissiveIntensity={2.2} />
+          <meshStandardMaterial color="#ffe08a" emissive="#FFD23F" emissiveIntensity={2.2} />
         </mesh>
       ))}
       {[-0.5, 0.5].map((o) => (
@@ -202,8 +202,8 @@ function SolarArray({ position, rows = 2, cols = 4, rot = 0 }: { position: [numb
         const r = Math.floor(i / cols), c = i % cols;
         return (
           <group key={i} position={[c * 1.2, 0.55, r * 1.05]} rotation={[-0.55, 0, 0]}>
-            <mesh><boxGeometry args={[1.1, 0.03, 0.7]} /><meshStandardMaterial color="#0d2a6e" emissive="#0a3fa8" emissiveIntensity={0.35} metalness={0.85} roughness={0.25} /></mesh>
-            <lineSegments geometry={edges}><lineBasicMaterial color="#6fb6ff" transparent opacity={0.5} /></lineSegments>
+            <mesh><boxGeometry args={[1.1, 0.03, 0.7]} /><meshStandardMaterial color="#152033" emissive="#1d2a40" emissiveIntensity={0.35} metalness={0.85} roughness={0.25} /></mesh>
+            <lineSegments geometry={edges}><lineBasicMaterial color="#3a4b6e" transparent opacity={0.5} /></lineSegments>
             <mesh position={[0, -0.32, 0.12]} rotation={[0.55, 0, 0]}><cylinderGeometry args={[0.025, 0.025, 0.6, 6]} /><meshStandardMaterial color="#5c6675" /></mesh>
           </group>
         );
@@ -217,7 +217,7 @@ function Beacon({ position }: { position: [number, number, number] }) {
   useFrame(({ clock }) => {
     if (ref.current) ref.current.emissiveIntensity = Math.sin(clock.elapsedTime * 3) > 0.6 ? 6 : 0.4;
   });
-  return <mesh position={position}><sphereGeometry args={[0.07, 12, 12]} /><meshStandardMaterial ref={ref} color="#ff4b3e" emissive="#ff4b3e" emissiveIntensity={4} /></mesh>;
+  return <mesh position={position}><sphereGeometry args={[0.07, 12, 12]} /><meshStandardMaterial ref={ref} color="#FFD23F" emissive="#FFD23F" emissiveIntensity={4} /></mesh>;
 }
 
 function Habitat({ withRover }: { withRover: boolean }) {
@@ -235,20 +235,21 @@ function Habitat({ withRover }: { withRover: boolean }) {
       {/* geodesic dome */}
       <mesh position={[0, 0.3, 0]}>
         <sphereGeometry args={[2, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshPhysicalMaterial color="#9fd2ff" transparent opacity={0.16} roughness={0.08} metalness={0.2} emissive="#0b4aa8" emissiveIntensity={0.35} side={THREE.DoubleSide} depthWrite={false} />
+        <meshPhysicalMaterial color="#8fa6c4" transparent opacity={0.16} roughness={0.08} metalness={0.2} emissive="#1d2a40" emissiveIntensity={0.35} side={THREE.DoubleSide} depthWrite={false} />
       </mesh>
-      <lineSegments geometry={domeEdges} position={[0, 0.3, 0]}><lineBasicMaterial color="#cfe9ff" transparent opacity={0.6} /></lineSegments>
-      <pointLight position={[0, 0.9, 0]} color="#ffb070" intensity={14} distance={7} decay={1.6} />
-      <mesh position={[0, 0.32, 0]} rotation={[-Math.PI / 2, 0, 0]}><circleGeometry args={[1.9, 48]} /><meshStandardMaterial color="#1a2433" emissive="#ff9a4a" emissiveIntensity={0.25} /></mesh>
+      <lineSegments geometry={domeEdges} position={[0, 0.3, 0]}><lineBasicMaterial color="#c2bab0" transparent opacity={0.55} /></lineSegments>
+      {/* interior light — the only yellow in the scene */}
+      <pointLight position={[0, 0.9, 0]} color="#FFD23F" intensity={14} distance={7} decay={1.6} />
+      <mesh position={[0, 0.32, 0]} rotation={[-Math.PI / 2, 0, 0]}><circleGeometry args={[1.9, 48]} /><meshStandardMaterial color="#1a2433" emissive="#FFD23F" emissiveIntensity={0.25} /></mesh>
       {/* interior structures seen through the glass */}
       {[[-0.6, 0.3], [0.5, -0.4], [0.2, 0.7]].map(([x, z], i) => (
-        <mesh key={i} position={[x, 0.65, z]}><boxGeometry args={[0.5, 0.6, 0.4]} /><meshStandardMaterial color="#d9dee6" emissive="#ffcf8a" emissiveIntensity={0.25} /></mesh>
+        <mesh key={i} position={[x, 0.65, z]}><boxGeometry args={[0.5, 0.6, 0.4]} /><meshStandardMaterial color="#d9dee6" emissive="#FFD23F" emissiveIntensity={0.22} /></mesh>
       ))}
       {/* ring foundation */}
       <mesh position={[0, 0.16, 0]}><cylinderGeometry args={[2.18, 2.3, 0.34, 64]} /><meshStandardMaterial {...METAL} color="#8d98a8" /></mesh>
       {Array.from({ length: 24 }, (_, i) => {
         const a = (i / 24) * Math.PI * 2;
-        return <mesh key={i} position={[Math.cos(a) * 2.31, 0.22, Math.sin(a) * 2.31]}><boxGeometry args={[0.06, 0.06, 0.06]} /><meshStandardMaterial color="#9fe2ff" emissive="#19c9ff" emissiveIntensity={2} /></mesh>;
+        return <mesh key={i} position={[Math.cos(a) * 2.31, 0.22, Math.sin(a) * 2.31]}><boxGeometry args={[0.06, 0.06, 0.06]} /><meshStandardMaterial color="#9fb0cc" emissive="#3a4b6e" emissiveIntensity={1.6} /></mesh>;
       })}
       {/* modules */}
       <Module length={2.8} angle={Math.PI} />
@@ -259,7 +260,7 @@ function Habitat({ withRover }: { withRover: boolean }) {
         <mesh position={[0, 1.1, 0]}><cylinderGeometry args={[0.55, 0.62, 2.2, 28]} /><meshStandardMaterial {...METAL} /></mesh>
         <mesh position={[0, 2.25, 0]}><cylinderGeometry args={[0.35, 0.55, 0.3, 28]} /><meshStandardMaterial {...METAL} color="#a8b3c2" /></mesh>
         {[0.5, 1.2, 1.8].map((y) => (
-          <mesh key={y} position={[0.52, y, 0.18]}><boxGeometry args={[0.04, 0.14, 0.22]} /><meshStandardMaterial color="#ffcf8a" emissive="#ffb35c" emissiveIntensity={2.4} /></mesh>
+          <mesh key={y} position={[0.52, y, 0.18]}><boxGeometry args={[0.04, 0.14, 0.22]} /><meshStandardMaterial color="#9fb0cc" emissive="#3a4b6e" emissiveIntensity={2} /></mesh>
         ))}
         <mesh position={[0, 4.0, 0]}><cylinderGeometry args={[0.03, 0.05, 3.4, 8]} /><meshStandardMaterial color="#c7cfda" metalness={0.8} roughness={0.3} /></mesh>
         {[3.0, 3.6, 4.2].map((y, i) => (
@@ -272,12 +273,12 @@ function Habitat({ withRover }: { withRover: boolean }) {
       <SolarArray position={[-6.4, 0, -2.4]} rows={2} cols={3} rot={0.25} />
       {/* pad path lights */}
       {Array.from({ length: 16 }, (_, i) => (
-        <mesh key={i} position={[-3.4 - i * 0.55, 0.05, 2.6 + i * 0.42]}><sphereGeometry args={[0.045, 8, 8]} /><meshStandardMaterial color="#ffb35c" emissive="#ff8b32" emissiveIntensity={3.2} /></mesh>
+        <mesh key={i} position={[-3.4 - i * 0.55, 0.05, 2.6 + i * 0.42]}><sphereGeometry args={[0.045, 8, 8]} /><meshStandardMaterial color="#c7cfda" emissive="#5a6e94" emissiveIntensity={2.6} /></mesh>
       ))}
       {withRover && (
         <group position={[-5.2, 0, 3.4]} rotation={[0, 0.5, 0]}>
           <mesh position={[0, 0.62, 0]}><boxGeometry args={[2.2, 0.7, 1.2]} /><meshStandardMaterial {...METAL} /></mesh>
-          <mesh position={[0.75, 0.92, 0]}><boxGeometry args={[0.7, 0.42, 1.0]} /><meshStandardMaterial color="#1f3b66" emissive="#ffb35c" emissiveIntensity={0.35} metalness={0.6} roughness={0.2} /></mesh>
+          <mesh position={[0.75, 0.92, 0]}><boxGeometry args={[0.7, 0.42, 1.0]} /><meshStandardMaterial color="#1d2a40" emissive="#FFD23F" emissiveIntensity={0.3} metalness={0.6} roughness={0.2} /></mesh>
           {[[-0.75, 0.62], [0.75, 0.62], [-0.75, -0.62], [0.75, -0.62]].map(([x, z], i) => (
             <mesh key={i} position={[x, 0.3, z]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.3, 0.3, 0.22, 20]} /><meshStandardMaterial color="#3b4350" roughness={0.9} /></mesh>
           ))}
@@ -301,7 +302,7 @@ function Station() {
       {[-4, -2.9, 2.9, 4].map((x) => (
         <group key={x} position={[x, 0, 0]}>
           {[1, -1].map((s) => (
-            <mesh key={s} position={[0, 0, s * 1.8]}><boxGeometry args={[0.9, 0.03, 3.2]} /><meshStandardMaterial color="#c79a3a" emissive="#5a3a08" emissiveIntensity={0.35} metalness={0.9} roughness={0.25} /></mesh>
+            <mesh key={s} position={[0, 0, s * 1.8]}><boxGeometry args={[0.9, 0.03, 3.2]} /><meshStandardMaterial color="#152033" emissive="#1d2a40" emissiveIntensity={0.35} metalness={0.9} roughness={0.25} /></mesh>
           ))}
         </group>
       ))}
@@ -334,14 +335,15 @@ function Scene({ env, withRover, still }: { env: Environment; withRover: boolean
   const surface = env === "lunar" || env === "mars";
   const camBase = useMemo(() => new THREE.Vector3(...(surface ? [-0.5 + pull * 2.2, 3.0 + pull * 1.2, 15 + pull * 9] : [0, 1.5, 14 + pull * 8]) as [number, number, number]), [surface, pull]);
   const target = useMemo(() => new THREE.Vector3(...(surface ? [1.6 + pull * 1.6, 2.6 - pull * 0.6, -2] : [2, 0.5, -4]) as [number, number, number]), [surface, pull]);
-  const fogColor = env === "mars" ? "#2b140d" : "#030814";
+  const fogColor = env === "mars" ? "#1a1210" : "#0a111d";
   return (
     <>
-      <color attach="background" args={[env === "mars" ? "#140a0a" : "#030814"]} />
+      <color attach="background" args={[env === "mars" ? "#1a1210" : "#0a111d"]} />
       {surface && <fog attach="fog" args={[fogColor, 26, env === "mars" ? 60 : 85]} />}
-      <ambientLight intensity={env === "mars" ? 0.4 : 0.28} color={env === "mars" ? "#ffb08a" : "#9fbfff"} />
-      <hemisphereLight args={[env === "mars" ? "#ffcfb0" : "#a8c8ff", "#0a0f18", 0.25]} />
-      <directionalLight position={sun.clone().multiplyScalar(30).toArray()} intensity={env === "mars" ? 2.0 : 3.4} color={env === "mars" ? "#ffd2a8" : "#fff4e6"} />
+      {/* cool taupe-navy ambient + a single warm key light */}
+      <ambientLight intensity={env === "mars" ? 0.4 : 0.3} color={env === "mars" ? "#8a7a6e" : "#5a6374"} />
+      <hemisphereLight args={[env === "mars" ? "#8a7466" : "#3a4b6e", "#0a111d", 0.25]} />
+      <directionalLight position={sun.clone().multiplyScalar(30).toArray()} intensity={env === "mars" ? 2.0 : 3.4} color="#ffe9cf" />
       <StarDome count={env === "mars" ? 900 : 2400} />
       {env === "lunar" && <Planet position={[9.5 + pull * 9, 12.5 + pull * 3, -40]} radius={5.4} sun={sun} />}
       {env === "mars" && (

@@ -5,7 +5,7 @@ import { ArrowRight, Check, ChevronDown, Copy, Download, FileSearch, FileText, G
 import { useEffect, useMemo, useRef, useState } from "react";
 import { firstSentence } from "@/lib/answer";
 import { api, streamSSE } from "@/lib/api";
-import { PILLAR_COLOR, toPsi } from "@/lib/format";
+import { fmtGravity, PILLAR_COLOR, toPsi } from "@/lib/format";
 import { useMission } from "@/lib/mission";
 import type { BriefCards, Investigation, Pillar } from "@/lib/types";
 import { CitedMarkdown } from "./CitedMarkdown";
@@ -32,9 +32,9 @@ function citesIn(body: string) {
 }
 function strength(body: string, n: number) {
   const insufficient = /insufficient evidence/i.test(body);
-  if (insufficient && n < 2) return { level: 1, label: "Insufficient", color: "#FF8B32" };
-  if (n >= 3 && !insufficient) return { level: 3, label: "Strong", color: "#34D399" };
-  return { level: 2, label: "Moderate", color: "#FFC15B" };
+  if (insufficient && n < 2) return { level: 1, label: "Insufficient", color: "#FFD23F" };
+  if (n >= 3 && !insufficient) return { level: 3, label: "Strong", color: "#efeae3" };
+  return { level: 2, label: "Moderate", color: "#a39a90" };
 }
 
 function StrengthMeter({ body, n }: { body: string; n: number }) {
@@ -66,7 +66,7 @@ function EvidencePanel({ ids, pillar, byId, onOpen }: { ids: string[]; pillar?: 
               return (
                 <li key={id} className="border-t border-[var(--line)] px-4 py-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[12px] text-[#9BE6FF]">{id}</span>
+                    <span className="font-mono text-[12px] text-dust-200">{id}</span>
                     <span className="text-[12px] text-mute">{inv.name}</span>
                     <ConfidenceBadge c={inv.conditions.confidence} />
                     <button onClick={() => onOpen(id)} className="ml-auto inline-flex items-center gap-1 text-[11.5px] text-ox hover:underline"><FileSearch className="h-3.5 w-3.5" />Dossier</button>
@@ -164,11 +164,17 @@ function FullBrief() {
             <span>Engineering guidance · verify against NASA PSI</span><span className="hidden sm:inline">{docNo}</span>
           </div>
           <header className="border-b border-[var(--line)] px-6 py-6 sm:px-9">
-            <div className="kicker !text-[10px] text-ox">FLAMEPRINT · SI brief</div>
-            <h2 className="mt-2 font-display text-[26px] font-semibold leading-tight text-ink">Fire Safety Brief: {hab?.name ?? "Custom mission"}</h2>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="kicker !text-[10px] text-ox">FLAMEPRINT · SI brief</div>
+                <h2 className="mt-2 font-display text-[26px] font-semibold leading-tight text-ink">Fire Safety Brief: {hab?.name ?? "Custom mission"}</h2>
+              </div>
+              <a href={hab ? `/passport?mission=${hab.id}` : `/passport?${new URLSearchParams({ o2: String(scenario.o2Pct), kpa: String(scenario.pressureKpa), g: String(scenario.gravityG), flow: String(scenario.flowCmS), phases: scenario.phases.join(",") })}`}
+                target="_blank" rel="noreferrer" className="btn btn-primary !py-1.5"><Download className="h-4 w-4" />Export Fire Passport</a>
+            </div>
             <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 text-[12.5px] sm:grid-cols-3 lg:grid-cols-6">
               {[
-                ["O₂", `${scenario.o2Pct} %`], ["Pressure", `${toPsi(scenario.pressureKpa)} psi`], ["Gravity", `${scenario.gravityG} g`],
+                ["O₂", `${scenario.o2Pct} %`], ["Pressure", `${toPsi(scenario.pressureKpa)} psi`], ["Gravity", `${fmtGravity(scenario.gravityG)} g`],
                 ["Ventilation", `${scenario.flowCmS} cm/s`], ["Evidence grade", analysis ? `${analysis.coverage.grade.letter} · ${analysis.coverage.grade.reason.split(";")[0]}` : "–"], ["Status", status],
               ].map(([k, v]) => (
                 <div key={k}><dt className="label !text-[9.5px]">{k}</dt><dd className="mt-0.5 font-mono text-[13px] text-ink">{v}</dd></div>
@@ -253,7 +259,7 @@ function FullBrief() {
                       <h3 className="font-display text-[17px] font-semibold text-ink">{key === "mission atmosphere" ? "Situation: mission atmosphere" : s.title}</h3>
                       {key === "evidence gaps" && <span className="ml-auto"><Evidence kind="catalog" label="From the gap detector" /></span>}
                     </div>
-                    <div className="mt-3" style={{ ["--bullet" as string]: key === "evidence gaps" ? "#FF8B32" : "#48BFFF" }}>
+                    <div className="mt-3" style={{ ["--bullet" as string]: key === "evidence gaps" ? "#FFD23F" : "#a39a90" }}>
                       <CitedMarkdown text={s.body} streaming={last} valid={valid} />
                     </div>
                   </motion.section>
@@ -326,7 +332,7 @@ function Cite({ id }: { id: string }) {
   const { openInvestigation } = useMission();
   return (
     <button onClick={() => openInvestigation(id)} title={`Open ${id}`}
-      className="rounded-[4px] border border-ox/35 bg-ox/10 px-1.5 align-baseline font-mono text-[10.5px] text-[#9BE6FF] transition-colors duration-150 hover:bg-ox/20">{id}</button>
+      className="rounded-[4px] border border-ox/35 bg-ox/10 px-1.5 align-baseline font-mono text-[10.5px] text-dust-200 transition-colors duration-150 hover:bg-ox/20">{id}</button>
   );
 }
 

@@ -101,7 +101,7 @@ function HabitatDiff() {
                       <span className="min-w-0 truncate text-ink">{m.name}</span>
                       <span className="flex shrink-0 items-center gap-1.5 text-[13px]">
                         <span style={{ color: LEVEL_STYLE[m.from].color }}>{LEVEL_STYLE[m.from].label}</span>
-                        <ArrowRight className="h-3.5 w-3.5" style={{ color: up ? "#FF5A4E" : "#34D399" }} aria-label={up ? "riskier" : "safer"} />
+                        <ArrowRight className="h-3.5 w-3.5" style={{ color: up ? "#FFD23F" : "#a39a90" }} aria-label={up ? "riskier" : "safer"} />
                         <span className="font-semibold" style={{ color: LEVEL_STYLE[m.to].color }}>{LEVEL_STYLE[m.to].label}</span>
                       </span>
                     </li>
@@ -150,7 +150,7 @@ function HabitatDiff() {
             {res.diff.rankMoves.map((m) => (
               <li key={m.id} className="flex justify-between gap-3">
                 <span className="text-ink">{m.id}</span>
-                <span className="font-mono" style={{ color: m.to < m.from ? "#34D399" : "#FF8B32" }}>#{m.from} → #{m.to}</span>
+                <span className="font-mono" style={{ color: m.to < m.from ? "#a39a90" : "#FFD23F" }}>#{m.from} → #{m.to}</span>
               </li>
             ))}
           </motion.ul>
