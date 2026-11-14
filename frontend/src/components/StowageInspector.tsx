@@ -13,7 +13,7 @@ import { Evidence, PageHeader } from "./ui";
 
 export const EXAMPLES = ["foam pillow", "cotton T-shirt", "acrylic window", "Velcro strap"];
 const MATCHED: Record<StowageResult["matchedBy"], string> = {
-  keyword: "matched by keyword", claude: "matched by Claude (from the fixed list)", none: "no match",
+  keyword: "matched by keyword", llm: "matched by the AI (from the fixed list)", none: "no match",
 };
 
 function useStowage() {

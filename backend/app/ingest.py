@@ -34,10 +34,11 @@ FIELD_PATTERNS: dict[str, list[str]] = {
     "investigationId": ["investigation", "experiment", "investigationid", "experimentid", "project", "study"],
     "id": ["testid", "test", "run", "runid", "testno", "testnumber", "point", "pointid", "id", "case", "caseid"],
     "o2Pct": ["o2", "oxygen", "xo2", "o2concentration", "oxygenconcentration", "o2molefraction", "oxygenfraction",
-              "yo2", "o2fraction", "o2pct", "o2percent", "ambiento2", "oxidizero2"],
+              "yo2", "o2fraction", "o2pct", "o2percent", "ambiento2", "oxidizero2", "percento2", "o2byvol",
+              "initialo2", "o2vol"],
     "pressureKpa": ["pressure", "p", "chamberpressure", "ambientpressure", "totalpressure", "cabinpressure"],
-    "flowCmS": ["flow", "flowspeed", "flowvelocity", "velocity", "airflow", "airspeed", "u", "uinf", "freestream",
-                "flowrate_cms", "ventilation", "coflowvelocity", "coflow"],
+    "flowCmS": ["flow", "flowspeed", "flowvelocity", "velocity", "airflow", "airspeed", "airrate", "u", "uinf",
+                "freestream", "flowrate_cms", "ventilation", "coflowvelocity", "coflow", "airvelocity"],
     "gravityG": ["gravity", "g", "glevel", "gravitylevel", "accel", "acceleration"],
     "fuel": ["fuel", "material", "sample", "samplematerial", "fueltype", "fuelname"],
     "diluent": ["diluent", "inert", "suppressant", "dilutent", "inertgas"],
@@ -132,9 +133,10 @@ FUZZY_SKIP = {"test", "case", "point", "sample", "status", "result"}
 def _reject(fld: str, nh: str, unit: str) -> bool:
     """Guard fuzzy matches that would be physically wrong (e.g. fuel flow rate ≠ air flow speed)."""
     if fld == "flowCmS":
-        return "fuel" in nh or any(u in unit for u in ("sccm", "slpm", "lpm", "mg/s", "g/s", "kg"))
+        return ("fuel" in nh or "restrictor" in nh
+                or any(u in unit for u in ("sccm", "slpm", "lpm", "mg/s", "g/s", "kg")))
     if fld == "o2Pct":
-        return any(x in nh for x in ("flow", "rate", "partial", "pressure"))
+        return any(x in nh for x in ("flowrate", "fuelrate", "partial", "pressure", "co2"))
     if fld == "pressureKpa":
         return "partial" in nh and "o2" not in nh
     return False
@@ -161,6 +163,14 @@ def map_columns(headers: list[str]) -> dict[str, str]:
                     mapping[fld] = h
                     used.add(h)
                     break
+    # Prefer a real fuel/material column over a bare sample/test id for 'fuel'
+    if "fuel" in mapping and normed[mapping["fuel"]] in {"sample", "test", "point", "case", "run"}:
+        better = next((h for h in headers
+                       if h not in used and ("fuel" in normed[h] or "material" in normed[h])), None)
+        if better:
+            used.discard(mapping["fuel"])
+            mapping["fuel"] = better
+            used.add(better)
     return mapping
 
 

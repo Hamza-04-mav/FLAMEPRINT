@@ -41,7 +41,7 @@ atmosphere · **C** only bracketed (partial gravity caps everything at C) · **M
 | Challenge objective | FLAMEPRINT feature |
 |---|---|
 | Identify investigations most relevant to crewed habitats | **Mission scenario builder** (presets for ISS, Moon Base, rover, Mars, suit and Earth, or custom O₂ / pressure / flow / gravity / fuels / safety focus) → **explainable ranking**. Every score breaks into 6 factors with plain-English reasons, and the weights are live sliders. |
-| Summarize, rank, interpret | **SI brief** (Claude, streamed) built only from a deterministic evidence packet. Citations are verified against that packet, and the brief says "Insufficient evidence" rather than guessing. Works offline through a deterministic writer. |
+| Summarize, rank, interpret | **SI brief** (Groq openai/gpt-oss-120b, streamed) built only from a deterministic evidence packet. Citations are verified against that packet, and the brief says "Insufficient evidence" rather than guessing. Works offline through a deterministic writer. |
 | Extract data for predictive modeling | **Data Lab**: drop in PSI CSV/XLSX/JSON/PDF. Columns are mapped automatically with unit conversion, condition envelopes are derived from test records, and a **model-ready CSV export** joins tests with investigation metadata. |
 | Compare similarities and differences | **Investigation genome**: a hardware lineage graph (CIR → MDCA → FLEX/FLEX-2/CFI, MSG → SPICE duct → BASS/BASS-II/SLICE, SAME → DAFT shared instrument) plus a side-by-side diff of any two investigations. |
 | Find where knowledge stops | **Evidence-gap detector** and **3D condition-space map** (O₂ × pressure × flow) with the mission beacon. Flags critical gaps such as *"No 0.17 g data in PSI"* and *"Solids untested above 21 % O₂ in μg"*. |
@@ -79,8 +79,8 @@ atmosphere · **C** only bracketed (partial gravity caps everything at C) · **M
 │  ingest.py   CSV/TSV/XLSX/JSON/PDF/TXT → normalized records (mapping + unit conv.)  │
 │  store.py    files = source of truth → index → PostgreSQL+pgvector or in-memory     │
 │  brief.py    evidence packet · offline writer · citation audit                      │
-│  llm.py      Claude (claude-opus-5-5) streaming + server-side refusal fallbacks,    │
-│              structured extraction (messages.parse → pydantic schema)               │
+│  llm.py      Groq (openai/gpt-oss-120b) streaming + deterministic fallback,     │
+│              structured extraction (JSON mode → pydantic schema)                     │
 └──────────────────────────────────────▲─────────────────────────────────────────────┘
                                        │
           data/seed (catalog) · data/psi (official PSI drop-in) · data/imported (uploads)
@@ -131,9 +131,8 @@ API docs (Swagger): **http://127.0.0.1:8000/docs**
 
 | Variable | Needed for | What to provide |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Claude-written briefs, synthesized Q&A, PDF → metadata extraction | A key from console.anthropic.com. Without it, the deterministic writer is used. |
-| `FLAMEPRINT_MODEL` | optional | Default `claude-opus-5-5` |
-| `FLAMEPRINT_EFFORT` | optional | `low` / `medium` (default) / `high` |
+| `GROQ_API_KEY` | LLM-written briefs, synthesized Q&A, PDF → metadata extraction | A key from console.groq.com. Without it, the deterministic writer is used. |
+| `FLAMEPRINT_MODEL` | optional | Default `openai/gpt-oss-120b` (Groq) |
 | `DATABASE_URL` | PostgreSQL + pgvector | e.g. `postgresql://flameprint:flameprint@localhost:5432/flameprint` after `docker compose up -d db` |
 | `FLAMEPRINT_LLM` | optional | `auto` (default) · `on` · `off` |
 
@@ -205,7 +204,7 @@ cd frontend && npm run typecheck && npm run lint && npm run build
 5. **Compare (1:35).** ISS → Moon base: grade **B → C**, which materials got riskier, the new partial-gravity gap.
 6. **Fire Passport (1:50).** **Get Fire Passport** → a one-page PDF. *"What we know, how sure we are, and what to test next."*
 
-Works the same with `FLAMEPRINT_LLM=off`: every number, grade and gap comes from Python; Claude only words the full brief.
+Works the same with `FLAMEPRINT_LLM=off`: every number, grade and gap comes from Python; the LLM only words the full brief.
 
 **Judge Q&A, "what's real and what's mocked?"** Every number comes from deterministic code or imported PSI files. Catalog tested ranges are
 labelled approximate, material verdicts are labelled *illustrative model*, unsourced values are grade **M**, and the flame is

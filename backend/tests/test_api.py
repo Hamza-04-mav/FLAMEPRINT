@@ -113,5 +113,5 @@ def test_health_reports_seed_loaded_from_default_dir():
     from fastapi.testclient import TestClient
     from app import main
     h = TestClient(main.app).get("/api/health").json()
-    assert h["ok"] and h["stats"]["investigations"] == 22
+    assert h["ok"] and h["stats"]["investigations"] == 24
     assert main.DATA_DIR.name == "data"

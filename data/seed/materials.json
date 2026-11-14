@@ -1,5 +1,5 @@
 {
-  "_about": "FLAMEPRINT material catalog. oxygenThreshold.o2Pct must come from a cited source; null means 'not sourced yet' and the material is shown as unknown risk with grade M. testedIn is taken from the seed catalog fuel lists and must be verified against PSI test records. See docs/OPEN_QUESTIONS.md.",
+  "_about": "FLAMEPRINT material catalog. oxygenThreshold.o2Pct is the 1 g limiting oxygen index (LOI, ASTM D2863 / ISO 4589) and MUST carry a cited source; null means 'not sourced yet' and the material shows unknown risk with grade M. LOI is a 1 g candle-like test, NOT a spacecraft acceptance test (NASA-STD-6001 Test 1) — the material verdict is an illustrative model that shifts the 1 g LOI by a schematic gravity/airflow curve. All 8 thresholds are now sourced from materials-science literature (2026-11-14), each with a citation; silicone uses a typical commercial-grade value (unfilled PDMS is lower). testedIn is taken from the seed catalog fuel lists and must be verified against PSI test records. See docs/OPEN_QUESTIONS.md.",
   "materials": [
     {
       "id": "cotton",
@@ -28,12 +28,12 @@
       ],
       "testedInBasis": "Seed catalog fuel list (investigation-level metadata). Verify against PSI test records.",
       "oxygenThreshold": {
-        "o2Pct": null,
-        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
-        "source": null,
-        "url": null
+        "o2Pct": 18,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589); untreated cotton",
+        "source": "Islam et al., 'Cotton-based Flame-retardant Textiles: A Review', BioResources 16(2):4354 (2021): untreated cotton LOI 16-22% (commonly ~18%)",
+        "url": "https://bioresources.cnr.ncsu.edu/wp-content/uploads/2021/03/BioRes_16_2_4354_REVIEW_Islam_V_Cotton_based_Flame_retardant_Textiles_18179.pdf"
       },
-      "notes": "Catalog lists cotton-fiberglass fabric (SIBAL), a cotton blend, not pure cotton."
+      "notes": "Catalog lists cotton-fiberglass fabric (SIBAL), a cotton blend, not pure cotton. LOI 18% is for untreated 100% cotton; the SIBAL blend's fiberglass backing is non-combustible, so pure-cotton LOI is the conservative input."
     },
     {
       "id": "pu-foam",
@@ -53,12 +53,12 @@
       "testedIn": [],
       "testedInBasis": null,
       "oxygenThreshold": {
-        "o2Pct": null,
-        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
-        "source": null,
-        "url": null
+        "o2Pct": 18,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589); virgin flexible foam",
+        "source": "Fire and Materials (2018): virgin flexible polyurethane foam LOI 17.0-21.3% (TDI- and MDI-based); ~18% taken as a conservative value",
+        "url": "https://publica-rest.fraunhofer.de/server/api/core/bitstreams/cda99000-2c7e-4ce6-9c6b-1c2b0b283140/content"
       },
-      "notes": ""
+      "notes": "Flexible PU foam is highly flammable; value is for virgin (non-flame-retarded) foam."
     },
     {
       "id": "pmma",
@@ -81,12 +81,12 @@
       ],
       "testedInBasis": "Seed catalog fuel list (investigation-level metadata). Verify against PSI test records.",
       "oxygenThreshold": {
-        "o2Pct": null,
+        "o2Pct": 17,
         "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
-        "source": null,
-        "url": null
+        "source": "Lyon, Janssens et al., 'The Limiting Oxygen Index test revisited': PMMA LOI 17.0 (ASTM D2863-06). (Industry tables list 17-19%.)",
+        "url": "https://www.researchgate.net/profile/Richard-Lyon-2/publication/288308898_The_limiting_oxygen_index_test_revisited"
       },
-      "notes": ""
+      "notes": "PMMA is the canonical microgravity solid fuel (burned in BASS/BASS-II)."
     },
     {
       "id": "nomex",
@@ -102,12 +102,12 @@
       "testedIn": [],
       "testedInBasis": null,
       "oxygenThreshold": {
-        "o2Pct": null,
-        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
-        "source": null,
-        "url": null
+        "o2Pct": 28,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589); untreated meta-aramid",
+        "source": "Aramid datasheets & ASTM D-2863 measurements: untreated Nomex LOI ~28% (range 28-31%). NASA (NTRS 20070018178) noted Nomex failed at 30% O2 in a 'J' configuration.",
+        "url": "https://ntrs.nasa.gov/api/citations/20070018178/downloads/20070018178.pdf"
       },
-      "notes": ""
+      "notes": "Fire-resistant in 21% air (LOI 28 > 21), but elevated-O2 habitats (e.g. 34% O2 Moon base) exceed its LOI, so it can burn there — a key high-O2 warning."
     },
     {
       "id": "ptfe",
@@ -125,12 +125,12 @@
       "testedIn": [],
       "testedInBasis": null,
       "oxygenThreshold": {
-        "o2Pct": null,
+        "o2Pct": 95,
         "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
-        "source": null,
-        "url": null
+        "source": "Polymer flammability references (SpecialChem fire-resistance/LOI guide; ASTM D2863 tables): PTFE LOI ~95%",
+        "url": "https://www.specialchem.com/plastics/guide/fire-resistance-loi"
       },
-      "notes": ""
+      "notes": "Among the least flammable common polymers; effectively non-combustible at habitat O2 levels. Apollo 13 showed the separate hazard of Teflon insulation degrading under electrical/thermal fault."
     },
     {
       "id": "velcro",
@@ -148,12 +148,12 @@
       "testedIn": [],
       "testedInBasis": null,
       "oxygenThreshold": {
-        "o2Pct": null,
-        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
-        "source": null,
-        "url": null
+        "o2Pct": 24,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589); nylon 6,6",
+        "source": "Nylon 6,6 oxygen index ~24-29% (unreinforced nylon 6/6 measured ~29%, ScienceDirect Oxygen Index overview); ~24% taken as conservative",
+        "url": "https://www.sciencedirect.com/topics/chemistry/oxygen-index"
       },
-      "notes": ""
+      "notes": "Hook-and-loop fasteners are typically nylon 6,6. Value is for the base polymer."
     },
     {
       "id": "paper",
@@ -175,12 +175,12 @@
       ],
       "testedInBasis": "Seed catalog fuel list (investigation-level metadata). Verify against PSI test records.",
       "oxygenThreshold": {
-        "o2Pct": null,
-        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
-        "source": null,
-        "url": null
+        "o2Pct": 19,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589); untreated cellulose paper",
+        "source": "Chen et al., 'Phytic acid flame-retardant cellulose paper', BioResources 16(4):7953 (2021): untreated cellulose paper LOI ~19.6% (ASTM D2863)",
+        "url": "https://bioresources.cnr.ncsu.edu/wp-content/uploads/2021/10/BioRes_16_4_7953_Chen_RLYX_Appl_Mod_Phytic_Acid_Flame_Retardant_Cellulosis_Paper_19136.pdf"
       },
-      "notes": "Catalog lists thin cellulose, which is close to, but not the same as, paper."
+      "notes": "Paper is near-pure cellulose; measured untreated value ~19.6% (close to cotton, as expected). Catalog lists thin cellulose, which is close to, but not the same as, paper."
     },
     {
       "id": "silicone",
@@ -200,12 +200,12 @@
       ],
       "testedInBasis": "Seed catalog fuel list (investigation-level metadata). Verify against PSI test records.",
       "oxygenThreshold": {
-        "o2Pct": null,
-        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589)",
-        "source": null,
-        "url": null
+        "o2Pct": 32,
+        "basis": "1 g limiting oxygen index (ASTM D2863 / ISO 4589); typical commercial silicone rubber (VMQ)",
+        "source": "Typical silicone rubber (VMQ/PMQ/PVMQ) LOI ~32% (MakeItFrom material data; Wacker Elastosil R 501/75 datasheet, ASTM D2863). Unfilled PDMS is lower (~21%); exact value depends on the flown grade.",
+        "url": "https://www.makeitfrom.com/material-properties/Silicone-Rubber-PMQ-PVMQ-VMQ"
       },
-      "notes": "Catalog lists silicone among multiple spacecraft materials."
+      "notes": "Value is for a typical filled commercial silicone rubber (seals/gaskets/tubing). Unfilled silicone/PDMS can sit near 21%; confirm against the grade actually flown. Catalog lists silicone among multiple spacecraft materials (SAFFIRE-II)."
     }
   ]
 }

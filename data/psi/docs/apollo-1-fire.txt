@@ -1,0 +1,64 @@
+TITLE: Apollo 1 (AS-204) Fire — Mission, Accident, Investigation, Lessons Learned
+SOURCE: https://sma.nasa.gov/sma-disciplines/accllp/apollo-1
+RETRIEVED: 2026-11-14
+RELEVANCE: Prevention (pure-O2 atmosphere + flammable materials), detection, crew egress.
+NOTE: Faithful compilation of the page's sections. The sma.nasa.gov ACCLLP page renders its
+      body in a tab/accordion structure that resists verbatim scraping, so this is assembled
+      from the page content (all facts, dates, numbers and names preserved).
+======================================================================
+
+## History
+After completing the Gemini program in 1966, NASA turned to the first crewed Apollo mission,
+designated AS-204 and later named Apollo 1. It was planned as an open-ended Earth-orbit flight
+of up to 14 days, targeting launch in early 1967, to prove the spacecraft was spaceworthy and
+to test the Service Module's large engine. Command Module 012 was shipped to Kennedy Space
+Center in August 1966 and moved to Launch Pad 34 in January 1967. During a late-January
+pre-launch test, a fire killed the crew. The investigation found technical and management
+failures; NASA responded with a redesigned spacecraft, a new hatch, and tighter controls on
+combustible materials.
+
+## Mission
+The flight was scheduled for February 21, 1967 as a 14-day Earth-orbit test of a Block I
+Command and Service Module (CSM). Objectives: test the spacecraft's life support systems and
+the main Service Propulsion System (SPS) engine, with eight SPS test firings planned (the final
+firing intended to deorbit the spacecraft for reentry on its 208th revolution). North American
+Aviation (Downey, California) built the Apollo spacecraft under a 1961 contract, in two crewed
+versions: the basic Block I (Earth-orbit testing) and a Block II with docking capability for
+lunar missions. The crew trained extensively in Apollo CM simulators at the Manned Spacecraft
+Center (now Johnson Space Center) and Kennedy Space Center. A full-duration flight would have
+lasted 330 hours 50 minutes, breaking Gemini VII's endurance record.
+
+## Crew
+Virgil "Gus" Grissom (Commander) and Edward White (Senior Pilot) were spaceflight veterans;
+Roger Chaffee (Pilot) was a rookie. NASA announced the crew on March 21, 1966.
+
+## Accident
+On January 27, 1967, during a preflight "plugs-out" test on the launch pad, with the crew in
+spacesuits, hatches closed, and the cabin pressurized with 100% oxygen, a fire broke out and
+killed all three astronauts. The pure-oxygen atmosphere caused the fire to spread extremely
+fast, with a rapid rise in temperature and pressure that ruptured the Command Module pressure
+vessel. The fire spread so fast there was no time to open the hatches. Autopsies concluded the
+astronauts died of asphyxia from carbon monoxide and other toxic gases; their burns were
+likely survivable.
+
+## Investigation (Apollo 204 Review Board)
+Established January 28, 1967 by Deputy Administrator Robert C. Seamans; it set up 21 panels and
+released a 3,000-page report on April 9, 1967. It could not identify a single ignition source
+but found evidence of arcing in several wires near the environmental control system (the area
+of most severe damage). The three-piece hatch took ~90 seconds to open under ideal conditions
+and could not be opened under increased pressure. The unfueled-rocket test had been deemed
+non-hazardous and was not reviewed by safety organizations, and no defined crew-rescue process
+existed.
+
+## Lessons Learned / Engineering Changes
+- Later crews flew the Block II Command Module.
+- The three-piece hatch was replaced with a unified hatch that opens from inside or outside in
+  ~3 seconds.
+- NASA severely restricted and controlled combustible materials in the Command Module and the
+  Lunar Module; new spacesuits used fire-resistant materials.
+- Management and safety-culture changes followed congressional hearings.
+
+## Why it matters for FLAMEPRINT
+Apollo 1 is the canonical demonstration that atmosphere composition (pure O2) and
+flammable-material selection dominate spacecraft fire risk — exactly the prevention axis
+FLAMEPRINT scores. It motivates the oxygen-threshold and material-verdict logic.

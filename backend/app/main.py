@@ -117,7 +117,7 @@ def next_experiments():
 
 @app.post("/api/stowage")
 async def stowage(req: StowageRequest):
-    """Can I bring this aboard? Keyword match first (works offline); Claude only picks an id from the list."""
+    """Can I bring this aboard? Keyword match first (works offline); the LLM only picks an id from the list."""
     ds = store.dataset
     m = materials.keyword_match(req.item, ds.materials)
     matched_by = "keyword" if m else "none"
@@ -129,7 +129,7 @@ async def stowage(req: StowageRequest):
             pid = None
         m = next((x for x in ds.materials if x.id == pid), None)
         if m:
-            matched_by = "claude"
+            matched_by = "llm"
     verdict = materials.assess(m, req.scenario, ds) if m else None
     level = verdict.level if verdict else "unknown"
     return {"item": req.item, "materialId": m.id if m else None, "materialName": m.name if m else None,
@@ -278,7 +278,7 @@ async def ingest(file: UploadFile = File(...), investigation_id: Optional[str] =
 async def extract(file: str = Form(...)):
     """LLM structured extraction of investigation metadata from an imported document."""
     if not llm.enabled():
-        raise HTTPException(503, "Structured extraction needs ANTHROPIC_API_KEY in backend/.env.")
+        raise HTTPException(503, "Structured extraction needs GROQ_API_KEY in backend/.env.")
     from .ingest import parse_document
     candidates = [DATA_DIR / "imported" / Path(file).name, DATA_DIR / file]
     path = next((p for p in candidates if p.is_file() and DATA_DIR.resolve() in p.resolve().parents), None)

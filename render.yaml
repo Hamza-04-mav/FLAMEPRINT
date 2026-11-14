@@ -16,5 +16,5 @@ services:
         value: auto        # "off" forces the offline writer for a safe demo
       - key: CORS_ORIGINS
         sync: false        # e.g. https://<project>.vercel.app (comma-separated)
-      - key: ANTHROPIC_API_KEY
+      - key: GROQ_API_KEY
         sync: false        # optional; set in the Render dashboard, never in the repo

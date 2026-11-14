@@ -3,28 +3,30 @@
 FLAMEPRINT never invents a number. Everything below is either **modeled** (grade `M` or the "illustrative model" label)
 or **unverified**, and needs a team decision before the demo. Keep this file current: the acceptance checklist requires it.
 
-## 1. Material oxygen thresholds (blocks the main demo)
+## 1. Material oxygen thresholds (demo UNBLOCKED — now review the sourced values)
 
-`data/seed/materials.json` → `materials[].oxygenThreshold`. Every value is `null` today, so every material shows
-**Not rated / grade M**, and the Answer screen shows a team notice. When a value is filled in, the material is rated
-automatically (level, margin, grade, verdict sentence, stowage, passport, timeline highlights).
+`data/seed/materials.json` → `materials[].oxygenThreshold`. **All 8 are now filled with cited 1 g LOI values**
+(2026-11-14). Each value carries `source` + `url`; every material is rated automatically (level, margin, grade,
+verdict sentence, stowage, passport, timeline highlights).
 
-For each material, fill in `o2Pct` (1 g limiting oxygen index, %), `source` (citation) and `url`, or leave `null`
-and note "none found".
+Team action: **confirm each cited value** (grade/specimen/test standard). Two to watch: `silicone` uses a typical
+commercial-grade LOI (unfilled PDMS is lower ~21%, so this is optimistic — swap for the grade actually flown if known),
+and `paper`/`cotton` are cellulose values that sit just above the ~21% air line.
 
-| id | Material | Candidate value to verify | Where it was seen (not verified, may be a secondary source) |
-|---|---|---|---|
-| `cotton` | Cotton fabric | ≈ 16–18 % (untreated) | Workwear catalogue (Fristads), secondary. Find a primary textile LOI study. |
-| `pu-foam` | Polyurethane foam | not found | Search ISO 4589 data for flexible PU foam. |
-| `pmma` | PMMA (acrylic) | ≈ 17 % | Zeus Industrial Products, "Flammability of polymers" technical note: https://www.appstate.edu/~clementsjs/journalarticles/zeus_flammability.pdf (403 from our tooling, so check it by hand) |
-| `nomex` | Nomex | ≈ 31 % (100 % Nomex fabric) | PMC peer-reviewed fabric study table: https://pmc.ncbi.nlm.nih.gov/articles/PMC9898679/table/tbl3 (check sample and test standard). NASA notes Nomex failed at 30 % O₂ in a "J" configuration: https://ntrs.nasa.gov/api/citations/20070018178/downloads/20070018178.pdf |
-| `ptfe` | PTFE wire insulation | ≈ 95 % | Zeus note above; SpecialChem LOI guide: https://www.specialchem.com/plastics/guide/fire-resistance-loi |
-| `velcro` | Velcro (nylon) | not found | Nylon 6,6 LOI from a polymer handbook or datasheet. |
-| `paper` | Paper | not found | Cellulose / paper LOI study. |
-| `silicone` | Silicone rubber | not found | Values vary widely by filler; use the grade actually flown. |
+| id | Material | Value used | Source (cited in materials.json) | Status |
+|---|---|---|---|---|
+| `cotton` | Cotton fabric | **18 %** | BioResources review (Islam et al., 2021): untreated cotton LOI 16–22 % | ✅ sourced |
+| `pu-foam` | Polyurethane foam | **18 %** | Fire and Materials (2018): virgin flexible PU foam LOI 17.0–21.3 % | ✅ sourced |
+| `pmma` | PMMA (acrylic) | **17 %** | Lyon & Janssens, "LOI test revisited" (ASTM D2863-06): PMMA 17.0 | ✅ sourced |
+| `nomex` | Nomex | **28 %** | Aramid datasheets / ASTM D-2863 (range 28–31 %); NASA NTRS 20070018178 (failed at 30 % O₂, "J" config) | ✅ sourced |
+| `ptfe` | PTFE wire insulation | **95 %** | SpecialChem LOI guide / ASTM D2863 tables | ✅ sourced |
+| `velcro` | Velcro (nylon 6,6) | **24 %** | Nylon 6,6 oxygen index ~24–29 % (ScienceDirect) | ✅ sourced |
+| `paper` | Paper | **19 %** | Chen et al., BioResources 16(4):7953 (2021): untreated cellulose paper LOI ~19.6 % (ASTM D2863) | ✅ sourced |
+| `silicone` | Silicone rubber | **32 %** | Typical commercial silicone rubber VMQ ~32 % (MakeItFrom; Wacker Elastosil R 501/75, ASTM D2863). Unfilled PDMS lower (~21 %) | ✅ sourced (grade-dependent) |
 
 LOI depends on specimen form and test setup, and is a 1 g, candle-like test, not a spacecraft acceptance test
-(NASA-STD-6001 Test 1). Say so in the pitch.
+(NASA-STD-6001 Test 1). Say so in the pitch. These are literature LOI values, not PSI test records — material grades
+stay B (if `testedIn`) or C, never A, until real PSI rows are imported.
 
 ## 2. Which materials each investigation actually burned (`testedIn`)
 
@@ -55,5 +57,6 @@ A non-empty `testedIn` raises a material's grade from C to B, so this matters.
 
 ## 5. Demo decision
 
-- Live Claude (`FLAMEPRINT_LLM=auto` + key) or offline (`FLAMEPRINT_LLM=off`)? Offline is deterministic and cannot fail
-  on venue Wi-Fi; everything except Claude-written briefs and the Claude stowage fallback still works.
+- Live Groq (`FLAMEPRINT_LLM=auto` + `GROQ_API_KEY`, model `openai/gpt-oss-120b`) or offline (`FLAMEPRINT_LLM=off`)?
+  Offline is deterministic and cannot fail on venue Wi-Fi; everything except LLM-written briefs and the LLM stowage
+  fallback still works.

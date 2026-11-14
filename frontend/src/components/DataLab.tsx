@@ -190,7 +190,7 @@ export function DataLab() {
                   {u.investigationId && <Pill>{u.investigationId}</Pill>}
                   <div className="ml-auto flex gap-1.5">
                     {isDoc(u.file) && (
-                      <button disabled={!health?.llm.enabled || !!busy} title={health?.llm.enabled ? "Extract structured investigation metadata with Claude" : "Needs ANTHROPIC_API_KEY"}
+                      <button disabled={!health?.llm.enabled || !!busy} title={health?.llm.enabled ? "Extract structured investigation metadata with the LLM (Groq)" : "Needs GROQ_API_KEY"}
                         onClick={() => act(`x:${u.file}`, () => api.extract(u.file), `Extracted metadata from ${u.file}. Marked unverified until you check it.`)}
                         className="flex items-center gap-1 rounded-md border border-violet-400/40 px-2 py-1 text-[11px] text-violet-200 hover:bg-violet-400/10 disabled:opacity-40">
                         <Sparkles className="h-3 w-3" />{busy === `x:${u.file}` ? "Extracting…" : "SI extract"}

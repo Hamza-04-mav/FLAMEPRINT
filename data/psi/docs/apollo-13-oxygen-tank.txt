@@ -1,0 +1,59 @@
+TITLE: Apollo 13 Oxygen Tank Explosion — Mission, Accident, Investigation, Lessons Learned
+SOURCE: https://sma.nasa.gov/sma-disciplines/accllp/apollo-13
+RETRIEVED: 2026-11-14
+RELEVANCE: Oxygen-system / electrical-thermal safety; Teflon insulation; redundancy.
+NOTE: Faithful compilation of the page's sections (the ACCLLP page resists verbatim scraping).
+      All facts, dates, numbers, voltages and names preserved.
+======================================================================
+
+## Mission
+Apollo 13 was planned as NASA's third crewed lunar landing, targeting the Fra Mauro region.
+Prime crew: Jim Lovell (Commander), Ken Mattingly (Command Module Pilot), Fred Haise (Lunar
+Module Pilot); backups Jack Swigert and Charles Duke. The Saturn V was mated with the spacecraft
+on December 10 and moved to Launch Pad 39A five days later for testing.
+
+## Launch and Pre-Launch Problems
+Charles Duke exposed the crew to German measles, so Swigert replaced Mattingly, who lacked
+immunity. Five and a half minutes after liftoff, one S-II (second stage) engine shut down early;
+the remaining engines burned longer to reach orbit.
+
+## Accident
+On the third day of the mission, after a 49-minute TV broadcast, oxygen tank number two exploded
+and damaged oxygen tank number one. Jack Swigert's report to Mission Control is remembered as
+"Houston, we've had a problem." Two of the three fuel cells were lost; the Service Module vented
+oxygen into space, threatening loss of all electrical power and water. The Command Module was
+declared "mortally wounded." The lunar landing was cancelled and the crew moved into the Lunar
+Module, Aquarius, which had its own oxygen supply and descent engine, using it as a lifeboat.
+
+## Recovery
+Teams in Houston improvised solutions, including adapting the Command Module's square
+carbon-dioxide (lithium hydroxide) canisters to the round openings in the Lunar Module's
+scrubber. Water was rationed, power was limited, and the cabin became very cold. The crew shed
+the Service Module before splashdown in the Pacific Ocean on April 17, ending the six-day
+mission.
+
+## Cause (combination of mistakes + deficient design)
+- In 1965 the Command Module was modified to raise permissible heater voltage to the oxygen tank
+  from 28 to 65 volts DC.
+- The thermostatic switches on the heaters were NOT modified to match the higher voltage.
+- During a final launch-pad test the heaters stayed on for an extended period, reaching about
+  1,000 degF (538 degC), degrading the Teflon wire insulation.
+- The tank was overheated for ~8 hours, leaving it vulnerable the next time it held oxygen.
+
+## Investigation (Apollo 13 Review Board)
+Chaired by Edgar M. Cortright; final report released June 15, 1970. The board found the accident
+resulted from a combination of mistakes and a deficient design, with the root cause the
+overheated oxygen-tank heaters that degraded their insulation during the pre-launch test.
+
+## Lessons Learned / Design Changes (Apollo 14 and later)
+- Redesign and recertify the Service Module oxygen storage system; NASA-wide review of all Apollo
+  systems using cryogenic oxygen.
+- A third oxygen tank added in a different bay; thermostats upgraded; stirring fans removed.
+- All electrical wiring sheathed in stainless steel. (Apollo 1 lessons had already increased
+  wiring insulation, which helped prevent arcing during the reentry power-up.)
+- Strengthened management/engineering oversight of subsystems.
+
+## Why it matters for FLAMEPRINT
+Apollo 13 shows the hazard of high-energy oxygen systems and thermal/electrical faults (Teflon
+insulation degradation) — relevant to PTFE wire insulation in the material list and to the value
+of redundant oxygen systems, echoed later by the Mir fire.

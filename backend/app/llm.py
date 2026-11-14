@@ -1,8 +1,10 @@
-"""Claude integration (Anthropic Python SDK).
+"""LLM integration — Groq (OpenAI-compatible API), default model openai/gpt-oss-120b.
 
-* Streaming briefs / answers with server-side refusal fallbacks (fallbacks="default").
-* Structured extraction of investigation metadata from PSI documents (messages.parse).
+* Streaming briefs / answers (deterministic engine is the fallback on any error).
+* Structured extraction of investigation metadata from PSI documents (JSON mode).
+* Stowage item -> material-id mapping (JSON mode, validated against a fixed list).
 Every call degrades gracefully: callers fall back to the deterministic engine on any error.
+Imports of the `groq` SDK are lazy, so the module loads (and offline tests run) without it.
 """
 from __future__ import annotations
 
@@ -15,9 +17,7 @@ from pydantic import BaseModel, Field
 
 log = logging.getLogger("flameprint.llm")
 
-MODEL = os.getenv("FLAMEPRINT_MODEL", "claude-opus-5-5")
-EFFORT = os.getenv("FLAMEPRINT_EFFORT", "medium")
-FALLBACK_BETA = "server-side-fallback-2026-07-01"
+MODEL = os.getenv("FLAMEPRINT_MODEL", "openai/gpt-oss-120b")
 MAX_DOC_CHARS = 400_000
 
 
@@ -27,12 +27,12 @@ def enabled() -> bool:
         return False
     if mode == "on":
         return True
-    return bool(os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN"))
+    return bool(os.getenv("GROQ_API_KEY"))
 
 
 def status() -> dict:
     return {"enabled": enabled(), "model": MODEL if enabled() else None,
-            "detail": f"Claude ({MODEL})" if enabled() else "No ANTHROPIC_API_KEY: using the deterministic offline writer."}
+            "detail": f"Groq ({MODEL})" if enabled() else "No GROQ_API_KEY: using the deterministic offline writer."}
 
 
 _client = None
@@ -41,52 +41,59 @@ _client = None
 def client():
     global _client
     if _client is None:
-        import anthropic
-        _client = anthropic.AsyncAnthropic(timeout=120.0, max_retries=2)
+        from groq import AsyncGroq
+        _client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"), timeout=120.0, max_retries=2)
     return _client
 
 
 def describe_error(e: Exception) -> str:
-    import anthropic
-    if isinstance(e, anthropic.AuthenticationError):
-        return "Invalid Anthropic API key"
-    if isinstance(e, anthropic.PermissionDeniedError):
+    import groq
+    if isinstance(e, groq.AuthenticationError):
+        return "Invalid Groq API key"
+    if isinstance(e, groq.PermissionDeniedError):
         return "API key lacks permission for this model"
-    if isinstance(e, anthropic.NotFoundError):
-        return f"Model '{MODEL}' not found"
-    if isinstance(e, anthropic.RateLimitError):
-        return "Rate limited by the Claude API"
-    if isinstance(e, anthropic.BadRequestError):
-        return f"Bad request: {e.message}"[:200]
-    if isinstance(e, anthropic.APIStatusError):
-        return f"Claude API error {e.status_code}"
-    if isinstance(e, anthropic.APIConnectionError):
-        return "Could not reach the Claude API"
+    if isinstance(e, groq.NotFoundError):
+        return f"Model '{MODEL}' not found on Groq"
+    if isinstance(e, groq.RateLimitError):
+        return "Rate limited by the Groq API"
+    if isinstance(e, groq.BadRequestError):
+        return f"Bad request: {getattr(e, 'message', str(e))}"[:200]
+    if isinstance(e, groq.APIStatusError):
+        return f"Groq API error {e.status_code}"
+    if isinstance(e, groq.APIConnectionError):
+        return "Could not reach the Groq API"
     return f"{type(e).__name__}"
 
 
 async def stream_text(system: str, user: str, max_tokens: int = 8000) -> AsyncIterator[dict]:
-    """Yields {'type':'delta','text':...} events, then {'type':'final', 'stop_reason':..., 'model':...}.
-    Raises before the first delta if the request fails, so callers can fall back cleanly."""
-    import anthropic
+    """Yields {'type':'delta','text':...} events, then {'type':'final','stop_reason':...,'model':...}.
+    Raises before the first delta if the request setup fails, so callers can fall back cleanly."""
     c = client()
-    common = dict(model=MODEL, max_tokens=max_tokens, system=system,
-                  messages=[{"role": "user", "content": user}],
-                  thinking={"type": "adaptive"}, output_config={"effort": EFFORT})
-    try:
-        cm = c.beta.messages.stream(betas=[FALLBACK_BETA], fallbacks="default", **common)
-        stream = await cm.__aenter__()
-    except (anthropic.BadRequestError, TypeError):
-        # account/platform without server-side fallbacks: plain request
-        cm = c.messages.stream(**common)
-        stream = await cm.__aenter__()
-    try:
-        async for text in stream.text_stream:
-            yield {"type": "delta", "text": text}
-        final = await stream.get_final_message()
-        yield {"type": "final", "stop_reason": final.stop_reason, "model": final.model}
-    finally:
-        await cm.__aexit__(None, None, None)
+    stream = await c.chat.completions.create(
+        model=MODEL, max_tokens=max_tokens, temperature=0.3, stream=True,
+        messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+    )
+    stop_reason = "stop"
+    async for chunk in stream:
+        if not chunk.choices:
+            continue
+        choice = chunk.choices[0]
+        if choice.delta and choice.delta.content:
+            yield {"type": "delta", "text": choice.delta.content}
+        if choice.finish_reason:
+            stop_reason = choice.finish_reason
+    yield {"type": "final", "stop_reason": stop_reason, "model": MODEL}
+
+
+async def _json_completion(system: str, user: str, max_tokens: int) -> str:
+    """One non-streaming JSON-mode completion; returns the raw JSON string."""
+    c = client()
+    resp = await c.chat.completions.create(
+        model=MODEL, max_tokens=max_tokens, temperature=0.0,
+        response_format={"type": "json_object"},
+        messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+    )
+    return resp.choices[0].message.content or "{}"
 
 
 # ------------------------------------------------------------------ structured extraction
@@ -97,30 +104,40 @@ class ExtractedRange(BaseModel):
 
 class ExtractedInvestigation(BaseModel):
     id: str = Field(description="Short investigation id, e.g. BASS-II, FLEX-2, ACME-BRE")
-    name: str
-    facility: Optional[str] = Field(None, description="e.g. CIR, MSG")
-    apparatus: Optional[str] = Field(None, description="e.g. MDCA, ACME, SPICE flow duct")
-    fuel_phase: list[str] = Field(default_factory=list, description="subset of: solid, liquid, gas")
+    name: str = ""
+    facility: Optional[str] = None
+    apparatus: Optional[str] = None
+    fuel_phase: list[str] = Field(default_factory=list)
     fuels: list[str] = Field(default_factory=list)
     geometry: Optional[str] = None
     objective: Optional[str] = None
-    o2_percent: Optional[ExtractedRange] = Field(None, description="ambient O2 mole percent range tested, only if stated")
-    pressure_kpa: Optional[ExtractedRange] = Field(None, description="pressure range in kPa, only if stated (convert units)")
-    flow_cm_s: Optional[ExtractedRange] = Field(None, description="imposed flow speed range in cm/s, only if stated")
+    o2_percent: Optional[ExtractedRange] = None
+    pressure_kpa: Optional[ExtractedRange] = None
+    flow_cm_s: Optional[ExtractedRange] = None
     diluents: list[str] = Field(default_factory=list)
     measurements: list[str] = Field(default_factory=list)
-    key_findings: list[str] = Field(default_factory=list, description="findings stated in the document, verbatim or close paraphrase")
+    key_findings: list[str] = Field(default_factory=list)
     fire_safety_prevention: Optional[str] = None
     fire_safety_detection: Optional[str] = None
     fire_safety_suppression: Optional[str] = None
-    relevance_prevention: float = Field(0.5, description="0..1")
-    relevance_detection: float = Field(0.5, description="0..1")
-    relevance_suppression: float = Field(0.5, description="0..1")
+    relevance_prevention: float = 0.5
+    relevance_detection: float = 0.5
+    relevance_suppression: float = 0.5
 
 
 EXTRACT_SYSTEM = """Extract structured metadata about ONE NASA microgravity combustion investigation from the document.
-Only record values explicitly stated in the document; leave a field null/empty when it is not stated. Do not guess numbers.
-Convert pressure to kPa (1 atm = 101.325 kPa, 1 psi = 6.895 kPa) and flow speed to cm/s."""
+Reply with ONLY a JSON object (no prose). Only record values explicitly stated in the document; use null or [] when a
+field is not stated. Do NOT guess numbers. Convert pressure to kPa (1 atm = 101.325 kPa, 1 psi = 6.895 kPa) and flow to cm/s.
+
+JSON shape:
+{
+  "id": "short id e.g. BASS-II", "name": "", "facility": null, "apparatus": null,
+  "fuel_phase": ["solid|liquid|gas"], "fuels": [], "geometry": null, "objective": null,
+  "o2_percent": {"min": null, "max": null}, "pressure_kpa": {"min": null, "max": null}, "flow_cm_s": {"min": null, "max": null},
+  "diluents": [], "measurements": [], "key_findings": [],
+  "fire_safety_prevention": null, "fire_safety_detection": null, "fire_safety_suppression": null,
+  "relevance_prevention": 0.5, "relevance_detection": 0.5, "relevance_suppression": 0.5
+}"""
 
 
 async def extract_investigation(text: str, source: str) -> tuple[dict, list[str]]:
@@ -128,15 +145,11 @@ async def extract_investigation(text: str, source: str) -> tuple[dict, list[str]
     if len(text) > MAX_DOC_CHARS:
         warnings.append(f"Document is {len(text):,} characters; only the first {MAX_DOC_CHARS:,} were sent for extraction.")
         text = text[:MAX_DOC_CHARS]
-    resp = await client().messages.parse(
-        model=MODEL, max_tokens=16000, system=EXTRACT_SYSTEM,
-        output_config={"effort": EFFORT},
-        messages=[{"role": "user", "content": f"<document source=\"{source}\">\n{text}\n</document>"}],
-        output_format=ExtractedInvestigation,
-    )
-    if resp.stop_reason == "refusal":
-        raise RuntimeError("The model declined to extract this document.")
-    x: ExtractedInvestigation = resp.parsed_output
+    raw = await _json_completion(EXTRACT_SYSTEM, f'<document source="{source}">\n{text}\n</document>', max_tokens=4000)
+    try:
+        x = ExtractedInvestigation.model_validate_json(raw)
+    except Exception as e:  # noqa: BLE001
+        raise RuntimeError(f"Model returned invalid extraction JSON: {str(e)[:120]}") from None
     rng = lambda r: [r.min if r.min is not None else r.max, r.max if r.max is not None else r.min] \
         if r and (r.min is not None or r.max is not None) else None
     phases = [p for p in x.fuel_phase if p in ("solid", "liquid", "gas")]
@@ -145,7 +158,7 @@ async def extract_investigation(text: str, source: str) -> tuple[dict, list[str]
                                   "suppression": x.fire_safety_suppression,
                                   "general": " ".join(x.key_findings[:3]) or None}.items() if v}
     inv = {
-        "id": x.id.strip().upper().replace(" ", "-"), "name": x.name, "facility": x.facility or "Unknown",
+        "id": x.id.strip().upper().replace(" ", "-"), "name": x.name or x.id, "facility": x.facility or "Unknown",
         "apparatus": x.apparatus, "fuelPhase": phases, "fuels": x.fuels, "geometry": x.geometry or "",
         "objective": x.objective or "", "diluents": x.diluents, "measurements": x.measurements,
         "conditions": {"o2Pct": rng(x.o2_percent), "pressureKpa": rng(x.pressure_kpa), "flowCmS": rng(x.flow_cm_s),
@@ -164,7 +177,7 @@ class MaterialPick(BaseModel):
 
 
 PICK_SYSTEM = """You map a household or spacecraft item to the material it is mostly made of.
-Answer with exactly one id from the allowed list, or "none" if no listed material is a good match.
+Reply with ONLY a JSON object: {"material_id": "<one id from the allowed list, or 'none'>"}.
 Never invent an id. Never give a risk, number or advice."""
 
 
@@ -179,11 +192,9 @@ def validate_pick(raw: Optional[str], allowed: list[str]) -> Optional[str]:
 async def pick_material(item: str, materials: list[dict]) -> Optional[str]:
     allowed = [m["id"] for m in materials]
     listing = "\n".join(f"- {m['id']}: {m['name']} (used for {m['usedFor']})" for m in materials)
-    resp = await client().messages.parse(
-        model=MODEL, max_tokens=200, system=PICK_SYSTEM,
-        messages=[{"role": "user", "content": f"Allowed ids:\n{listing}\n\nItem: {item[:200]}"}],
-        output_format=MaterialPick,
-    )
-    if resp.stop_reason == "refusal" or resp.parsed_output is None:
+    raw = await _json_completion(PICK_SYSTEM, f"Allowed ids:\n{listing}\n\nItem: {item[:200]}", max_tokens=60)
+    try:
+        pick = MaterialPick.model_validate_json(raw)
+    except Exception:  # noqa: BLE001
         return None
-    return validate_pick(resp.parsed_output.material_id, allowed)
+    return validate_pick(pick.material_id, allowed)

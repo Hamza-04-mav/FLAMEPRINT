@@ -127,7 +127,7 @@ export interface StowageResult {
   item: string;
   materialId: string | null;
   materialName: string | null;
-  matchedBy: "keyword" | "claude" | "none";
+  matchedBy: "keyword" | "llm" | "none";
   verdict: MaterialVerdict | null;
   advice: string;
 }

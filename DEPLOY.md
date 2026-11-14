@@ -24,7 +24,7 @@ The service finds the catalog by itself: `main.py` resolves `data/` from the rep
 
 | Variable | Where | Value | Notes |
 |---|---|---|---|
-| `ANTHROPIC_API_KEY` | Render | team key | Optional. Without it: offline brief writer and keyword-only stowage. |
+| `GROQ_API_KEY` | Render | team key | Optional. Without it: offline brief writer and keyword-only stowage. |
 | `FLAMEPRINT_LLM` | Render | `auto` | `off` forces offline mode for a safe demo. |
 | `CORS_ORIGINS` | Render | `https://<project>.vercel.app` | Comma-separated. Add any custom domain. |
 | `PYTHON_VERSION` | Render | the version you tested locally | Pinned to 3.12.7 in `render.yaml`; change it if you tested on another. |

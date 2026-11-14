@@ -3,7 +3,7 @@
 build_context() produces a compact, factual packet (scenario, physics estimates, ranking,
 coverage gaps, investigation facts). BOTH writers use only this packet:
   * local_brief()  - deterministic writer, works offline / without an API key
-  * the LLM writer - Claude, constrained to cite ids present in the packet (see llm.py)
+  * the LLM writer - Groq (openai/gpt-oss-120b), constrained to cite ids present in the packet (see llm.py)
 """
 from __future__ import annotations
 
@@ -214,7 +214,7 @@ def local_answer(question: str, hits: list[dict]) -> str:
         used += 1
     if not used:
         return "Insufficient evidence: the retrieved passages don't directly address this question."
-    lines.append("\n*Add an Anthropic API key for synthesized answers.*")
+    lines.append("\n*Add a Groq API key (GROQ_API_KEY) for synthesized answers.*")
     return "\n".join(lines)
 
 

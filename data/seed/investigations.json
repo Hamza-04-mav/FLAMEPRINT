@@ -1,5 +1,5 @@
 {
-  "_about": "FLAMEPRINT seed catalog. Investigation-level metadata curated from the NASA Space Apps 2026 'Flame in Freefall' challenge brief and public NASA investigation descriptions. It contains NO test-level measurements. Condition envelopes marked 'approx' are coarse orientation ranges that must be verified against PSI; null means 'not characterized here'. Importing PSI test files (data/psi or the Data Lab) replaces envelopes with values derived from real test records. Any investigation can be overridden by importing a JSON object with the same id.",
+  "_about": "FLAMEPRINT seed catalog (24 investigations). Investigation-level metadata curated from the NASA Space Apps 2026 'Flame in Freefall' challenge brief, the NASA Researcher's Guide to ISS Combustion Science (2015, data/psi/docs), and the NASA Glenn combustion science page. It contains NO test-level measurements. Condition envelopes marked 'approx' are coarse orientation ranges that must be verified against PSI; null means 'not characterized here' (design/apparatus ranges are kept in 'note', never claimed as coverage). Importing PSI test files (data/psi or the Data Lab) replaces envelopes with values derived from real test records. Any investigation can be overridden by importing a JSON object with the same id.",
   "investigations": [
     {
       "id": "BASS",
@@ -302,9 +302,10 @@
         "note": "Quiescent chamber; O2, pressure and CO2/He dilution varied. Import the PSI test matrix for exact values."
       },
       "diluents": [
+        "N2",
         "CO2",
         "He",
-        "N2"
+        "Xe"
       ],
       "measurements": [
         "droplet diameter vs. time",
@@ -313,8 +314,8 @@
         "extinction diameter"
       ],
       "insights": {
-        "suppression": "Measured how much CO2 or helium dilution it takes to put out droplet flames, which directly informs suppressant choice and post-fire atmospheres.",
-        "general": "Large n-heptane droplets kept burning after the visible flame went out, through a low-temperature 'cool flame'.",
+        "suppression": "Measured how much CO2 or helium dilution it takes to put out droplet flames, which directly informs suppressant choice and post-fire atmospheres. Key finding (NASA Researcher's Guide, 2015): the flammability limit is LOWER in reduced gravity, so terrestrial inert-gas suppressant standards do not offer the same margin of safety in low gravity as on Earth.",
+        "general": "Large n-heptane droplets kept burning after the visible flame went out, through a low-temperature 'cool flame'. MDCA supports droplets 1-5 mm in a 0-3 atm ambient of up to 40% O2 (balance inert).",
         "detection": "Burning can continue with no visible flame, so optical flame detection alone can miss it."
       },
       "earthApplications": [
@@ -926,6 +927,85 @@
       "provenance": "Challenge brief"
     },
     {
+      "id": "SoFIE",
+      "name": "Solid Fuel Ignition and Extinction",
+      "facility": "CIR",
+      "apparatus": "SoFIE flow duct (larger, improved BASS-concept duct)",
+      "platform": "ISS",
+      "fuelPhase": [
+        "solid"
+      ],
+      "fuels": [
+        "representative thick and thin solid fuels"
+      ],
+      "geometry": "Forced opposed-flow flame spread over solid samples in a flow duct",
+      "objective": "Find the fundamental limiting oxygen concentration for solid materials in microgravity, as a function of forced opposed flow velocity, ambient oxygen concentration and pressure, and test whether the NASA-STD-6001 1 g flame-propagation acceptance test is conservative in low gravity.",
+      "pillars": {
+        "prevention": 1.0,
+        "detection": 0.3,
+        "suppression": 0.4
+      },
+      "conditions": {
+        "o2Pct": null,
+        "pressureKpa": null,
+        "flowCmS": null,
+        "confidence": "unknown",
+        "note": "DESIGN range per the NASA Researcher's Guide (2015): oxygen 10-40% by volume, pressure 0.2-1.5 atm (~20-152 kPa), forced opposed flow. This is the apparatus/planned range, NOT verified PSI coverage — left null so it does not over-claim. Import the PSI test matrix to characterize."
+      },
+      "measurements": [
+        "limiting oxygen concentration vs. flow",
+        "flame spread rate",
+        "ignition and extinction",
+        "video"
+      ],
+      "insights": {
+        "prevention": "SoFIE directly tests whether ground-based material acceptance (NASA-STD-6001 Test 1, a 1 g upward flame-spread test) stays conservative in microgravity, where some materials are flammable at lower oxygen than on Earth.",
+        "modeling": "Limiting-oxygen-vs-flow data across thick and thin solids for calibrating microgravity flammability models; successor to the BASS flow-duct approach."
+      },
+      "earthApplications": [
+        "Flammability test-method validation"
+      ],
+      "status": "in-psi",
+      "provenance": "NASA Researcher's Guide to ISS Combustion Science (2015) + NASA Glenn combustion science page (retrieved 2026-11-14). PSI presence/records not verified locally."
+    },
+    {
+      "id": "FLARE",
+      "name": "Flammability Limits At Reduced-g Experiment",
+      "facility": "ISS (JAXA Kibo)",
+      "apparatus": "Solid-sample flammability unit",
+      "platform": "ISS",
+      "fuelPhase": [
+        "solid"
+      ],
+      "fuels": [
+        "thin and thick solid fuels"
+      ],
+      "geometry": "Flame spread over solid samples, compared between normal gravity and microgravity",
+      "objective": "Estimate microgravity material flammability limits from ground-based data by comparing normal-gravity and microgravity flame spread, to provide a practical screening method for material acceptance.",
+      "pillars": {
+        "prevention": 1.0,
+        "detection": 0.2,
+        "suppression": 0.3
+      },
+      "conditions": {
+        "o2Pct": null,
+        "pressureKpa": null,
+        "flowCmS": null,
+        "confidence": "unknown",
+        "note": "International collaboration (JAXA, NASA, ESA, CNES, DLR and universities). Conditions not characterized in public summaries; import the PSI test matrix."
+      },
+      "measurements": [
+        "flame spread rate",
+        "flammability limit estimate (1 g vs microgravity)"
+      ],
+      "insights": {
+        "prevention": "Aims to let ground tests predict microgravity flammability, which would make material screening cheaper and faster if validated.",
+        "general": "A NASA/JAXA/ESA/CNES/DLR collaboration bridging normal-gravity and microgravity flammability."
+      },
+      "status": "in-psi",
+      "provenance": "NASA Glenn combustion science page (retrieved 2026-11-14). PSI presence/records not verified locally."
+    },
+    {
       "id": "LUCI",
       "name": "Lunar-g Combustion Investigation (expected)",
       "facility": "TBD",
@@ -963,18 +1043,18 @@
     },
     {
       "id": "FM2",
-      "name": "Flammability of Materials on the Moon (expected)",
-      "facility": "TBD",
-      "apparatus": "TBD",
-      "platform": "Lunar gravity (planned)",
+      "name": "Flammability of Materials on the Moon (FM2)",
+      "facility": "Lunar lander payload",
+      "apparatus": "Sealed combustion chamber (lunar surface)",
+      "platform": "Lunar surface — lunar gravity (1/6 g, ~0.165 g)",
       "fuelPhase": [
         "solid"
       ],
       "fuels": [
-        "spacecraft materials (TBD)"
+        "SIBAL cotton-fiberglass fabric"
       ],
-      "geometry": "TBD",
-      "objective": "Expected lunar-gravity material flammability data. Not yet in PSI.",
+      "geometry": "Flame spread over a fabric sample in lunar gravity",
+      "objective": "Burn a material on the Moon's surface to obtain the first combustion data at lunar gravity (1/6 g), filling the partial-gravity gap between microgravity and 1 g. Ground-simulated beforehand in a drop-tower centrifuge. Data not yet in PSI.",
       "pillars": {
         "prevention": 1.0,
         "detection": 0.2,
@@ -984,18 +1064,22 @@
         "o2Pct": null,
         "pressureKpa": null,
         "flowCmS": null,
-        "confidence": "unknown"
+        "confidence": "unknown",
+        "note": "Lunar gravity (1/6 g). Exact atmosphere and flow TBD; no data in PSI yet. Design range is the acceptance question FLAMEPRINT scores for the Moon base."
       },
-      "measurements": [],
+      "measurements": [
+        "flame spread rate",
+        "video"
+      ],
       "insights": {
-        "general": "Expected to provide lunar-gravity material flammability data directly."
+        "general": "Described by NASA Glenn as the first combustion experiment on another planetary body (the Moon). Expected to give lunar-gravity material flammability data directly, which no microgravity experiment can."
       },
       "tags": [
         "partial-gravity",
         "pending"
       ],
       "status": "pending",
-      "provenance": "Challenge brief"
+      "provenance": "NASA Glenn combustion science page (nasa.gov/glenn, retrieved 2026-11-14) + challenge brief"
     }
   ],
   "relations": [
@@ -1064,6 +1148,24 @@
       "to": "FM2",
       "type": "informs",
       "note": "μg solids → lunar-g solids"
+    },
+    {
+      "from": "BASS",
+      "to": "SoFIE",
+      "type": "follow-on",
+      "note": "SoFIE uses a larger, improved flow duct along the BASS concept"
+    },
+    {
+      "from": "SoFIE",
+      "to": "FM2",
+      "type": "informs",
+      "note": "μg limiting-oxygen data informs lunar-g material acceptance"
+    },
+    {
+      "from": "BASS-II",
+      "to": "FLARE",
+      "type": "informs",
+      "note": "Flammability limits: μg experiments inform the 1 g→μg estimation method"
     }
   ],
   "earthSpinoffs": [
