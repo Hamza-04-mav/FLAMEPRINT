@@ -13,16 +13,16 @@ Team action: **confirm each cited value** (grade/specimen/test standard). Two to
 commercial-grade LOI (unfilled PDMS is lower ~21%, so this is optimistic — swap for the grade actually flown if known),
 and `paper`/`cotton` are cellulose values that sit just above the ~21% air line.
 
-| id | Material | Value used | Source (cited in materials.json) | Status |
-|---|---|---|---|---|
-| `cotton` | Cotton fabric | **18 %** | BioResources review (Islam et al., 2021): untreated cotton LOI 16–22 % | ✅ sourced |
-| `pu-foam` | Polyurethane foam | **18 %** | Fire and Materials (2018): virgin flexible PU foam LOI 17.0–21.3 % | ✅ sourced |
-| `pmma` | PMMA (acrylic) | **17 %** | Lyon & Janssens, "LOI test revisited" (ASTM D2863-06): PMMA 17.0 | ✅ sourced |
-| `nomex` | Nomex | **28 %** | Aramid datasheets / ASTM D-2863 (range 28–31 %); NASA NTRS 20070018178 (failed at 30 % O₂, "J" config) | ✅ sourced |
-| `ptfe` | PTFE wire insulation | **95 %** | SpecialChem LOI guide / ASTM D2863 tables | ✅ sourced |
-| `velcro` | Velcro (nylon 6,6) | **24 %** | Nylon 6,6 oxygen index ~24–29 % (ScienceDirect) | ✅ sourced |
-| `paper` | Paper | **19 %** | Chen et al., BioResources 16(4):7953 (2021): untreated cellulose paper LOI ~19.6 % (ASTM D2863) | ✅ sourced |
-| `silicone` | Silicone rubber | **32 %** | Typical commercial silicone rubber VMQ ~32 % (MakeItFrom; Wacker Elastosil R 501/75, ASTM D2863). Unfilled PDMS lower (~21 %) | ✅ sourced (grade-dependent) |
+| id         | Material             | Value used | Source (cited in materials.json)                                                                                              | Status                       |
+| ---------- | -------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `cotton`   | Cotton fabric        | **18 %**   | BioResources review (Islam et al., 2021): untreated cotton LOI 16–22 %                                                        | ✅ sourced                   |
+| `pu-foam`  | Polyurethane foam    | **18 %**   | Fire and Materials (2018): virgin flexible PU foam LOI 17.0–21.3 %                                                            | ✅ sourced                   |
+| `pmma`     | PMMA (acrylic)       | **17 %**   | Lyon & Janssens, "LOI test revisited" (ASTM D2863-06): PMMA 17.0                                                              | ✅ sourced                   |
+| `nomex`    | Nomex                | **28 %**   | Aramid datasheets / ASTM D-2863 (range 28–31 %); NASA NTRS 20070018178 (failed at 30 % O₂, "J" config)                        | ✅ sourced                   |
+| `ptfe`     | PTFE wire insulation | **95 %**   | SpecialChem LOI guide / ASTM D2863 tables                                                                                     | ✅ sourced                   |
+| `velcro`   | Velcro (nylon 6,6)   | **24 %**   | Nylon 6,6 oxygen index ~24–29 % (ScienceDirect)                                                                               | ✅ sourced                   |
+| `paper`    | Paper                | **19 %**   | Chen et al., BioResources 16(4):7953 (2021): untreated cellulose paper LOI ~19.6 % (ASTM D2863)                               | ✅ sourced                   |
+| `silicone` | Silicone rubber      | **32 %**   | Typical commercial silicone rubber VMQ ~32 % (MakeItFrom; Wacker Elastosil R 501/75, ASTM D2863). Unfilled PDMS lower (~21 %) | ✅ sourced (grade-dependent) |
 
 LOI depends on specimen form and test setup, and is a 1 g, candle-like test, not a spacecraft acceptance test
 (NASA-STD-6001 Test 1). Say so in the pitch. These are literature LOI values, not PSI test records — material grades
