@@ -9,7 +9,7 @@ import { fmtGravity, PILLAR_COLOR, toPsi } from "@/lib/format";
 import { useMission } from "@/lib/mission";
 import type { BriefCards, Investigation, Pillar } from "@/lib/types";
 import { CitedMarkdown } from "./CitedMarkdown";
-import { AresEmblem } from "./NasaMarks";
+
 import { ConfidenceBadge, ErrorNote, Evidence, PageHeader, Skeleton } from "./ui";
 
 interface Meta { mode?: string; model?: string; fallbackReason?: string; coverageIndex?: number; investigations?: string[] }
@@ -357,7 +357,7 @@ export function BriefPanel() {
 
   return (
     <div>
-      <PageHeader kicker="Brief" title="What should engineers do?" actions={<AresEmblem />}>
+    <PageHeader kicker="Brief" title="What should engineers do?">
         Cited guidance for {hab ? `the ${hab.name}` : "this habitat"}, in three safety areas.
       </PageHeader>
       {err && <div className="mb-4"><ErrorNote message={err} /></div>}
