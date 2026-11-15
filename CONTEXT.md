@@ -215,9 +215,13 @@ Font: SF system on Apple, Inter fallback. The intro (`Boot.tsx`) shows on the fi
      habitat stepper has a **sliding active ring** (`layoutId`, sun); list items **stagger 30 ms** (pipeline, Evidence rows); gauge tested
      segments + material risk bars **grow once on first view** (`whileInView` + `viewport once`); the background tint already cross-fades
      (Phase 4). `prefers-reduced-motion` keeps opacity fades and disables parallax/tilt/camera/slide/glow-breathe (framer `reducedMotion="user"`
-   - the global CSS reduce block). **Next:** deeper redesigns — Brief-as-checklist with priority meters, Compare overlaid two-marker chart,
-     Tools-as-visual-cards; sidebar footer safe-area; **Phase 8** a11y/perf sweep + before/after screenshots + the single full `next build`.
-     **Deferred Norman items:** psi/kPa unit toggle, stowage combobox, undo, disabling impossible slider combos.
+   - the global CSS reduce block) · **Phase 6 complete** (finalisation): Brief `.prose-brief` bullets are now **checklist ticks** (icons +
+     `StrengthMeter` priority meters + Export Passport already present); `CompareHabitats` has an **overlaid two-marker axis chart**
+     (O₂/pressure/airflow/gravity — dust A-dot vs glowing sun B-dot + per-axis delta arrows); the Stowage tool opens with an illustration +
+     input + visual result card; **sidebar footer safe-area** fixed (defect #9). **Status: of 11 planned phases, Phases 0–7 are done and on
+     `origin/main`.** **Next — Phase 8:** a11y/perf sweep + before/after screenshots in `docs/screenshots/` + the single full `next build`.
+     Phases 9–11 await the owner's specs. **Deferred Norman items** (can fold into a later phase): psi/kPa unit toggle, stowage combobox,
+     undo, disabling impossible slider combinations.
 
 1. **[Team] Review the 6 sourced material LOI thresholds** in `data/seed/materials.json` (cotton 18, pu-foam 18, pmma 17,
    nomex 28, ptfe 95, velcro 24 — each with `source`+`url`). Confirm the cited values, and decide a value (or keep `null`)
