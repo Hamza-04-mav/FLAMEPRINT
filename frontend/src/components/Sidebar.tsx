@@ -141,7 +141,7 @@ function Panel({ rail, onNavigate }: { rail: boolean; onNavigate?: () => void })
 /** Desktop sidebar: icon rail on lg, full on xl. Mobile uses <MobileNav>. */
 export function Sidebar() {
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden border-r border-[rgba(239,234,227,0.08)] bg-[rgba(21,32,51,0.55)] [backdrop-filter:blur(24px)_saturate(140%)] lg:block lg:w-[76px] xl:w-[252px]">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden border-r border-[rgba(239,234,227,0.08)] bg-[rgba(21,32,51,0.55)] [backdrop-filter:blur(24px)_saturate(140%)] md:block md:w-[72px] lg:w-[76px] xl:w-[252px]">
       <div className="hidden h-full overflow-y-auto no-scrollbar xl:block"><Panel rail={false} /></div>
       <div className="h-full overflow-y-auto no-scrollbar xl:hidden"><Panel rail /></div>
     </aside>

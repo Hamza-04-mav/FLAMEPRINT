@@ -289,6 +289,11 @@ input[type="range"].fp-range::-moz-range-thumb {
   border: 3px solid var(--fill, var(--dust-300));
 }
 
+/* touch: give the slider a >=44px hit height on coarse pointers */
+@media (pointer: coarse) {
+  input[type="range"].fp-range { height: 44px; }
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

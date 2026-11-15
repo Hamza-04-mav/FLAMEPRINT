@@ -155,7 +155,7 @@ export function Header() {
       <header className="sticky top-0 z-30 px-4 pt-3 sm:px-6 sm:pt-4">
         <div className="mx-auto flex max-w-[1200px] items-center gap-2">
           <button onClick={() => setNav(true)} aria-label="Open navigation"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line-strong)] bg-space-900/70 text-mute backdrop-blur-xl hover:text-ink lg:hidden">
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line-strong)] bg-space-900/70 text-mute backdrop-blur-xl hover:text-ink md:hidden">
             <Menu className="h-5 w-5" />
           </button>
           <div className="min-w-0 flex-1"><MissionPicker /></div>

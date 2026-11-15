@@ -12,6 +12,7 @@ import { EarthPanel } from "@/components/EarthPanel";
 import { Header } from "@/components/Header";
 import { InvestigationDrawer } from "@/components/InvestigationDrawer";
 import { MissionConfig } from "@/components/MissionConfig";
+import { MobileTabBar } from "@/components/MobileTabBar";
 import { Ranking } from "@/components/Ranking";
 import { RankingToast } from "@/components/RankingToast";
 import { Sidebar } from "@/components/Sidebar";
@@ -27,9 +28,9 @@ function Dashboard() {
     <>
       <CosmicBackdrop />
       <Sidebar />
-      <div className="relative z-10 lg:pl-[76px] xl:pl-[252px]">
+      <div className="relative z-10 md:pl-[72px] lg:pl-[76px] xl:pl-[252px]">
         <Header />
-        <main className="mx-auto max-w-[1200px] px-4 pb-16 pt-6 sm:px-6 sm:pt-8">
+        <main className="mx-auto max-w-[1200px] px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 sm:pt-8 md:pb-16">
           {error && tab !== "answer" && <div className="mb-4"><ErrorNote message={error} onRetry={refreshData} /></div>}
           <AnimatePresence mode="wait">
             {ready && <motion.div key={tab}
@@ -55,6 +56,7 @@ function Dashboard() {
       <MissionConfig />
       <InvestigationDrawer />
       <RankingToast />
+      <MobileTabBar />
     </>
   );
 }

@@ -171,7 +171,7 @@ export default function FlameMorph({ flames, active = true }: { flames: FlameSpe
   return (
     <Canvas orthographic camera={{ zoom: 100, position: [0, 0, 5] }} gl={{ antialias: true, alpha: true, premultipliedAlpha: true, powerPreference: "low-power" }}
       onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
-      dpr={[1, 1.75]} style={{ width: "100%", height: "100%" }} frameloop={active ? "always" : "never"}>
+      dpr={[1, 1.5]} style={{ width: "100%", height: "100%" }} frameloop={active ? "always" : "never"}>
       <Stage flames={flames} />
     </Canvas>
   );

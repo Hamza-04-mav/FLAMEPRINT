@@ -83,7 +83,7 @@ export function Slider({
           const p = posOf(t.value);
           const active = Math.abs(p - pct) < 1.2;
           return <span key={i} aria-hidden title={t.label}
-            className="pointer-events-none absolute top-[7px] h-2 w-[2px] -translate-x-1/2 rounded-full"
+            className="pointer-events-none absolute top-1/2 h-2 w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full"
             style={{ left: `${p}%`, background: active ? "var(--sun-500)" : "rgba(138,129,120,0.6)" }} />;
         })}
         <input

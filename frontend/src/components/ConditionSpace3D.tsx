@@ -198,7 +198,7 @@ export default function ConditionSpace3D({ space, scenario, uEff, habitats, high
   const boxes = plottable(space);
   const selId = selection?.kind === "envelope" ? selection.id : null;
   return (
-    <Canvas camera={{ position: VIEW_POS.iso, fov: 42 }} dpr={[1, 1.75]} gl={{ antialias: true }} onPointerMissed={() => onSelect(null)}>
+    <Canvas camera={{ position: VIEW_POS.iso, fov: 42 }} dpr={[1, 1.5]} gl={{ antialias: true }} onPointerMissed={() => onSelect(null)}>
       <color attach="background" args={["#0a111d"]} />
       <fog attach="fog" args={["#0a111d", 20, 42]} />
       <ambientLight intensity={0.7} />
