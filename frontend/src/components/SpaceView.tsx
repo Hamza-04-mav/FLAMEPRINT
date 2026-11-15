@@ -15,7 +15,7 @@ import { DUST, SUN } from "@/lib/theme";
 import { useWebGL } from "@/lib/webgl";
 import type { Selection, ViewPreset } from "./ConditionSpace3D";
 import { FlammabilityMap, MAP_H, MAP_W } from "./FlammabilityMap";
-import { AresEmblem } from "./NasaMarks";
+
 import { Safe3D } from "./Safe3D";
 import { ConfidenceBadge, ErrorNote, Evidence, PageHeader, Skeleton } from "./ui";
 
@@ -328,7 +328,7 @@ export function SpaceView() {
 
   return (
     <div>
-      <PageHeader kicker="Gaps" title="Where NASA has no data yet" actions={<AresEmblem />}>
+    
         Untested is not the same as safe. Here is what is missing, and what to test next.
       </PageHeader>
       {err && <div className="mb-4"><ErrorNote message={err} onRetry={load} /></div>}
