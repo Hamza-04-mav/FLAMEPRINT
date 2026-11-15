@@ -55,7 +55,7 @@ export function AskPanel() {
       <PageHeader kicker="Tools · Ask the archive" title="Ask the archive"
         actions={<>
           {retrieval && <Pill>{retrieval === "postgres" ? "pgvector search" : "in-memory vector search"}</Pill>}
-          {mode && <Pill tone={mode === "llm" ? "cyan" : "amber"}>{mode === "llm" ? "Claude synthesis" : "extractive (offline)"}</Pill>}
+          {mode && <Pill tone={mode === "llm" ? "cyan" : "amber"}>{mode === "llm" ? "Groq synthesis" : "extractive (offline)"}</Pill>}
         </>}>
         Search the catalog and imported PSI documents; every answer cites its sources.
       </PageHeader>

@@ -133,7 +133,7 @@ function FullBrief() {
   }, [analysis]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const docNo = `FP-${(scenario.habitatId || "custom").toUpperCase()}-${(stamp ?? "").slice(0, 10).replace(/-/g, "") || "DRAFT"}`;
-  const header = `# FLAMEPRINT Fire Safety Brief (${docNo})\n\n_Scenario: ${hab?.name ?? "Custom"} · ${scenario.o2Pct}% O₂ · ${toPsi(scenario.pressureKpa)} psi · ${scenario.gravityG} g · ventilation ${scenario.flowCmS} cm/s · fuels: ${scenario.phases.join(", ")}_\n_Generated ${stamp ?? new Date().toISOString()} · ${meta.mode === "llm" ? `Claude (${meta.model})` : "deterministic engine"}_\n\n`;
+  const header = `# FLAMEPRINT Fire Safety Brief (${docNo})\n\n_Scenario: ${hab?.name ?? "Custom"} · ${scenario.o2Pct}% O₂ · ${toPsi(scenario.pressureKpa)} psi · ${scenario.gravityG} g · ventilation ${scenario.flowCmS} cm/s · fuels: ${scenario.phases.join(", ")}_\n_Generated ${stamp ?? new Date().toISOString()} · ${meta.mode === "llm" ? `Groq (${meta.model})` : "deterministic engine"}_\n\n`;
   const download = () => {
     const blob = new Blob([header + text], { type: "text/markdown" });
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `${docNo.toLowerCase()}.md` });
@@ -142,7 +142,7 @@ function FullBrief() {
   };
   const copy = async () => { await navigator.clipboard.writeText(header + text); setCopied(true); setTimeout(() => setCopied(false), 1500); };
   const busy = state === "waiting" || state === "streaming";
-  const engine = meta.mode === "llm" ? `Claude · ${meta.model}` : meta.mode === "local" ? "Deterministic writer" : health?.llm.enabled ? `Claude · ${health.llm.model}` : "Deterministic writer";
+  const engine = meta.mode === "llm" ? `Groq · ${meta.model}` : meta.mode === "local" ? "Deterministic writer" : health?.llm.enabled ? `Groq · ${health.llm.model}` : "Deterministic writer";
   const status = state === "idle" && !text ? "Not generated" : busy ? "Drafting…" : "Issued";
   const scrollTo = (i: number) => document.getElementById(`brief-sec-${i}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
@@ -183,7 +183,7 @@ function FullBrief() {
             <div className="mt-4 flex flex-wrap items-center gap-2 text-[11.5px] text-mute">
               <span>Fuels: {scenario.phases.join(", ")}</span><span className="text-slate-600">·</span>
               <span>Engine: <span className="text-slate-200">{engine}</span></span>
-              {meta.fallbackReason && <span className="text-amber-200/90">(Claude unavailable: {meta.fallbackReason})</span>}
+              {meta.fallbackReason && <span className="text-amber-200/90">(Groq unavailable: {meta.fallbackReason})</span>}
             </div>
           </header>
 

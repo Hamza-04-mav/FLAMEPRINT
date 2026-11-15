@@ -264,7 +264,7 @@ export function DataLab() {
             <li>Drop official PSI files into <code className="text-slate-200">data/psi/</code> (server) or upload them here.</li>
             <li>Columns are matched automatically (O₂, pressure, flow, gravity, fuel, outcome) and units are converted.</li>
             <li>Tested ranges become <span className="text-emerald-300">data-derived</span>. Ranking, coverage, the 3D map and briefs update.</li>
-            <li>PDFs and text are indexed for retrieval and, with Claude, can be turned into structured metadata.</li>
+            <li>PDFs and text are indexed for retrieval and, with the Groq LLM, can be turned into structured metadata.</li>
           </ol>
         </div>
         </>}

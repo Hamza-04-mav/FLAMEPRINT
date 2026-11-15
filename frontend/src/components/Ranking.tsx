@@ -178,7 +178,12 @@ export function Ranking() {
 
   return (
     <div>
-      <PageHeader kicker="Evidence" title="Which NASA experiments back this up?">
+      <PageHeader kicker="Evidence" title="Which NASA experiments back this up?"
+        actions={
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img src="/NASA/nasa-ares-logo.svg" alt="NASA ARES" width={72} height={63}
+            className="hidden h-[64px] w-auto opacity-90 sm:block" title="NASA PSI combustion investigations (ARES)" />
+        }>
         The {TOP} investigations closest to {hab ? `the ${hab.name}` : "this habitat"}, each with an evidence grade.
       </PageHeader>
 
