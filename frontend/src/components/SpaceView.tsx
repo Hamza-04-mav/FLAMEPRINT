@@ -328,7 +328,7 @@ export function SpaceView() {
 
   return (
     <div>
-    
+    <PageHeader kicker="Gaps" title="Where NASA has no data yet">
         Untested is not the same as safe. Here is what is missing, and what to test next.
       </PageHeader>
       {err && <div className="mb-4"><ErrorNote message={err} onRetry={load} /></div>}
