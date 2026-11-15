@@ -139,3 +139,17 @@ describe("habitat journey planner", () => {
     expect(planJourney("iss", "iss")).toBeNull();
   });
 });
+
+describe("count-up helpers", () => {
+  it("only counts pure numbers and keeps their shape", async () => {
+    const { parseCountable, formatLike } = await import("./countup");
+    expect(parseCountable("1,248")).toMatchObject({ value: 1248, grouped: true, decimals: 0 });
+    expect(parseCountable("10.2")).toMatchObject({ value: 10.2, decimals: 1 });
+    expect(parseCountable("0.17 g")).toBeNull();
+    expect(parseCountable("#1")).toBeNull();
+    expect(parseCountable("0")).toBeNull();
+    const p = parseCountable("18,540")!;
+    expect(formatLike(p, 9270.4)).toBe("9,270");
+    expect(formatLike(parseCountable("10.2")!, 5.04)).toBe("5.0");
+  });
+});

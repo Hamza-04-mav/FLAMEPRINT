@@ -6,6 +6,8 @@ import { AskPanel } from "@/components/AskPanel";
 import { Boot } from "@/components/Boot";
 import { BriefPanel } from "@/components/BriefPanel";
 import { CosmicBackdrop } from "@/components/CosmicBackdrop";
+import { AutoReveal } from "@/components/motion/AutoReveal";
+import { ScrollProgress } from "@/components/motion/ScrollProgress";
 import { CompareHabitats } from "@/components/CompareHabitats";
 import { DataLab } from "@/components/DataLab";
 import { EarthPanel } from "@/components/EarthPanel";
@@ -28,6 +30,8 @@ function Dashboard() {
   return (
     <>
       <CosmicBackdrop />
+      <AutoReveal />
+      <ScrollProgress />
       <Sidebar />
       <div className="relative z-10 md:pl-[72px] lg:pl-[76px] xl:pl-[252px]">
         <Header />

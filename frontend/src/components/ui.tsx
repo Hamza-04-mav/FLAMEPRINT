@@ -1,5 +1,6 @@
 "use client";
 
+import { TypeIn } from "./motion/TypeIn";
 import { animate, motion, useMotionValue, useTransform } from "framer-motion";
 import { type ReactNode, useEffect } from "react";
 import { CONF_LABEL } from "@/lib/format";
@@ -17,7 +18,7 @@ export function PageHeader({ kicker, title, children, actions }: {
       className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div className="max-w-2xl">
         <div className="kicker">{kicker}</div>
-        <h1 className="mt-2 t-title">{title}</h1>
+        <h1 className="mt-2 t-title">{typeof title === "string" ? <TypeIn text={title} /> : title}</h1>
         {children && <p className="mt-2 text-[15px] leading-relaxed text-mute">{children}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}

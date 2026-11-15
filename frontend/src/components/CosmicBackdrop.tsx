@@ -1,6 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion, type MotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
+import { AnimatePresence, motion, type MotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
+import { PARALLAX } from "@/lib/motion";
 import { useEffect, useMemo, useRef } from "react";
 import { environmentFor, ENV_TINT } from "@/lib/environment";
 import { useMission } from "@/lib/mission";
@@ -124,10 +125,15 @@ export function CosmicBackdrop() {
     return () => window.removeEventListener("mousemove", h);
   }, [reduce, px, py]);
 
-  // three parallax depths, far → near
-  const far = { x: useT(px, 6), y: useT(py, 4) };
-  const mid = { x: useT(px, 14), y: useT(py, 9) };
-  const near = { x: useT(px, 26), y: useT(py, 16) };
+  // three parallax depths, far → near: pointer + scroll (each depth moves at its own rate as the page scrolls)
+  const { scrollY } = useScroll();
+  const sy = useSpring(scrollY, { stiffness: 80, damping: 24 });
+  const depth = (pointer: MotionValue<number>, k: number, scroll: number) =>
+    useTransform([pointer, sy] as MotionValue<number>[], ([p, s]: number[]) => p * k - (reduce ? 0 : s * scroll)); // eslint-disable-line react-hooks/rules-of-hooks
+  const far = { x: useT(px, 6), y: depth(py, 4, PARALLAX.far) };
+  const mid = { x: useT(px, 14), y: depth(py, 9, PARALLAX.mid) };
+  const near = { x: useT(px, 26), y: depth(py, 16, PARALLAX.near) };
+  const hor = { x: mid.x, y: depth(py, 9, PARALLAX.horizon) };
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
@@ -140,15 +146,15 @@ export function CosmicBackdrop() {
       </AnimatePresence>
 
       {/* three star layers at different parallax depths */}
-      <motion.div className="absolute -inset-10" style={{ x: far.x, y: far.y }}><Stars density={6200} seedBase={11} big={0.98} /></motion.div>
-      <motion.div className="absolute -inset-10" style={{ x: mid.x, y: mid.y }}><Stars density={5200} seedBase={5717} big={0.955} /></motion.div>
+      <motion.div className="absolute -inset-10" style={{ x: far.x, y: far.y }}><div className="fp-drift absolute inset-0"><Stars density={6200} seedBase={11} big={0.98} /></div></motion.div>
+      <motion.div className="absolute -inset-10" style={{ x: mid.x, y: mid.y }}><div className="fp-drift absolute inset-0" style={{ animationDuration: `${PARALLAX.drift * 0.7}s` }}><Stars density={5200} seedBase={5717} big={0.955} /></div></motion.div>
       <motion.div className="absolute -inset-10" style={{ x: near.x, y: near.y }}>
         <Stars density={9000} seedBase={99173} big={0.9} />
         {!reduce && <Twinkles />}
       </motion.div>
 
       {/* moon / planet horizon — crossfades per habitat */}
-      <motion.div className="absolute inset-0" style={{ x: mid.x, y: mid.y }}>
+      <motion.div className="absolute inset-0" style={{ x: hor.x, y: hor.y }}>
         <AnimatePresence initial={false}>
           <Horizon key={suit ? "suit" : env} envKey={env} suit={suit} />
         </AnimatePresence>

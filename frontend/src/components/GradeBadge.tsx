@@ -15,7 +15,7 @@ export function Stamp({ letter, size = "md" }: { letter: Grade["letter"]; size?:
   const c = GRADE_STYLE[letter].color;
   const d = DIM[size];
   return (
-    <span aria-hidden className={`relative grid shrink-0 place-items-center rounded-[10px] font-display font-semibold leading-none ${d.box} ${d.tilt}`}
+    <span data-stamp="" aria-hidden className={`relative grid shrink-0 place-items-center rounded-[10px] font-display font-semibold leading-none ${d.box} ${d.tilt}`}
       style={{ color: c, border: `1.5px solid ${c}`, boxShadow: `inset 0 0 0 2px var(--color-space-950), inset 0 0 0 3px ${c}66`, background: `${c}0f` }}>
       {letter}
       {size === "lg" && (

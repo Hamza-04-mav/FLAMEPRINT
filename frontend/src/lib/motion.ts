@@ -61,3 +61,16 @@ export const JOURNEY = {
 /** Ease-in-out with a touch of overshoot for camera moves (cubic). */
 export const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 export const easeOutBack = (t: number, k = 1.2) => 1 + (k + 1) * Math.pow(t - 1, 3) + k * Math.pow(t - 1, 2);
+
+/* ── Animation pass v2: one site-wide motion vocabulary (owner-approved exception to the 150–300 ms budget) ── */
+
+/** Section reveal: fade + rise as a panel/card/row enters the viewport, once. */
+export const REVEAL = { rise: 24, duration: 0.45, stagger: 0.05, maxStagger: 0.25 } as const;
+/** Headline type-in with a brief scramble; total stays under 600 ms. */
+export const TYPE = { total: 0.55, scramble: 0.12 } as const;
+/** Count-up from zero to the real value, once on first view. */
+export const COUNT = { duration: 0.9 } as const;
+/** Scroll-linked depth (px of travel per px scrolled) and ambient star drift (seconds per cycle). */
+export const PARALLAX = { far: 0.02, mid: 0.05, near: 0.09, horizon: 0.06, drift: 140 } as const;
+/** Answer hero travel (seconds); `travel` overrides JOURNEY for the in-hero sequence. */
+export const TRAVEL = { desktop: 2.0, mobile: 1.2, settle: 0.9 } as const;

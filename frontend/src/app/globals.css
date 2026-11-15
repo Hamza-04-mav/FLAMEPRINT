@@ -422,3 +422,44 @@ input[type="range"].fp-range::-moz-range-thumb {
   .passport { font-size: 11px; }
   .passport section, .passport tr { break-inside: avoid; }
 }
+
+/* ═══════════ Animation pass v2: site-wide motion (AutoReveal) ═══════════ */
+@property --fp-bracket { syntax: "<length>"; inherits: false; initial-value: 0px; }
+[data-fp="pending"] { opacity: 0; transform: translate3d(0, 24px, 0); }
+[data-fp="in"] {
+  opacity: 1; transform: none;
+  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1) var(--fp-delay, 0s), transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) var(--fp-delay, 0s);
+}
+/* thin corner brackets that draw as a panel reveals (dust, HUD-style) */
+.panel[data-fp]::after {
+  content: ""; position: absolute; inset: -1px; pointer-events: none; border-radius: inherit;
+  --c: rgba(194, 186, 176, 0.55); --w: 1.5px;
+  background:
+    linear-gradient(var(--c), var(--c)) top left / var(--fp-bracket) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) top left / var(--w) var(--fp-bracket) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--fp-bracket) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--w) var(--fp-bracket) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--fp-bracket) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--w) var(--fp-bracket) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--fp-bracket) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--w) var(--fp-bracket) no-repeat;
+}
+.panel[data-fp="in"]::after { --fp-bracket: 14px; transition: --fp-bracket 0.6s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--fp-delay, 0s) + 0.15s); }
+/* hairlines draw in from the left once their section is in view */
+[data-fp] [data-fp-line], [data-fp][data-fp-line] { transform-origin: left center; transform: scaleX(0); }
+[data-fp="in"] [data-fp-line], [data-fp="in"][data-fp-line] { transform: scaleX(1); transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--fp-delay, 0s) + 0.1s); }
+/* grade stamps press in with a short scale-and-settle */
+@keyframes fp-stamp { 0% { opacity: 0; transform: scale(1.45) rotate(-5deg); } 60% { opacity: 1; transform: scale(0.94); } 100% { transform: none; } }
+[data-fp="in"] [data-stamp] { animation: fp-stamp 0.5s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--fp-delay, 0s) + 0.2s) both; }
+/* hover and press: a quick spring lift (uses `translate`, so it never fights the reveal transform) */
+.btn, a.panel, button.panel, main li > button { transition: translate 0.16s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.16s, border-color 0.16s, color 0.16s; }
+.btn:hover, a.panel:hover, button.panel:hover { translate: 0 -2px; }
+.btn:active, a.panel:active, button.panel:active { translate: 0 0; scale: 0.98; }
+/* ambient: the star field drifts slowly at all times */
+@keyframes fp-drift { from { translate: 0 0; } to { translate: -36px -18px; } }
+.fp-drift { animation: fp-drift 140s linear infinite alternate; }
+@media (prefers-reduced-motion: reduce) {
+  [data-fp="pending"] { opacity: 1; transform: none; }
+  [data-fp] [data-fp-line] { transform: none; }
+  .fp-drift { animation: none; }
+}
