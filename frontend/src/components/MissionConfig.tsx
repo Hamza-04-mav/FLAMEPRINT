@@ -40,7 +40,7 @@ export function MissionConfig() {
             <div className="flex-1 overflow-y-auto px-5 py-5 scrollbar-thin">
               <ScenarioBuilder bare />
             </div>
-            <div className="border-t border-[var(--line)] px-5 py-3 text-[11.5px] leading-snug text-slate-500">
+            <div className="border-t border-[var(--line)] px-5 py-3 text-[11.5px] leading-snug text-slate-400">
               Every view (ranking, coverage, gaps, brief) recomputes from these values with deterministic code.
             </div>
           </motion.aside>

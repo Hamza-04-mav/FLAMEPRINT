@@ -122,9 +122,9 @@ function AppRow({ s, i }: { s: Spinoff; i: number }) {
                 <span className="text-slate-400"> · {inv!.objective.length > 110 ? inv!.objective.slice(0, 108) + "…" : inv!.objective}</span>
               </li>
             ))}
-            {invs.length > 3 && <li className="text-[11.5px] text-slate-500">+ {invs.slice(3).map((x) => x!.id).join(", ")}</li>}
+            {invs.length > 3 && <li className="text-[11.5px] text-slate-400">+ {invs.slice(3).map((x) => x!.id).join(", ")}</li>}
           </ul>
-        ) : <p className="text-[12.5px] text-slate-500">NASA technology broadly. No single PSI investigation is linked.</p>}
+        ) : <p className="text-[12.5px] text-slate-400">NASA technology broadly. No single PSI investigation is linked.</p>}
       </div>
       <div className="hidden justify-center lg:flex"><ArrowRight className="h-5 w-5 text-ox-2" /></div>
       <div className="rounded-[12px] border p-4" style={{ borderColor: `${c}40`, background: `${c}0d` }}>

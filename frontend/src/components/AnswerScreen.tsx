@@ -56,7 +56,7 @@ function Verdict() {
   return (
     <TiltCard as="section" className="panel flex min-w-0 flex-col p-6 sm:p-8">
       <div className="font-mono text-[12px] text-mute">
-        {name} <span className="text-slate-500">· {Math.round(scenario.o2Pct)}% O₂ · {p.psi} <span className="text-[10px]">({Math.round(scenario.pressureKpa)} kPa)</span> · {fmtGravity(scenario.gravityG)} g</span>
+        {name} <span className="text-slate-400">· {Math.round(scenario.o2Pct)}% O₂ · {p.psi} <span className="text-[10px]">({Math.round(scenario.pressureKpa)} kPa)</span> · {fmtGravity(scenario.gravityG)} g</span>
         {hab?.assumed && <span className="ml-2 align-middle"><Evidence kind="estimate" label="assumed" /></span>}
       </div>
 

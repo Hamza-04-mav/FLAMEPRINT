@@ -55,7 +55,7 @@ export function Boot() {
               <motion.div className="h-full bg-ox shadow-[0_0_8px_#8a8178]"
                 animate={{ width: `${(n / LINES.length) * 100}%` }} />
             </div>
-            <div className="mt-3 flex justify-between text-[10px] tracking-[0.14em] text-slate-600"><span>CLICK TO SKIP</span><span className="tabular-nums">{Math.round((n / LINES.length) * 100)}%</span></div>
+            <div className="mt-3 flex justify-between text-[10px] tracking-[0.14em] text-slate-400"><span>CLICK TO SKIP</span><span className="tabular-nums">{Math.round((n / LINES.length) * 100)}%</span></div>
           </div>
         </motion.div>
       )}

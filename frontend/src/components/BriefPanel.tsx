@@ -72,7 +72,7 @@ function EvidencePanel({ ids, pillar, byId, onOpen }: { ids: string[]; pillar?: 
                     <button onClick={() => onOpen(id)} className="ml-auto inline-flex items-center gap-1 text-[11.5px] text-ox hover:underline"><FileSearch className="h-3.5 w-3.5" />Dossier</button>
                   </div>
                   {note && <p className="mt-1.5 text-[12px] leading-relaxed text-slate-400">{note}</p>}
-                  <p className="mt-1 text-[10.5px] text-slate-600">{inv.provenance}</p>
+                  <p className="mt-1 text-[10.5px] text-slate-400">{inv.provenance}</p>
                 </li>
               );
             })}
@@ -181,7 +181,7 @@ function FullBrief() {
               ))}
             </dl>
             <div className="mt-4 flex flex-wrap items-center gap-2 text-[11.5px] text-mute">
-              <span>Fuels: {scenario.phases.join(", ")}</span><span className="text-slate-600">·</span>
+              <span>Fuels: {scenario.phases.join(", ")}</span><span className="text-slate-400">·</span>
               <span>Engine: <span className="text-slate-200">{engine}</span></span>
               {meta.fallbackReason && <span className="text-amber-200/90">(Groq unavailable: {meta.fallbackReason})</span>}
             </div>
@@ -194,15 +194,15 @@ function FullBrief() {
                   const I = PILLAR_ICON[p];
                   return (
                     <div key={p} className="flex items-center gap-4 rounded-[12px] border border-dashed border-[var(--line-strong)] px-5 py-4 opacity-70">
-                      <span className="font-mono text-[12px] text-slate-500">{i + 1}.0</span>
+                      <span className="font-mono text-[12px] text-slate-400">{i + 1}.0</span>
                       <I className="h-5 w-5" style={{ color: PILLAR_COLOR[p] }} />
                       <span className="font-display text-[16px] capitalize text-slate-300">{p}</span>
-                      <span className="ml-auto font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-500">Awaiting generation</span>
+                      <span className="ml-auto font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-400">Awaiting generation</span>
                     </div>
                   );
                 })}
                 <div className="flex flex-col items-center gap-3 pt-4 text-center">
-                  <FileText className="h-8 w-8 text-slate-600" />
+                  <FileText className="h-8 w-8 text-slate-400" />
                   <p className="max-w-md text-[13px] text-mute">Gaps are labelled <span className="text-amber-200">Insufficient evidence</span> instead of guessed. Nothing is shown until it is generated.</p>
                   <button onClick={run} className="btn btn-primary"><Sparkles className="h-4 w-4" />Generate brief</button>
                 </div>
@@ -238,7 +238,7 @@ function FullBrief() {
                       <div className="flex flex-wrap items-center gap-3">
                         <span className="grid h-11 w-11 place-items-center rounded-[10px] border" style={{ borderColor: `${c}55`, background: `${c}14`, color: c }}><I className="h-5 w-5" /></span>
                         <div>
-                          <div className="font-mono text-[10.5px] text-slate-500">SECTION {pillarNo}.0</div>
+                          <div className="font-mono text-[10.5px] text-slate-400">SECTION {pillarNo}.0</div>
                           <h3 className="font-display text-[20px] font-semibold text-ink">{s.title}</h3>
                         </div>
                         <div className="ml-auto flex items-center gap-4">
@@ -255,7 +255,7 @@ function FullBrief() {
                 return (
                   <motion.section key={s.title} id={`brief-sec-${i}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="scroll-mt-28">
                     <div className="flex items-baseline gap-3 border-b border-[var(--line)] pb-2">
-                      <span className="font-mono text-[11px] text-slate-500">{app ? `APPENDIX ${app}` : "0.0"}</span>
+                      <span className="font-mono text-[11px] text-slate-400">{app ? `APPENDIX ${app}` : "0.0"}</span>
                       <h3 className="font-display text-[17px] font-semibold text-ink">{key === "mission atmosphere" ? "Situation: mission atmosphere" : s.title}</h3>
                       {key === "evidence gaps" && <span className="ml-auto"><Evidence kind="catalog" label="From the gap detector" /></span>}
                     </div>
@@ -280,7 +280,7 @@ function FullBrief() {
         <aside className="space-y-5 xl:sticky xl:top-[112px] xl:self-start">
           <section className="panel p-5">
             <div className="label mb-3">Contents</div>
-            {sections.length === 0 ? <p className="text-[12.5px] text-slate-500">Appears as the brief is written.</p> : (
+            {sections.length === 0 ? <p className="text-[12.5px] text-slate-400">Appears as the brief is written.</p> : (
               <ol className="space-y-1">
                 {sections.map((s, i) => {
                   const done = i < sections.length - 1 || state === "done";
@@ -297,11 +297,11 @@ function FullBrief() {
           </section>
           <section className="panel p-5">
             <div className="label mb-3 flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-ok" />Citation audit</div>
-            {!cites ? <p className="text-[12.5px] text-slate-500">Runs when the brief finishes.</p> : (
+            {!cites ? <p className="text-[12.5px] text-slate-400">Runs when the brief finishes.</p> : (
               <>
                 <div className="flex gap-5">
                   <div><div className="font-display text-[24px] font-semibold text-emerald-300">{cites.valid.length}</div><div className="label !text-[9px]">verified</div></div>
-                  <div><div className={`font-display text-[24px] font-semibold ${cites.invalid.length ? "text-rose-300" : "text-slate-600"}`}>{cites.invalid.length}</div><div className="label !text-[9px]">unverified</div></div>
+                  <div><div className={`font-display text-[24px] font-semibold ${cites.invalid.length ? "text-rose-300" : "text-slate-400"}`}>{cites.invalid.length}</div><div className="label !text-[9px]">unverified</div></div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1">
                   {cites.valid.map((c) => <span key={c} className="rounded-[4px] border border-emerald-400/30 px-1.5 font-mono text-[10.5px] text-emerald-200">{c}</span>)}
@@ -309,7 +309,7 @@ function FullBrief() {
                 </div>
               </>
             )}
-            <p className="mt-3 text-[11.5px] leading-snug text-slate-500">The model only receives the evidence packet and must cite its ids. Each citation is checked against it.</p>
+            <p className="mt-3 text-[11.5px] leading-snug text-slate-400">The model only receives the evidence packet and must cite its ids. Each citation is checked against it.</p>
           </section>
           {meta.investigations && (
             <section className="panel p-5">
@@ -381,7 +381,7 @@ export function BriefPanel() {
                   {c.gap && <li className="text-[13.5px] leading-snug text-amber-200">{c.gap}</li>}
                 </ul>
               )}
-              {c && c.more > 0 && <p className="mt-auto pt-4 text-[12.5px] text-slate-500">+{c.more} more in the full brief</p>}
+              {c && c.more > 0 && <p className="mt-auto pt-4 text-[12.5px] text-slate-400">+{c.more} more in the full brief</p>}
             </section>
           );
         })}

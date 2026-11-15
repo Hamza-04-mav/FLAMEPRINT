@@ -246,11 +246,12 @@ body {
 @keyframes sun-breathe { 0%, 100% { box-shadow: 0 0 0 1px var(--sun-ring), 0 8px 26px -8px rgba(255, 210, 63, 0.22); } 50% { box-shadow: 0 0 0 1px var(--sun-ring), 0 10px 32px -6px rgba(255, 210, 63, 0.32); } }
 .sun-glow-breathe { animation: sun-breathe 5s ease-in-out infinite; }
 
-/* keyboard focus ring (whitelisted sun role 5) */
+/* keyboard focus ring (whitelisted sun role 5) — yellow ring + soft glow */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--sun-500);
   outline-offset: 2px;
   border-radius: 6px;
+  box-shadow: 0 0 0 4px var(--sun-wash), 0 0 14px -2px var(--sun-glow);
 }
 
 /* ───────────── controls ───────────── */

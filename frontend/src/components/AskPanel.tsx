@@ -61,10 +61,10 @@ export function AskPanel() {
       </PageHeader>
       <div className="panel panel-glow p-5 sm:p-7">
       <form onSubmit={(e) => { e.preventDefault(); void ask(q); }} className="relative">
-        <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+        <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input value={q} onChange={(e) => setQ(e.target.value)} maxLength={500}
           placeholder="Ask about fuels, oxygen levels, suppression, detection, hardware…"
-          className="w-full rounded-[12px] border border-[var(--line-strong)] bg-space-950/70 py-4 pl-11 pr-24 text-[15px] text-slate-100 outline-none placeholder:text-slate-600 focus:border-ox/60 focus:shadow-[0_0_0_4px_rgba(25,201,255,0.08)]" />
+          className="w-full rounded-[12px] border border-[var(--line-strong)] bg-space-950/70 py-4 pl-11 pr-24 text-[15px] text-slate-100 outline-none placeholder:text-slate-400 focus:border-ox/60 focus:shadow-[0_0_0_4px_rgba(25,201,255,0.08)]" />
         <button type="submit" disabled={busy}
           className="btn btn-primary absolute right-2 top-1/2 -translate-y-1/2 !px-3.5 !py-2 !text-[12.5px] disabled:opacity-50">
           Ask <CornerDownLeft className="h-3 w-3" />
@@ -83,7 +83,7 @@ export function AskPanel() {
         <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_280px]">
           <div>
             <div className="mb-3 text-sm font-medium text-slate-200">“{asked}”</div>
-            {busy && !text && <div className="flex items-center gap-2 text-sm text-slate-500"><span className="h-2 w-2 animate-ping rounded-full bg-ox" />Searching archive…</div>}
+            {busy && !text && <div className="flex items-center gap-2 text-sm text-slate-400"><span className="h-2 w-2 animate-ping rounded-full bg-ox" />Searching archive…</div>}
             <CitedMarkdown text={text} valid={valid} streaming={busy} />
           </div>
           <div>
@@ -98,7 +98,7 @@ export function AskPanel() {
                   <span className="ml-auto h-1 w-14 overflow-hidden rounded-full bg-slate-800">
                     <span className="block h-full bg-ox" style={{ width: `${Math.max(4, Math.min(100, h.score * 160))}%` }} />
                   </span>
-                  <span className="w-9 text-right font-mono text-[10px] text-slate-500">{h.score.toFixed(2)}</span>
+                  <span className="w-9 text-right font-mono text-[10px] text-slate-400">{h.score.toFixed(2)}</span>
                 </motion.div>
               ))}
             </div>

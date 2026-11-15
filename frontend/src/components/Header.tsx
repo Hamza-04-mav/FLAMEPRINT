@@ -88,7 +88,7 @@ function MissionPicker() {
               className="flex w-full items-center gap-2 rounded-[8px] px-2.5 py-2 text-[13px] text-ox hover:bg-white/[0.04]">
               <SlidersHorizontal className="h-4 w-4" /> Adjust conditions…
             </button>
-            <div className="px-2.5 pb-1.5 pt-1 text-[10.5px] text-slate-500">Environment: {ENV_LABEL[env]}</div>
+            <div className="px-2.5 pb-1.5 pt-1 text-[10.5px] text-slate-400">Environment: {ENV_LABEL[env]}</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -137,7 +137,7 @@ function StatusPopover() {
                 <li key={k} className="flex items-start gap-2.5 text-[12px]">
                   <span className="mt-[3px]"><EvidenceMark kind={k} size={9} /></span>
                   <span><span style={{ color: EVIDENCE[k].color }}>{EVIDENCE[k].label}</span>
-                    <span className="block text-[11px] text-slate-500">{EVIDENCE[k].hint}</span></span>
+                    <span className="block text-[11px] text-slate-400">{EVIDENCE[k].hint}</span></span>
                 </li>
               ))}
             </ul>

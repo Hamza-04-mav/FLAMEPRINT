@@ -361,6 +361,7 @@ function Scene({ env, withRover, still }: { env: Environment; withRover: boolean
 export default function MissionScene3D({ env, withRover, active, still }: { env: Environment; withRover: boolean; active: boolean; still: boolean }) {
   return (
     <Canvas camera={{ position: [0.5, 3.4, 14], fov: 40, near: 0.1, far: 400 }} dpr={[1, 1.5]}
+      role="img" aria-label={`Illustrative 3D view of a crewed habitat on the ${env} environment. Decorative; all data is in the panels above.`}
       gl={{ antialias: true, powerPreference: "high-performance" }} frameloop={active ? "always" : "never"}
       onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.05; }}>
       <Scene env={env} withRover={withRover} still={still} />

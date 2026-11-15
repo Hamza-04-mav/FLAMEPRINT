@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Info } from "lucide-react";
+import { AreaChart, Info, Table2 } from "lucide-react";
 import { useId, useMemo, useState } from "react";
-import { OUTCOME_COLOR } from "@/lib/format";
+import { fmtRange, OUTCOME_COLOR } from "@/lib/format";
 import { useMission } from "@/lib/mission";
 import type { ConditionSpace } from "@/lib/types";
 import { EvidenceMark } from "./ui";
@@ -22,6 +22,7 @@ export function FlammabilityMap({ space, missionName = "your habitat", showCurve
 }) {
   const { scenario, analysis } = useMission();
   const [more, setMore] = useState(false);
+  const [asTable, setAsTable] = useState(false);
   const uid = useId().replace(/:/g, "");
   const uEff = analysis?.readout.effectiveFlowCmS ?? scenario.flowCmS;
   const curve = useMemo(() => !space ? "" : space.schematicCurve.filter((p) => p.flowCmS <= X_MAX)
@@ -34,6 +35,43 @@ export function FlammabilityMap({ space, missionName = "your habitat", showCurve
 
   return (
     <div>
+      <div className="mb-2 flex justify-end">
+        <button onClick={() => setAsTable((x) => !x)} aria-pressed={asTable} className="btn btn-ghost !px-2 !py-1 text-[12px]">
+          {asTable ? <><AreaChart className="h-3.5 w-3.5" />View as chart</> : <><Table2 className="h-3.5 w-3.5" />View as table</>}
+        </button>
+      </div>
+      {asTable ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-[12.5px]">
+            <caption className="sr-only">NASA-tested oxygen and airflow ranges, and where {missionName} sits.</caption>
+            <thead>
+              <tr className="text-dust-400">
+                <th scope="col" className="py-1.5 pr-3 font-medium">Investigation</th>
+                <th scope="col" className="py-1.5 pr-3 font-medium">Tested O₂</th>
+                <th scope="col" className="py-1.5 pr-3 font-medium">Tested airflow</th>
+                <th scope="col" className="py-1.5 font-medium">Source</th>
+              </tr>
+            </thead>
+            <tbody className="font-mono tabular-nums text-dust-200">
+              <tr className="border-y border-[var(--line)]">
+                <th scope="row" className="py-1.5 pr-3 font-semibold text-sun">{missionName} (you)</th>
+                <td className="py-1.5 pr-3">{Math.round(scenario.o2Pct)} %</td>
+                <td className="py-1.5 pr-3">{uEff.toFixed(1)} cm/s</td>
+                <td className="py-1.5 font-sans text-dust-400">your scenario</td>
+              </tr>
+              {boxes.map((e) => (
+                <tr key={e.id} className="border-b border-[var(--line)]">
+                  <th scope="row" className="py-1.5 pr-3 font-normal text-dust-100">{e.id}</th>
+                  <td className="py-1.5 pr-3">{fmtRange(e.envelope.o2Pct, " %")}</td>
+                  <td className="py-1.5 pr-3">{fmtRange(e.envelope.flowCmS, " cm/s")}</td>
+                  <td className="py-1.5 font-sans text-dust-400">{e.envelope.confidence === "data" ? "PSI data" : "catalog approx"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+      <>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
         aria-label={`Oxygen versus airflow: tested ranges and ${missionName} at ${Math.round(scenario.o2Pct)}% oxygen, ${uEff.toFixed(0)} centimetres per second`}>
         <defs>
@@ -50,14 +88,14 @@ export function FlammabilityMap({ space, missionName = "your habitat", showCurve
         {/* the void: everything is untested unless a range lights it up */}
         <rect x={PAD.l} y={PAD.t} width={plotW} height={plotH} rx={10} fill="#0a111d" />
         <rect x={PAD.l} y={PAD.t} width={plotW} height={plotH} rx={10} fill={`url(#void${uid})`} />
-        <text x={W - PAD.r - 14} y={PAD.t + 22} textAnchor="end" className="fill-slate-500 font-mono text-[14px] tracking-[0.2em]">UNTESTED</text>
+        <text x={W - PAD.r - 14} y={PAD.t + 22} textAnchor="end" className="fill-slate-400 font-mono text-[14px] tracking-[0.2em]">UNTESTED</text>
 
         {/* axes */}
         {[10, 20, 30, 40, 50].map((y) => (
-          <text key={y} x={PAD.l - 10} y={sy(y) + 4} textAnchor="end" className="fill-slate-500 font-mono text-[14px]">{y}%</text>
+          <text key={y} x={PAD.l - 10} y={sy(y) + 4} textAnchor="end" className="fill-slate-400 font-mono text-[14px]">{y}%</text>
         ))}
         {[0, 10, 20, 30, 40, 50, 60].map((x) => (
-          <text key={x} x={sx(x)} y={H - PAD.b + 22} textAnchor="middle" className="fill-slate-500 font-mono text-[14px]">{x}</text>
+          <text key={x} x={sx(x)} y={H - PAD.b + 22} textAnchor="middle" className="fill-slate-400 font-mono text-[14px]">{x}</text>
         ))}
         <text x={PAD.l + plotW / 2} y={H - 8} textAnchor="middle" className="fill-slate-400 text-[15px]">Airflow the flame feels (cm/s)</text>
         <text x={14} y={PAD.t + plotH / 2} textAnchor="middle" transform={`rotate(-90 14 ${PAD.t + plotH / 2})`} className="fill-slate-400 text-[15px]">Oxygen</text>
@@ -121,6 +159,8 @@ export function FlammabilityMap({ space, missionName = "your habitat", showCurve
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

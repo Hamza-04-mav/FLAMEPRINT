@@ -46,12 +46,12 @@ export function ScenarioBuilder({ bare = false }: { bare?: boolean }) {
             >
               {on && <motion.span layoutId={bare ? "hab-on-sheet" : "hab-on"} className="absolute inset-0 -z-0 bg-blue/[0.16]" />}
               <span className="relative z-10 flex items-center gap-1.5 text-[12.5px] font-medium">{ICONS[h.id]}{h.short}</span>
-              <span className="relative z-10 font-mono text-[10px] text-slate-500">{h.o2Pct}% · {toPsi(h.pressureKpa)} psi</span>
+              <span className="relative z-10 font-mono text-[10px] text-slate-400">{h.o2Pct}% · {toPsi(h.pressureKpa)} psi</span>
             </motion.button>
           );
         })}
       </div>
-      <p className="mt-2 min-h-[2.4em] text-[11.5px] leading-snug text-slate-500">
+      <p className="mt-2 min-h-[2.4em] text-[11.5px] leading-snug text-slate-400">
         {active ? <>{active.basis}{active.assumed && <span className="text-amber-300/80"> (assumed preset)</span>}</> : "Custom scenario."}
       </p>
 
@@ -70,7 +70,7 @@ export function ScenarioBuilder({ bare = false }: { bare?: boolean }) {
           <div className="relative mt-1 h-4">
             {G_MARKS.map((m) => (
               <button key={m.label} type="button" onClick={() => set({ gravityG: m.g })}
-                className="absolute -translate-x-1/2 font-mono text-[10px] text-slate-500 hover:text-flame-2"
+                className="absolute -translate-x-1/2 font-mono text-[10px] text-slate-400 hover:text-flame-2"
                 style={{ left: `${m.g * 100}%` }}>{m.label}</button>
             ))}
           </div>

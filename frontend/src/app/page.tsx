@@ -47,7 +47,7 @@ function Dashboard() {
               {tab === "data" && <DataLab />}
             </motion.div>}
           </AnimatePresence>
-          <footer className="mt-16 border-t border-[var(--line)] pt-5 text-[11.5px] leading-relaxed text-slate-500">
+          <footer className="mt-16 border-t border-[var(--line)] pt-5 text-[11.5px] leading-relaxed text-slate-400">
             FLAMEPRINT · NASA Space Apps 2026 · Independent project, not NASA-endorsed. Test values come only from imported NASA PSI
             files; anything marked approx, estimate, illustrative or modeled must be verified against PSI.
           </footer>

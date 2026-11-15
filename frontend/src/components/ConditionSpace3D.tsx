@@ -115,7 +115,7 @@ function Target({ scenario, uEff, inVoid, name }: { scenario: Scenario; uEff: nu
 function Axes() {
   const tick = (key: string, pos: [number, number, number], text: string) => (
     <Html key={key} position={pos} center distanceFactor={16} style={{ pointerEvents: "none" }}>
-      <span className="whitespace-nowrap font-mono text-[10px] text-slate-500">{text}</span>
+      <span className="whitespace-nowrap font-mono text-[10px] text-slate-400">{text}</span>
     </Html>
   );
   const zf = mz(F_RANGE[1]) + 0.3;
@@ -198,7 +198,8 @@ export default function ConditionSpace3D({ space, scenario, uEff, habitats, high
   const boxes = plottable(space);
   const selId = selection?.kind === "envelope" ? selection.id : null;
   return (
-    <Canvas camera={{ position: VIEW_POS.iso, fov: 42 }} dpr={[1, 1.5]} gl={{ antialias: true }} onPointerMissed={() => onSelect(null)}>
+    <Canvas camera={{ position: VIEW_POS.iso, fov: 42 }} dpr={[1, 1.5]} gl={{ antialias: true }} onPointerMissed={() => onSelect(null)}
+      role="img" aria-label={`3D map of NASA-tested conditions (oxygen, pressure, airflow). ${missionName} ${inVoid ? "sits in an untested gap" : "sits inside a tested range"}. Use the 2D map's "View as table" for a text version.`}>
       <color attach="background" args={["#0a111d"]} />
       <fog attach="fog" args={["#0a111d", 20, 42]} />
       <ambientLight intensity={0.7} />

@@ -74,7 +74,7 @@ export function Slider({
         <span className="text-[13px] text-slate-300">{label}</span>
         <span className="font-mono text-[13px] tabular-nums text-slate-100">
           {display ?? value}
-          {unit && <span className="ml-0.5 text-slate-500">{unit}</span>}
+          {unit && <span className="ml-0.5 text-slate-400">{unit}</span>}
         </span>
       </div>
       <div className="relative">
@@ -102,7 +102,7 @@ export function Slider({
           })}
         </div>
       )}
-      {hint && <div className="mt-0.5 text-[11px] leading-snug text-slate-500">{hint}</div>}
+      {hint && <div className="mt-0.5 text-[11px] leading-snug text-slate-400">{hint}</div>}
     </label>
   );
 }

@@ -27,7 +27,7 @@ function Pick({ value, onChange, habitats, label }: { value: string; onChange: (
         className="mt-1.5 w-full rounded-[10px] border border-[var(--line-strong)] bg-space-950 px-3 py-2.5 font-display text-[17px] font-semibold text-ink focus:border-ox/60 focus:outline-none">
         {habitats.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
       </select>
-      {h && p && <span className="mt-1.5 block font-mono text-[12px] text-slate-500">{Math.round(h.o2Pct)}% O₂ · {p.psi} · {fmtGravity(h.gravityG)} g</span>}
+      {h && p && <span className="mt-1.5 block font-mono text-[12px] text-slate-400">{Math.round(h.o2Pct)}% O₂ · {p.psi} · {fmtGravity(h.gravityG)} g</span>}
     </label>
   );
 }
@@ -182,7 +182,7 @@ function HabitatDiff() {
           <motion.ul key="same" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: EASE }} className="mt-3 grid grid-cols-1 gap-x-8 gap-y-2 overflow-hidden text-[13.5px] sm:grid-cols-2">
             {same.map((m) => (
-              <li key={m.id} className="flex justify-between gap-3 text-slate-500">
+              <li key={m.id} className="flex justify-between gap-3 text-slate-400">
                 <span>{m.name}</span><span>{LEVEL_STYLE[m.level].label}</span>
               </li>
             ))}

@@ -203,7 +203,7 @@ export function Genome({ embedded = false }: { embedded?: boolean }) {
               </svg>
             </div>
           )}
-          <div className="pointer-events-none absolute bottom-3 left-4 font-mono text-[10px] tracking-[0.14em] text-slate-500">CLICK TO INSPECT · DOUBLE-CLICK FOR DOSSIER</div>
+          <div className="pointer-events-none absolute bottom-3 left-4 font-mono text-[10px] tracking-[0.14em] text-slate-400">CLICK TO INSPECT · DOUBLE-CLICK FOR DOSSIER</div>
         </section>
 
         {/* inspector */}
@@ -216,7 +216,7 @@ export function Genome({ embedded = false }: { embedded?: boolean }) {
               </motion.p>
             ) : (
               <motion.div key={node.id} initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className="mt-3">
-                <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-slate-500">{node.kind}</div>
+                <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-slate-400">{node.kind}</div>
                 <div className="mt-1 flex items-center gap-2">
                   <span className="font-display text-[22px] font-semibold text-ink">{node.label}</span>
                   {inv && <ConfidenceBadge c={inv.conditions.confidence} />}
@@ -227,9 +227,9 @@ export function Genome({ embedded = false }: { embedded?: boolean }) {
                   <>
                     <div className="mt-4 flex flex-wrap items-center gap-1.5 text-[11.5px]">
                       <span className="rounded-[6px] border border-[var(--line)] px-2 py-0.5 text-slate-300">{inv.facility}</span>
-                      <span className="text-slate-600">→</span>
+                      <span className="text-slate-400">→</span>
                       <span className="rounded-[6px] border border-[var(--line)] px-2 py-0.5 text-[#c2bab0]">{inv.apparatus ?? "apparatus n/a"}</span>
-                      <span className="text-slate-600">→</span>
+                      <span className="text-slate-400">→</span>
                       <span className="rounded-[6px] border border-ox/40 px-2 py-0.5 text-ink">{inv.id}</span>
                     </div>
                     <div className="mt-4 divide-y divide-[var(--line)] text-[12.5px]">
@@ -250,7 +250,7 @@ export function Genome({ embedded = false }: { embedded?: boolean }) {
                                   <span style={{ color: REL_COLOR[r.type] }}>{r.type}</span>
                                   <button onClick={() => setSel(other)} className="ml-auto font-mono text-ink hover:text-ox">{other}</button>
                                 </div>
-                                {r.note && <p className="mt-1 leading-snug text-slate-500">{r.note}</p>}
+                                {r.note && <p className="mt-1 leading-snug text-slate-400">{r.note}</p>}
                               </li>
                             );
                           })}
@@ -291,7 +291,7 @@ export function Genome({ embedded = false }: { embedded?: boolean }) {
           <motion.section key={pair.join("|")} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="panel mt-5 p-5 sm:p-6">
             <div className="mb-4 flex flex-wrap items-center gap-3">
               <ArrowLeftRight className="h-4 w-4 text-ox" />
-              <h3 className="font-display text-[18px] font-semibold text-ink">{cmp.a.id} <span className="text-slate-500">vs</span> {cmp.b.id}</h3>
+              <h3 className="font-display text-[18px] font-semibold text-ink">{cmp.a.id} <span className="text-slate-400">vs</span> {cmp.b.id}</h3>
               {cmp.sharedHardware.length > 0 && <span className="rounded-[6px] border border-ox/30 bg-ox/[0.06] px-2 py-0.5 text-[11.5px] text-[#c2bab0]">shared: {cmp.sharedHardware.join(", ")}</span>}
               <button onClick={() => setPair(null)} className="ml-auto grid h-8 w-8 place-items-center rounded-lg text-mute hover:bg-white/5 hover:text-ink" aria-label="Clear comparison"><X className="h-4 w-4" /></button>
             </div>

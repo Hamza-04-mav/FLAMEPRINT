@@ -69,7 +69,7 @@ function ResultCard({ res, g, habitatName, compact }: { res: StowageResult; g: n
         </div>
         {v && <GradeBadge grade={v.grade} size="sm" />}
       </div>
-      <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[10px] text-slate-500">
+      <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[10px] text-slate-400">
         <span>{MATCHED[res.matchedBy]}</span>
         {v && <Evidence kind="illustrative" label={v.label} />}
       </div>
@@ -83,7 +83,7 @@ function SearchBox({ s, autoFocus }: { s: ReturnType<typeof useStowage>; autoFoc
       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-mute" />
       <input value={s.item} onChange={(e) => s.setItem(e.target.value)} autoFocus={autoFocus} maxLength={200}
         placeholder="Type an item, e.g. foam pillow" aria-label="Item to check"
-        className="w-full rounded-[10px] border border-[var(--line-strong)] bg-space-950/70 py-2.5 pl-9 pr-20 text-[14px] text-ink placeholder:text-slate-500 focus:border-ox/60 focus:outline-none" />
+        className="w-full rounded-[10px] border border-[var(--line-strong)] bg-space-950/70 py-2.5 pl-9 pr-20 text-[14px] text-ink placeholder:text-slate-400 focus:border-ox/60 focus:outline-none" />
       <button type="submit" disabled={s.busy || !s.item.trim()}
         className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-[8px] bg-blue px-3 py-1.5 text-[12.5px] font-medium text-white disabled:opacity-40">
         {s.busy ? "…" : "Check"}
@@ -117,7 +117,7 @@ export function StowageSearch() {
         <input value={s.item} onChange={(e) => s.setItem(e.target.value)} maxLength={200}
           onKeyDown={(e) => e.key === "Escape" && close()}
           placeholder="Can I bring this aboard? e.g. foam pillow" aria-label="Can I bring this aboard? Type an item"
-          className="w-full rounded-full border border-[var(--line-strong)] bg-space-950/70 py-2.5 pl-10 pr-4 text-[14px] text-ink placeholder:text-slate-500 focus:border-ox/60 focus:outline-none" />
+          className="w-full rounded-full border border-[var(--line-strong)] bg-space-950/70 py-2.5 pl-10 pr-4 text-[14px] text-ink placeholder:text-slate-400 focus:border-ox/60 focus:outline-none" />
       </form>
       <AnimatePresence>
         {(s.res || s.err) && (
@@ -174,7 +174,7 @@ export function StowageInspector() {
           <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {(allMats ? analysis.materials : analysis.materials.slice(0, 5)).map((m) => (
               <li key={m.id} className="flex items-center justify-between gap-2 rounded-[8px] bg-space-950/40 px-3 py-2 text-[13px]">
-                <span className="min-w-0"><span className="text-ink">{m.name}</span><span className="block truncate text-[11.5px] text-slate-500">{m.usedFor}</span></span>
+                <span className="min-w-0"><span className="text-ink">{m.name}</span><span className="block truncate text-[11.5px] text-slate-400">{m.usedFor}</span></span>
                 <span className="shrink-0 text-[12px]" style={{ color: LEVEL_STYLE[m.level].color }}>{LEVEL_STYLE[m.level].label}</span>
               </li>
             ))}

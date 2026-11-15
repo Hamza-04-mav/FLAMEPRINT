@@ -84,7 +84,7 @@ function Breakdown({ r, onOpen }: { r: Ranked; onOpen: () => void }) {
               <motion.div className="h-full rounded-full" style={{ background: FACTOR_COLOR[f.key], opacity: f.confidence === "unknown" ? 0.5 : 1 }}
                 initial={{ width: 0 }} animate={{ width: `${Math.max(2, f.score * 100)}%` }} transition={{ duration: 0.3, ease: EASE }} />
             </div>
-            <p className="mt-1 text-[12px] leading-snug text-slate-500">{f.why}</p>
+            <p className="mt-1 text-[12px] leading-snug text-slate-400">{f.why}</p>
           </li>
         ))}
       </ul>
@@ -113,11 +113,11 @@ function Row({ r, i, open, onToggle, planned }: { r: Ranked; i: number; open: bo
       transition={{ duration: 0.28, ease: EASE, delay: Math.min(i, 6) * 0.03 }} className={open ? "bg-white/[0.025]" : ""}>
       <button onClick={onToggle} aria-expanded={open}
         className="grid w-full grid-cols-[28px_minmax(0,1fr)_auto_20px] items-center gap-4 px-5 py-4 text-left transition-colors duration-150 hover:bg-white/[0.02] sm:px-6">
-        <span className={`font-mono text-[13px] ${i < 3 ? "text-dust-200" : "text-slate-500"}`}>{i + 1}</span>
+        <span className={`font-mono text-[13px] ${i < 3 ? "text-dust-200" : "text-slate-400"}`}>{i + 1}</span>
         <span className="min-w-0">
           <span className="flex flex-wrap items-baseline gap-x-2">
             <span className="font-display text-[16px] font-semibold text-ink">{r.id}</span>
-            <span className="truncate text-[13px] text-slate-500">{r.name}</span>
+            <span className="truncate text-[13px] text-slate-400">{r.name}</span>
             {planned && <span className="font-mono text-[10px] text-dust-400">planned</span>}
           </span>
           <MiniCoverage r={r} />
@@ -126,7 +126,7 @@ function Row({ r, i, open, onToggle, planned }: { r: Ranked; i: number; open: bo
           <span className="hidden sm:block"><ScoreRing value={r.score} /></span>
           <GradeBadge grade={r.grade} size="md" inert />
         </span>
-        <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
       <AnimatePresence initial={false}>
         {open && (

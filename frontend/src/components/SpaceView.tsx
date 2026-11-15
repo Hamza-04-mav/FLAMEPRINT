@@ -62,11 +62,11 @@ function NextExperimentsList() {
               <span className="text-[13.5px] font-medium leading-snug text-ink"><span className="mr-1.5 font-mono text-[11px] text-flame-2">{String(i + 1).padStart(2, "0")}</span>{x.title}</span>
               <span className="shrink-0 font-mono text-[11px] text-mute" title="severity weight × habitats affected">{x.score}</span>
             </div>
-            <p className="mt-1 text-[11.5px] text-slate-500">{x.why}. Affects {x.habitatsAffected.map(short).join(", ")}.</p>
+            <p className="mt-1 text-[11.5px] text-slate-400">{x.why}. Affects {x.habitatsAffected.map(short).join(", ")}.</p>
             <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-mute">
               {x.plannedBy.length ? <>planned investigation:{x.plannedBy.map((id) => (
                 <button key={id} onClick={() => openInvestigation(id)} className="rounded-[4px] border border-ox/35 bg-ox/10 px-1.5 font-mono text-[10.5px] text-dust-200 hover:bg-ox/20">{id}</button>
-              ))}</> : <span className="text-slate-500">no planned investigation in the catalog</span>}
+              ))}</> : <span className="text-slate-400">no planned investigation in the catalog</span>}
             </div>
           </li>
         ))}
@@ -225,7 +225,7 @@ export function SpaceView() {
               </motion.div>
             )}
           </AnimatePresence>
-          <div className="mt-4 text-[11px] leading-snug text-slate-500">Airflow includes the buoyancy estimate (∝ √g). Boxes that span a full axis have that axis uncharacterized.</div>
+          <div className="mt-4 text-[11px] leading-snug text-slate-400">Airflow includes the buoyancy estimate (∝ √g). Boxes that span a full axis have that axis uncharacterized.</div>
         </aside>
   );
 
@@ -292,7 +292,7 @@ export function SpaceView() {
               <RotateCcw className="h-3.5 w-3.5" />
             </button>
           </div>
-          <div className="pointer-events-none absolute bottom-4 left-4 font-mono text-[10px] tracking-[0.16em] text-slate-500">
+          <div className="pointer-events-none absolute bottom-4 left-4 font-mono text-[10px] tracking-[0.16em] text-slate-400">
             DRAG TO ORBIT · SCROLL TO ZOOM · CLICK A REGION OR POINT TO INSPECT
           </div>
           <button onClick={() => setShow3d(false)} className="chip-link absolute bottom-4 right-4">Back to 2D</button>

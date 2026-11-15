@@ -78,7 +78,7 @@ function NavItem({ item, rail, onNavigate, small = false }: { item: (typeof NAV)
       {!rail && (
         <span className="relative z-10 min-w-0 leading-tight">
           <span className={`block ${small ? "text-[13px]" : "text-[14px] font-semibold"}`}>{item.label}</span>
-          {item.question && <span className={`block truncate text-[11.5px] ${active ? "text-white/75" : "text-slate-500"}`}>{item.question}</span>}
+          {item.question && <span className={`block truncate text-[11.5px] ${active ? "text-white/75" : "text-slate-400"}`}>{item.question}</span>}
         </span>
       )}
     </button>
@@ -100,7 +100,7 @@ function Status({ rail }: { rail: boolean }) {
     );
   }
   return (
-    <div className="px-3 text-[11.5px] leading-relaxed text-slate-500">
+    <div className="px-3 text-[11.5px] leading-relaxed text-slate-400">
       <div className="flex items-center gap-2 text-slate-400"><span className="led" style={{ color: tone }} />{text}</div>
       <div className="mt-2.5 flex items-center gap-2.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}

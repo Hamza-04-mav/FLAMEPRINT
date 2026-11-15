@@ -82,7 +82,7 @@ export function DataLab() {
               drag ? "border-ox bg-ox/10 shadow-[0_0_0_4px_rgba(25,201,255,0.12)]" : "border-[var(--line-strong)] bg-space-950/30 hover:border-ox/50"}`}>
             <motion.div animate={{ y: drag ? -6 : 0 }}><UploadCloud className="h-10 w-10 text-ox" /></motion.div>
             <div className="mt-2 font-medium text-slate-200">Drop a PSI file or click to browse</div>
-            <div className="mt-1 text-[12px] text-slate-500">CSV · TSV · XLSX test matrices · JSON metadata · PDF / TXT / MD documents</div>
+            <div className="mt-1 text-[12px] text-slate-400">CSV · TSV · XLSX test matrices · JSON metadata · PDF / TXT / MD documents</div>
             <input ref={fileRef} type="file" className="hidden" accept=".csv,.tsv,.xlsx,.json,.pdf,.txt,.md"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) void doPreview(f); e.target.value = ""; }} />
           </div>
@@ -145,7 +145,7 @@ export function DataLab() {
                     )}
                     {preview.report.unmapped.length > 0 && (
                       <div><div className="label mb-1.5">Kept verbatim (unmapped)</div>
-                        <div className="text-[12px] text-slate-500">{preview.report.unmapped.join(" · ")}</div></div>
+                        <div className="text-[12px] text-slate-400">{preview.report.unmapped.join(" · ")}</div></div>
                     )}
                   </div>
                 </div>
@@ -186,7 +186,7 @@ export function DataLab() {
               {uploads.map((u) => (
                 <div key={u.file} className="flex flex-wrap items-center gap-2 rounded-[4px] border border-slate-800 bg-space-900/50 px-3 py-2 text-[12.5px]">
                   <span className="font-mono text-slate-200">{u.file}</span>
-                  <span className="text-slate-500">{(u.bytes / 1024).toFixed(1)} KB</span>
+                  <span className="text-slate-400">{(u.bytes / 1024).toFixed(1)} KB</span>
                   {u.investigationId && <Pill>{u.investigationId}</Pill>}
                   <div className="ml-auto flex gap-1.5">
                     {isDoc(u.file) && (
@@ -197,14 +197,14 @@ export function DataLab() {
                       </button>
                     )}
                     <button onClick={() => act(`d:${u.file}`, () => api.deleteUpload(u.file), `Removed ${u.file}.`)}
-                      className="rounded-md p-1 text-slate-500 hover:bg-rose-500/10 hover:text-rose-300" aria-label={`Delete ${u.file}`}>
+                      className="rounded-md p-1 text-slate-400 hover:bg-rose-500/10 hover:text-rose-300" aria-label={`Delete ${u.file}`}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 </div>
               ))}
               <button onClick={() => confirm("Remove all uploaded files?") && act("clear", api.clearUploads, "All uploads removed.")}
-                className="mt-2 text-xs text-slate-500 hover:text-rose-300">Remove all uploads</button>
+                className="mt-2 text-xs text-slate-400 hover:text-rose-300">Remove all uploads</button>
             </div>
           )}
         </div>}
@@ -244,13 +244,13 @@ export function DataLab() {
         <div className="panel p-4 sm:p-5">
           <div className="label mb-3">Ingestion log</div>
           <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1 scrollbar-thin">
-            {reports.length === 0 && <p className="text-sm text-slate-500">Only the seed catalog is loaded.</p>}
+            {reports.length === 0 && <p className="text-sm text-slate-400">Only the seed catalog is loaded.</p>}
             {reports.map((r) => (
               <div key={r.file} className="rounded-[4px] border border-slate-800 bg-space-900/50 p-2.5 text-[12px]">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-slate-200">{r.file}</span>
                   <Pill tone={r.kind === "error" ? "rose" : "slate"}>{r.kind}</Pill>
-                  <span className="text-slate-500">{r.records} rec</span>
+                  <span className="text-slate-400">{r.records} rec</span>
                 </div>
                 {r.warnings?.slice(0, 3).map((w) => <div key={w} className="mt-1 text-amber-200/80">⚠ {w}</div>)}
               </div>
@@ -278,7 +278,7 @@ function Stat({ n, label }: { n: number; label: string }) {
   return (
     <div className="rounded-[10px] border border-[var(--line)] bg-space-950/50 p-3">
       <div className="font-display text-2xl font-semibold text-slate-50">{n}</div>
-      <div className="text-[10.5px] text-slate-500">{label}</div>
+      <div className="text-[10.5px] text-slate-400">{label}</div>
     </div>
   );
 }

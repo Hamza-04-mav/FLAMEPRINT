@@ -80,11 +80,11 @@ export function InvestigationDrawer() {
                 <div className="rounded-md border border-slate-700/60 bg-space-950/50 p-3">
                   <div className="mb-2 flex items-center justify-between"><span className="label">Tested range</span><ConfidenceBadge c={env.confidence} /></div>
                   <div className="grid grid-cols-3 gap-2 font-mono text-[12px]">
-                    <div><div className="text-slate-500">O₂</div><div className="text-dust-200">{fmtRange(env.o2Pct, "%")}</div></div>
-                    <div><div className="text-slate-500">pressure</div><div className="text-indigo-200">{fmtRange(env.pressureKpa, " kPa")}</div></div>
-                    <div><div className="text-slate-500">flow</div><div className="text-emerald-200">{fmtRange(env.flowCmS, " cm/s")}</div></div>
+                    <div><div className="text-slate-400">O₂</div><div className="text-dust-200">{fmtRange(env.o2Pct, "%")}</div></div>
+                    <div><div className="text-slate-400">pressure</div><div className="text-indigo-200">{fmtRange(env.pressureKpa, " kPa")}</div></div>
+                    <div><div className="text-slate-400">flow</div><div className="text-emerald-200">{fmtRange(env.flowCmS, " cm/s")}</div></div>
                   </div>
-                  {env.note && <div className="mt-2 text-[11.5px] text-slate-500">{env.note}</div>}
+                  {env.note && <div className="mt-2 text-[11.5px] text-slate-400">{env.note}</div>}
                 </div>
 
                 <div>
@@ -107,7 +107,7 @@ export function InvestigationDrawer() {
                     <div className="space-y-2">
                       {Object.entries(inv.insights).map(([k, v]) => (
                         <div key={k} className="rounded-[4px] border-l-2 border-ox/50 bg-space-950/40 py-1.5 pl-3 pr-2">
-                          <div className="font-mono text-[10px] uppercase tracking-wider text-slate-500">{k}</div>
+                          <div className="font-mono text-[10px] uppercase tracking-wider text-slate-400">{k}</div>
                           <div className="text-slate-300">{v}</div>
                         </div>
                       ))}
@@ -121,7 +121,7 @@ export function InvestigationDrawer() {
                     {d!.relations.map((r) => (
                       <button key={`${r.from}${r.to}`} onClick={() => openInvestigation(r.from === focusId ? r.to : r.from)}
                         className="mr-2 mb-1.5 rounded-md border border-slate-700 px-2 py-1 text-[11.5px] text-slate-300 hover:border-ox/50">
-                        {r.from} → {r.to} <span className="text-slate-500">· {r.type}</span>
+                        {r.from} → {r.to} <span className="text-slate-400">· {r.type}</span>
                       </button>
                     ))}
                   </div>
@@ -130,18 +130,18 @@ export function InvestigationDrawer() {
                 <div>
                   <div className="label mb-2">Imported PSI tests ({d!.totalTests})</div>
                   {d!.totalTests === 0 ? (
-                    <p className="text-[12px] text-slate-500">No test records imported for this investigation yet. Use the Data Lab to add its PSI test matrix.</p>
+                    <p className="text-[12px] text-slate-400">No test records imported for this investigation yet. Use the Data Lab to add its PSI test matrix.</p>
                   ) : (
                     <div className="overflow-x-auto rounded-[4px] border border-slate-800 scrollbar-thin">
                       <table className="w-full text-left font-mono text-[11px]">
-                        <thead className="text-slate-500"><tr>{["id", "O₂", "kPa", "cm/s", "outcome", "source"].map((h) => <th key={h} className="px-2 py-1.5 font-normal">{h}</th>)}</tr></thead>
+                        <thead className="text-slate-400"><tr>{["id", "O₂", "kPa", "cm/s", "outcome", "source"].map((h) => <th key={h} className="px-2 py-1.5 font-normal">{h}</th>)}</tr></thead>
                         <tbody>
                           {d!.tests.slice(0, 60).map((t) => (
                             <tr key={t.id} className="border-t border-slate-800/70 text-slate-300">
                               <td className="px-2 py-1">{t.id.split(":").pop()}</td><td className="px-2">{t.o2Pct ?? "–"}</td>
                               <td className="px-2">{t.pressureKpa ?? "–"}</td><td className="px-2">{t.flowCmS ?? "–"}</td>
                               <td className="px-2" style={{ color: OUTCOME_COLOR[t.outcome ?? "unknown"] }}>{t.outcome ?? "–"}</td>
-                              <td className="px-2 text-slate-500">{t.source}</td>
+                              <td className="px-2 text-slate-400">{t.source}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -149,7 +149,7 @@ export function InvestigationDrawer() {
                     </div>
                   )}
                 </div>
-                <div className="border-t border-slate-800 pt-3 text-[11.5px] text-slate-500">Provenance: {inv.provenance}</div>
+                <div className="border-t border-slate-800 pt-3 text-[11.5px] text-slate-400">Provenance: {inv.provenance}</div>
               </div>
             )}
           </motion.aside>
@@ -162,7 +162,7 @@ export function InvestigationDrawer() {
 function Field({ k, v }: { k: string; v: string }) {
   return (
     <div className="rounded-[4px] bg-space-950/40 p-2">
-      <div className="font-mono text-[10px] uppercase tracking-wider text-slate-500">{k}</div>
+      <div className="font-mono text-[10px] uppercase tracking-wider text-slate-400">{k}</div>
       <div className="text-slate-200">{v}</div>
     </div>
   );
