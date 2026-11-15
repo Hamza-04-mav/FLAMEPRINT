@@ -3,8 +3,9 @@
 > **Read this first.** It is the single source of truth for the project's goal, current state and next steps.
 > Claude (or a person) **must update it at the end of every working session**. See [How to update this file](#how-to-update-this-file).
 >
-> Last updated: **2026-11-14** · `origin/main` has PR #1, PR #2, the real-data/Groq pass, and UI Phases 0+1 (pushed earlier). UI
-> **Phases 2–3 are committed locally only — the owner pushes.** Repo: `github.com/Hamza-04-mav/FLAMEPRINT` (private)
+> Last updated: **2026-11-15** · Cinematic motion pass committed locally (flame hole fix, living Gaps 2D/3D + morph,
+> Answer habitat journey + stepper glyphs) on top of `origin/main` UI Phases 0–10. **The owner pushes.** Repo:
+> `github.com/Hamza-04-mav/FLAMEPRINT` (private)
 >
 > **UI/UX "Ink sun" upgrade in progress** (presentation-layer only — no scoring math/data/logic changed). Spec: 3-colour palette
 > (Ink navy / Dust taupe / Solar yellow), SF typography, iOS glass, visual-language-over-text, 5-second read, 375→1920px.
@@ -87,6 +88,9 @@ Useful links: `#answer #evidence #gaps #brief #compare` (pages), `#stowage #data
 9. **Content budget** (from the declutter brief): 1 headline + at most 1 sentence per page; at most 3 panels above the fold at
    1440×900; at most 5 list items before "Show more"; at most 1 chart; card text = title + 2 short lines; psi first, kPa small;
    plain words ("tested range", not "envelope"; "safety area", not "pillar"); motion 150–300 ms; no looping decoration except the flame.
+   **Owner-approved exception (2026-11-15):** the Answer-page habitat journey (`JOURNEY`: 2.1 s per hop, 2.4 s for
+   Moon base → Suit, 1.2 s under 768 px) and the Gaps 2D↔3D morph (`MORPH`: 700 ms; camera moves 600 ms) may exceed the
+   150–300 ms budget. Every other interaction keeps it. Both are off with `prefers-reduced-motion` or without WebGL.
 10. **Hiding is not deleting:** every capability stays reachable via "Show details", the Tools menu or expand rows.
 
 ---
@@ -152,13 +156,19 @@ Sidebar = **5 pages + Tools menu**. Header = one habitat pill (tap to change) + 
 
 | Page (hash)          | Question                                 | Component                                               | First screen                                                                                                                                                                                                                           | Behind a click                                                                                     |
 | -------------------- | ---------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Answer `#answer`     | Is my habitat safe, and how sure are we? | `AnswerScreen.tsx`                                      | `MissionTimeline` (play: ISS → Moon → Suit → Rover → Mars), verdict sentence (`lib/answer.buildVerdict`), grade stamp, `FlameMorph` hero (the only WebGL), top 5 material cards (`FlameCanvas` 2D), `StowageSearch`, Get Fire Passport | Adjust conditions · all materials · habitat in 3D                                                  |
+| Answer `#answer`     | Is my habitat safe, and how sure are we? | `AnswerScreen.tsx` | `MissionTimeline` (one glyph per habitat via `HabitatGlyph`; a single sun ring travels along the line), verdict, grade stamp, `FlameMorph` hero, top 5 materials, `StowageSearch`, Get Fire Passport. **A habitat change from the stepper or Play plays a habitat journey** (`JourneyOverlay` + lazy `JourneyScene`, state in `lib/journey.tsx`, scene choice in `lib/journeyPlan.ts`) | Adjust conditions · all materials · habitat in 3D |
 | Evidence `#ranking`  | Which experiments back it up?            | `Ranking.tsx`                                           | top 5 rows: rank, id, one sentence (`rankReason`), approx label, stamp                                                                                                                                                                 | factor bars + dossier · all 22 · Adjust scoring                                                    |
-| Gaps `#space`        | Where is there no data? What next?       | `SpaceView.tsx` + `FlammabilityMap.tsx`                 | O₂ × airflow "void" map, top 3 gaps, top 3 next tests                                                                                                                                                                                  | schematic curve, inspector, every-habitat list, not-plottable · Explore in 3D (`ConditionSpace3D`) |
+| Gaps `#space`        | Where is there no data? What next?       | `SpaceView.tsx` + `FlammabilityMap.tsx` + `ConditionSpace3D.tsx` | O₂ × airflow void map (one-time entrance, gap connector with the O₂ distance via `lib/space.nearestTested`, gliding habitat dot, hover/focus tooltips, tappable ghost habitats), top 3 gaps, top 3 next tests | Explore in 3D = one 700 ms morph on the same stage (camera starts flat and top-down, pressure extrudes); 3D has auto-fit framing, glass volumes, axis projections, collision-free labels (`lib/labels.placeLabels`) · Show details |
 | Brief `#brief`       | What should engineers do?                | `BriefPanel.tsx`                                        | 3 cards from `/api/brief-cards`, citation chips, audit line                                                                                                                                                                            | Read full brief (streamed `FullBrief`) · On Earth too                                              |
 | Compare `#habitats`  | What changes between habitats?           | `CompareHabitats.tsx`                                   | ISS → Moon base: grade stamps, changed materials, new gaps                                                                                                                                                                             | unchanged · rank moves · "Compare experiments" toggle (`Genome embedded`, also `#genome`)          |
 | Tools                | —                                        | `StowageInspector`, `DataLab`, `AskPanel`, `EarthPanel` |                                                                                                                                                                                                                                        |                                                                                                    |
 | Passport `/passport` | printable one page                       | `app/passport/page.tsx`                                 | light theme, no WebGL, prints as 1 page                                                                                                                                                                                                |                                                                                                    |
+
+**Cinematic layer (Answer + Gaps only).** One WebGL context per page at all times: `ReleaseGL` (inside every
+`<Canvas>`) frees a context immediately on unmount instead of R3F's ~500 ms delay; during a journey `FlameMorph` and the
+3D habitat show 2D posters (`useJourney().gpuBusy`), and the GPU stays held two frames after it. The journey ends on an
+exact replica of `CosmicBackdrop`'s exported `<Horizon>`, so the overlay dissolves into the page without a pop. Motion
+tokens for all of it live in `lib/motion.ts` (`CHART`, `DROP`, `MORPH`, `JOURNEY`).
 
 Shared: `lib/mission.tsx` (state, tabs, `resolveTab` legacy-hash map, debounced `/api/analyze`), `lib/api.ts` (REST + SSE),
 `lib/answer.ts` (verdict, grade/level colours, `rankReason`, `firstSentence`, `fmtPressure`), `GradeBadge.tsx` (passport `Stamp`;
@@ -179,6 +189,10 @@ Font: SF system on Apple, Inter fallback. The intro (`Boot.tsx`) shows on the fi
 
 ## 7. What's left (priority order)
 
+0a. ✅ **Cinematic motion pass (2026-11-15, committed locally).** Flame hole removed; Gaps 2D/3D made alive with a
+   continuous 2D↔3D morph; Answer habitat journey (5 scenes + transit + mirrored backwards hops) and unique stepper
+   glyphs. Remaining polish if time allows: the 2D map's text is small at 375 px (viewBox scaling); the 3D axes sit on
+   the far edges, so the morph's start pose matches the 2D map's orientation and aspect, not its exact axis placement.
 0. **UI/UX "Ink sun" upgrade (in progress).** Presentation-layer only. **Phases follow the owner's brief** (not the audit's old
    numbering); `docs/ui-audit.md` holds the full audit + the 9 confirmed defects. **Workflow:** commit per phase **locally** — the owner
    pushes; **run the full `next build` only once, at the final phase (Phase 8)** — per-phase checks are typecheck + lint + vitest only.
@@ -263,6 +277,14 @@ Font: SF system on Apple, Inter fallback. The intro (`Boot.tsx`) shows on the fi
 - **Headless Chrome screenshots below ~500 px wide are crops.** Use DevTools device emulation to measure real 390 px layouts.
 - **`set -e` with `curl` probes in shell scripts** exits early on the first expected connection refusal.
 - **LUCI and FM2 are lunar-gravity investigations.** Never list them as planned for Mars.
+- **R3F destroys a WebGL context ~500 ms after its `<Canvas>` unmounts.** Swapping canvases briefly gives two live
+  contexts. Put `<ReleaseGL />` inside every canvas (immediate, StrictMode-safe release).
+- **`position: fixed` inside a transformed ancestor** (the page-transition wrapper) is fixed to that box, not the
+  viewport. Full-screen overlays must use a portal to `document.body`.
+- **drei `<Html>` inside R3F 9 + React 19** logs "synchronously unmount a root". Draw labels in one HTML layer outside
+  the canvas instead (see `ConditionSpace3D` `LabelLayer`).
+- **Headless Chrome doesn't fire focus events** unless `Emulation.setFocusEmulationEnabled` is on. Test keyboard focus
+  with it, or in a real browser.
 - **This folder was created from a ZIP**, then its history was grafted onto the team repo's initial commit. `main` is now normal
   shared history; branch from `origin/main` for new work.
 
@@ -294,6 +316,7 @@ Font: SF system on Apple, Inter fallback. The intro (`Boot.tsx`) shows on the fi
 | 2026-11-15 | Claude Code (with Zaki)    | **NASA branding + 3D resilience (Phase 8 addendum).** Added the official NASA **worm wordmark** (inlined `nasa-3.svg`, white via `currentColor`, cropped viewBox) to the top bar and the NASA **insignia** (`nasa-6.svg`) to the sidebar footer (rail + full), for Space Apps authenticity (disclaimer kept). Fixed **"View habitat in 3D" ChunkLoadError**: new `lazyRetry` wrapper on the 3D `dynamic()` imports + a `Safe3D` error boundary (Reload action) around MissionScene3D/FlameMorph/ConditionSpace3D — a dev stale-chunk artifact, now graceful (production build unaffected). Typecheck, lint, 8 vitest pass. |
 | 2026-11-15 | Claude Code (with Zaki)    | **UI/UX Phase 9 — accessibility & quality.** Contrast sweep: small text off `dust-500` — `text-slate-500/600` → `slate-400` (≈5.3:1 on navy) across 20 components (passport light theme + dead files excluded). Keyboard **focus ring = yellow + soft glow**. 3D canvases (`MissionScene3D`, `ConditionSpace3D`) get `role="img"` + descriptive `aria-label`. Gaps `FlammabilityMap` gains a **"View as table"** toggle (text alternative listing tested O₂/airflow ranges + the habitat row). Risk already icon+label; evidence marks shape-coded; 3D lazy-loaded. Lighthouse not measurable without a build (Phase 11). Typecheck, lint, 8 vitest pass. |
 | 2026-11-15 | Claude Code (with Zaki)    | **UI/UX Phase 10 — content consistency (+ dropdown bugfix).** One gravity format everywhere via `fmtGravity` (fixed Brief export header + printable passport). Honesty tags (`Evidence`) **restyled as small dust outline tags** (shape mark keeps the kind). New `Abbr`+`GLOSSARY` give jargon (PSI/µg/LOI) hover tooltips (sidebar "PSI", µg gravity tick). **Fixed:** header habitat **dropdown scrolled the whole page** (taller than viewport) — now capped `min(72vh,460px)` with internal scroll + `overscroll-contain`. Typecheck, lint, 8 vitest pass. |
+| 2026-11-15 | Claude Code (with Cerelva) | **Cinematic motion pass** (3 local commits). (1) `FlameMorph`: removed the dark "fuel droplet" disc, now a soft core. (2) Gaps: 2D map entrance, gap connector, glide + trail, hover/focus tooltips, density fills, ghost habitats; 3D exact auto-fit, glass volumes, orb + drop line + axis projections, collision-free labels with leader lines, eased view tabs, fly-to-volume, ≤1.8°/s drift, demand/never frameloop; one 700 ms 2D↔3D morph; fixed audit defect #7 and the drei `<Html>` console error. (3) Answer: habitat journey overlay (ISS→Moon, Moon→Suit hero, Suit→Rover, Rover→Mars, →Earth, transit; mirrored backwards; skippable; retarget; Play chains with a hold), screen-space hand-off onto a replica of the backdrop horizon, unique stepper glyphs and a travelling sun ring. Verified: max 1 live WebGL context across all hops, retarget and skip; reduced motion and no-WebGL fall back cleanly; no console errors; only palette tokens added. New tested helpers: `nearestTested`, `placeLabels`, `planJourney` (11 vitest). Deviations: verdict crossfade happens under the opaque overlay at the midpoint and is revealed by the final dissolve (keeps the scene readable); generic transit carries a capsule so it has a subject. |
 
 ---
 

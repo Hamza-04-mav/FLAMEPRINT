@@ -236,6 +236,19 @@ reducedMotion="user"` + `useReducedMotion`), `aria-live="polite"` on the verdict
 | 8   | Gaps chart: truncated label, 8-item legend                              | `FlammabilityMap.tsx:83` (`"schematic limit · illustrative"` can clip) and legend `:98-111` = 3 base + (PSI range + 4 outcomes) = **8 items** when `detailed`                      |
 | 9   | Sidebar footer hidden under Next.js dev indicator                       | `Sidebar.tsx:133-136` (`Status` at `mt-auto`, bottom-left) collides with the Next dev badge; needs bottom safe-area padding                                                        |
 
+**Fixed in the cinematic motion pass (2026-11-15):**
+
+- **#7 (3D labels overlap, legend/tabs clip):** `ConditionSpace3D` labels moved out of drei `<Html>` into one HTML layer
+  with priority-based collision avoidance and leader lines (`lib/labels.placeLabels`, tested); axis titles, ticks and the
+  habitat's value chips are fixed labels that hide rather than overlap; the legend and view toggle share one wrapping row
+  whose height is an exclusion zone for labels. Also fixed: clipped pressure ticks (now psi, inside an exact projected
+  camera fit), the O₂ title colliding with the 30% tick, the scene sitting high and off-centre, and the console error
+  "Attempted to synchronously unmount a root while React was already rendering" (caused by drei `<Html>`).
+- **Gaps 2D:** y-axis title no longer clipped (left pad 74), tested ranges readable (stacked low-opacity fills, 1.25 px
+  outlines), ghost-habitat names only on hover/focus so nothing overlaps the gap connector.
+- **Hero flame:** the dark "fuel droplet" disc in `FlameMorph` (a hard-edged mask, visible at every gravity) replaced by
+  a soft core.
+
 **Keep-as-is (explicitly):** question-phrased nav, "untested ≠ safe", the evidence/illustrative tags
 (restyle only).
 
