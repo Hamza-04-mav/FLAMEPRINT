@@ -26,8 +26,18 @@ from .store import Store  # noqa: E402
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("flameprint")
 
-DATA_DIR = Path(os.getenv("FLAMEPRINT_DATA_DIR", Path(__file__).resolve().parents[2] / "data"))
-store = Store(DATA_DIR, os.getenv("DATABASE_URL") or None)
+def _dir_setting(name: str, default: Path) -> Path:
+    """An env path setting; a relative value is resolved once against the working directory (the project root on
+    Vercel). Unset or empty falls back to `default`."""
+    raw = os.getenv(name, "").strip()
+    return Path(raw).resolve() if raw else default
+
+
+# Read-only inputs (seed catalog, committed PSI files, templates). Default: <repo>/data.
+DATA_DIR = _dir_setting("FLAMEPRINT_DATA_DIR", Path(__file__).resolve().parents[2] / "data")
+# The only place the API writes (Data Lab uploads + manifest). Default: <DATA_DIR>/imported.
+UPLOAD_DIR = _dir_setting("FLAMEPRINT_UPLOAD_DIR", DATA_DIR / "imported")
+store = Store(DATA_DIR, os.getenv("DATABASE_URL") or None, upload_dir=UPLOAD_DIR)
 
 app = FastAPI(title="FLAMEPRINT API", version="1.0.0",
               description="Fire-safety insights from NASA PSI microgravity combustion data.")
@@ -45,7 +55,8 @@ def sse(event: str, data) -> str:
 def health():
     ds = store.dataset
     return {"ok": True, "db": store.db_status, "llm": llm.status(), "stats": engine.stats(ds),
-            "dataDir": str(DATA_DIR), "loadedAt": store.loaded_at}
+            "dataDir": str(DATA_DIR), "uploadDir": str(store.upload_dir), "uploadsWritable": store.uploads_writable,
+            "loadedAt": store.loaded_at}
 
 
 @app.get("/api/habitats")
@@ -271,6 +282,10 @@ async def ingest(file: UploadFile = File(...), investigation_id: Optional[str] =
         report = store.save_upload(file.filename or "upload", data, investigation_id or None)
     except ValueError as e:
         raise HTTPException(400, str(e)) from None
+    except OSError as e:
+        log.warning("Upload write failed in %s: %s", store.upload_dir, e)
+        raise HTTPException(503, "Uploads are unavailable: the upload directory is not writable "
+                                 "(set FLAMEPRINT_UPLOAD_DIR to a writable path).") from None
     return {"report": report, "stats": engine.stats(store.dataset)}
 
 
@@ -280,8 +295,9 @@ async def extract(file: str = Form(...)):
     if not llm.enabled():
         raise HTTPException(503, "Structured extraction needs GROQ_API_KEY in backend/.env.")
     from .ingest import parse_document
-    candidates = [DATA_DIR / "imported" / Path(file).name, DATA_DIR / file]
-    path = next((p for p in candidates if p.is_file() and DATA_DIR.resolve() in p.resolve().parents), None)
+    roots = [store.upload_dir.resolve(), DATA_DIR.resolve()]  # never read outside these two trees
+    candidates = [store.upload_dir / Path(file).name, DATA_DIR / file]
+    path = next((p for p in candidates if p.is_file() and any(r in p.resolve().parents for r in roots)), None)
     if not path:
         raise HTTPException(404, "Document not found among imported/PSI files.")
     parsed = parse_document(path.name, path.read_bytes(), [i.id for i in store.dataset.investigations])

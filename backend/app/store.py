@@ -3,7 +3,8 @@
 Source of truth = files, so every result can be traced back to an original PSI file:
   data/seed/investigations.json   curated investigation catalog (no test data)
   data/psi/**                     drop-in folder for official PSI files (read at startup)
-  data/imported/                  files uploaded through the Data Lab (+ _manifest.json)
+  data/imported/                  files uploaded through the Data Lab (+ _manifest.json); relocatable with
+                                  FLAMEPRINT_UPLOAD_DIR so the data dir can be read-only (e.g. on Vercel)
 
 On every (re)load, the parsed dataset is indexed for retrieval:
   * DATABASE_URL set  -> synced into PostgreSQL; chunk search uses pgvector (cosine distance)
@@ -53,14 +54,26 @@ def card_text(inv: Investigation) -> str:
 
 
 class Store:
-    def __init__(self, root: Path, database_url: Optional[str] = None):
+    """`root` is only ever read (seed, psi, templates); every write goes to `upload_dir` (default `root/imported`)."""
+
+    def __init__(self, root: Path, database_url: Optional[str] = None, upload_dir: Optional[Path] = None):
         self.root = root
         self.seed_path = root / "seed" / "investigations.json"
         self.materials_path = root / "seed" / "materials.json"
         self.psi_dir = root / "psi"
-        self.upload_dir = root / "imported"
-        self.upload_dir.mkdir(parents=True, exist_ok=True)
-        self.psi_dir.mkdir(parents=True, exist_ok=True)
+        self.upload_dir = Path(upload_dir) if upload_dir else root / "imported"
+        # On a read-only data dir (Vercel) both of these may fail: the app must still serve the committed data.
+        try:
+            self.psi_dir.mkdir(parents=True, exist_ok=True)  # convenience drop-in folder; never required
+        except OSError:
+            pass
+        try:
+            self.upload_dir.mkdir(parents=True, exist_ok=True)
+            self.uploads_writable = True
+        except OSError as e:
+            self.uploads_writable = False
+            log.warning("Upload dir %s is not writable (%s); Data Lab uploads are disabled. "
+                        "Set FLAMEPRINT_UPLOAD_DIR to a writable path.", self.upload_dir, e)
         self.database_url = database_url
         self._lock = threading.RLock()
         self._ds: Optional[Dataset] = None
@@ -103,6 +116,8 @@ class Store:
     def _files(self) -> list[tuple[Path, str]]:
         out = []
         for base, origin in ((self.psi_dir, "server"), (self.upload_dir, "upload")):
+            if not base.is_dir():
+                continue
             for p in sorted(base.rglob("*")):
                 if p.is_file() and p.suffix.lower() in SUPPORTED_EXT and not p.name.startswith("_") \
                         and p.name.lower() != "readme.md":
@@ -126,7 +141,9 @@ class Store:
         # metadata first so test files can resolve newly described investigations
         files.sort(key=lambda f: 0 if f[0].suffix.lower() == ".json" else 1)
         for path, origin in files:
-            rel = path.relative_to(self.root).as_posix()
+            # uploads may live outside root (FLAMEPRINT_UPLOAD_DIR): always label them imported/<path>
+            rel = ("imported/" + path.relative_to(self.upload_dir).as_posix() if origin == "upload"
+                   else path.relative_to(self.root).as_posix())
             default_inv = manifest.get(path.name, {}).get("investigationId") if origin == "upload" else None
             try:
                 parsed = parse_file(path.name, path.read_bytes(), known, default_inv)
@@ -282,6 +299,8 @@ class Store:
         return fname
 
     def uploads(self) -> list[dict]:
+        if not self.upload_dir.is_dir():
+            return []
         m = self._manifest()
         return [{"file": p.name, "bytes": p.stat().st_size, **m.get(p.name, {})}
                 for p in sorted(self.upload_dir.iterdir()) if p.is_file() and not p.name.startswith(("_", "."))]
@@ -300,6 +319,8 @@ class Store:
 
     def clear_uploads(self) -> int:
         n = 0
+        if not self.upload_dir.is_dir():
+            return n
         with self._lock:
             for p in self.upload_dir.iterdir():
                 if p.is_file() and not p.name.startswith("."):

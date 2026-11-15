@@ -3,6 +3,40 @@
 Backend on **Render** (FastAPI), frontend on **Vercel** (Next.js), both from this repo. Deploy once Phase 1 passes,
 then redeploy after each change so the live URL never falls behind.
 
+## Option A (current): everything on Vercel, two projects from this repo
+
+**Backend project.** Vercel → Add New → Project → this repo. **Root Directory: `./`** (repo root), Framework Preset:
+**FastAPI** (or Other). Vercel runs the root `index.py` (it imports `backend/app/main.py`) and installs the root
+`requirements.txt` (which points at `backend/requirements.txt`). Env vars:
+
+| Variable | Value | Why |
+|---|---|---|
+| `FLAMEPRINT_DATA_DIR` | `data` | Relative to the working directory, which on Vercel is the project root, so it resolves to the bundled `data/`. `/api/health` → `dataDir` shows the absolute path. |
+| `FLAMEPRINT_UPLOAD_DIR` | `/tmp/flameprint/imported` | The bundle is read-only; `/tmp` is the function's scratch space. Uploads are **per instance and temporary**. |
+| `FLAMEPRINT_LLM` | `auto` | `off` forces the offline writer. |
+| `GROQ_API_KEY` | team key | Optional. |
+| `CORS_ORIGINS` | `https://<frontend>.vercel.app` | Add after the frontend exists. |
+
+Deploy, then open `https://<backend>.vercel.app/api/health`: expect `"ok": true`, `"investigations": 24`,
+`"uploadsWritable": true`, and `"dataDir"` ending in `/data`.
+
+**What gets bundled.** Vercel bundles every project file into the Python function; the root `vercel.json` additionally
+pins `data/{seed,psi,templates}/**` into the `index.py` function (`includeFiles`) and leaves out `frontend/`, `docs/`,
+`backend/tests/` and `data/imported/` (`excludeFiles`). `.vercelignore` keeps `.env` files, virtualenvs,
+`node_modules` and local uploads out of every upload. Never add `data/` to either ignore list: the API reads
+`data/seed/investigations.json` at startup.
+
+**Frontend project.** Add New → Project → same repo. **Root Directory: `frontend`** (Next.js detected). Env vars:
+`NEXT_PUBLIC_API_BASE` and `FLAMEPRINT_API_URL`, both `https://<backend>.vercel.app`. Deploy.
+
+**Then** set `CORS_ORIGINS=https://<frontend>.vercel.app` on the backend project and redeploy it.
+
+Read-only data dir: the API only ever writes to `FLAMEPRINT_UPLOAD_DIR`. If that is unset or unwritable, it still starts
+and serves all committed data, `/api/health` reports `"uploadsWritable": false`, and `/api/ingest` answers 503
+(`backend/tests/test_readonly_data.py`). For permanent data, commit PSI files to `data/psi/` and redeploy.
+
+## Option B: backend on Render
+
 ## 1. Backend on Render
 
 1. Render → **New → Blueprint** → connect the GitHub repo. Render reads `render.yaml` (root dir `backend`,
