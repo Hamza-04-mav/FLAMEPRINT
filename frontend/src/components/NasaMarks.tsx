@@ -4,6 +4,16 @@
  * on the dark UI). Used for NASA Space Apps challenge authenticity. The app still
  * states it is independent and not NASA-endorsed.
  */
+/** Official NASA ARES combustion-research emblem (public/NASA/nasa-ares-logo.svg),
+ *  used in the top-right of the data pages (Evidence · Gaps · Brief). */
+export function AresEmblem({ className = "hidden h-[64px] w-auto opacity-90 sm:block" }: { className?: string }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/NASA/nasa-ares-logo.svg" alt="NASA ARES" width={72} height={63} className={className}
+      title="NASA PSI combustion investigations (ARES)" />
+  );
+}
+
 export function NasaWordmark({ className = "", title = "NASA" }: { className?: string; title?: string }) {
   return (
     <svg viewBox="1 69 191 54" className={className} role="img" aria-label={title} fill="currentColor">
