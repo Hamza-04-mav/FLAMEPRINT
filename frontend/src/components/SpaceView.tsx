@@ -6,15 +6,17 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { fmtRange, OUTCOME_COLOR, PHASE_COLOR, plural, scoreColor, SEVERITY_COLOR, toPsi } from "@/lib/format";
+import { lazyRetry } from "@/lib/lazyRetry";
 import { useMission } from "@/lib/mission";
 import { effectiveFlow, scenarioInVoid } from "@/lib/space";
 import type { ConditionSpace, NextExperiment } from "@/lib/types";
 import { useWebGL } from "@/lib/webgl";
 import type { Selection, ViewPreset } from "./ConditionSpace3D";
 import { FlammabilityMap } from "./FlammabilityMap";
+import { Safe3D } from "./Safe3D";
 import { ConfidenceBadge, ErrorNote, Evidence, PageHeader, Skeleton } from "./ui";
 
-const ConditionSpace3D = dynamic(() => import("./ConditionSpace3D"), {
+const ConditionSpace3D = dynamic(lazyRetry(() => import("./ConditionSpace3D")), {
   ssr: false, loading: () => (
     <div className="grid h-full place-items-center">
       <div className="text-center font-mono text-[10.5px] tracking-[0.2em] text-ox/70">
@@ -256,8 +258,8 @@ export function SpaceView() {
               WebGL is not available in this browser. The 2D O₂ × flow plane below shows the same envelopes and your mission.
             </div>
           ) : space ? (
-            <ConditionSpace3D space={space} scenario={scenario} uEff={uEff} habitats={habitats} highlight={highlight} inVoid={inVoid} missionName={name}
-              selection={sel} onSelect={setSel} view={view} viewNonce={nonce} autoRotate={spin} />
+            <Safe3D label="The 3D coverage map"><ConditionSpace3D space={space} scenario={scenario} uEff={uEff} habitats={habitats} highlight={highlight} inVoid={inVoid} missionName={name}
+              selection={sel} onSelect={setSel} view={view} viewNonce={nonce} autoRotate={spin} /></Safe3D>
           ) : !err && <Skeleton className="absolute inset-0 !rounded-none !bg-transparent" />}
 
           {/* overlays */}

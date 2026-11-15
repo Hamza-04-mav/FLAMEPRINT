@@ -90,11 +90,23 @@ function Status({ rail }: { rail: boolean }) {
   const online = !!health && !error;
   const tone = error ? "#8a8178" : online ? "#efeae3" : "#a39a90";
   const text = error ? "Engine offline" : online ? (health.llm.enabled ? "Online · Groq" : "Online · offline writer") : "Connecting…";
-  if (rail) return <span title={text} className="led mx-auto block" style={{ color: tone }} />;
+  if (rail) {
+    return (
+      <div className="flex flex-col items-center gap-2.5">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/NASA/nasa-6.svg" alt="NASA" width={26} height={26} className="shrink-0 opacity-95" title="Built on NASA open data — independent entry, not NASA-endorsed" />
+        <span title={text} className="led" style={{ color: tone }} />
+      </div>
+    );
+  }
   return (
     <div className="px-3 text-[11.5px] leading-relaxed text-slate-500">
       <div className="flex items-center gap-2 text-slate-400"><span className="led" style={{ color: tone }} />{text}</div>
-      <div className="mt-1">Built on NASA PSI open data. Independent project, not NASA-endorsed.</div>
+      <div className="mt-2.5 flex items-center gap-2.5">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/NASA/nasa-6.svg" alt="NASA insignia" width={30} height={30} className="shrink-0 opacity-95" />
+        <span className="text-[11px]">Built on NASA PSI open data. Independent entry, not NASA-endorsed.</span>
+      </div>
     </div>
   );
 }

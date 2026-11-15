@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { buildVerdict, fmtPressure, LEVEL_STYLE, levelRose } from "@/lib/answer";
 import { environmentFor } from "@/lib/environment";
 import { fmtGravity, toKpa, toPsi } from "@/lib/format";
+import { lazyRetry } from "@/lib/lazyRetry";
 import { useMission } from "@/lib/mission";
 import { standardT } from "@/lib/motion";
 import type { MaterialVerdict, RiskLevel } from "@/lib/types";
@@ -14,14 +15,15 @@ import { useInView, useWebGL } from "@/lib/webgl";
 import { AnswerPipeline } from "./AnswerPipeline";
 import { ConditionReadout } from "./ConditionGauges";
 import { FlameCanvas } from "./FlameCanvas";
+import { Safe3D } from "./Safe3D";
 import { GradeBadge } from "./GradeBadge";
 import { MissionTimeline } from "./MissionTimeline";
 import { StowageSearch } from "./StowageInspector";
 import { TiltCard } from "./TiltCard";
 import { Evidence, Skeleton, Slider } from "./ui";
 
-const FlameMorph = dynamic(() => import("./FlameMorph"), { ssr: false });
-const MissionScene3D = dynamic(() => import("./MissionScene3D"), { ssr: false, loading: () => <Skeleton className="h-full w-full !rounded-none" /> });
+const FlameMorph = dynamic(lazyRetry(() => import("./FlameMorph")), { ssr: false });
+const MissionScene3D = dynamic(lazyRetry(() => import("./MissionScene3D")), { ssr: false, loading: () => <Skeleton className="h-full w-full !rounded-none" /> });
 
 const VISIBLE_MATERIALS = 5;
 const EASE = [0.2, 0.7, 0.2, 1] as const;
@@ -120,7 +122,7 @@ function HeroFlame() {
       <div className="absolute inset-0">
         {webgl === false
           ? <div className="grid h-full place-items-center"><FlameCanvas g={g} level={worst} width={140} height={180} /></div>
-          : webgl && <FlameMorph active={visible} flames={[{ g, o2: scenario.o2Pct, flow: scenario.flowCmS }]} />}
+          : webgl && <Safe3D label="The gravity flame"><FlameMorph active={visible} flames={[{ g, o2: scenario.o2Pct, flow: scenario.flowCmS }]} /></Safe3D>}
       </div>
       <div className="absolute left-4 top-4"><Evidence kind="illustrative" label="illustrative" /></div>
       <div className="absolute inset-x-4 bottom-4 text-[13px] text-slate-300">
@@ -240,7 +242,9 @@ function Habitat3D() {
       </button>
       {open && (
         <div ref={ref} className="panel relative h-[360px] w-full basis-full overflow-hidden">
-          <MissionScene3D env={environmentFor(scenario.habitatId, scenario.gravityG)} withRover={scenario.habitatId === "rover"} active={visible} still={!!reduce} />
+          <Safe3D label="The 3D habitat">
+            <MissionScene3D env={environmentFor(scenario.habitatId, scenario.gravityG)} withRover={scenario.habitatId === "rover"} active={visible} still={!!reduce} />
+          </Safe3D>
           <div className="absolute bottom-3 right-3"><Evidence kind="illustrative" label="Scene · illustrative" /></div>
         </div>
       )}
