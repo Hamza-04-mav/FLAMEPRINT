@@ -6,7 +6,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { type Environment, environmentFor, ENV_LABEL } from "@/lib/environment";
 import { fmtGravity, toPsi } from "@/lib/format";
 import { useMission } from "@/lib/mission";
-import { NasaWordmark } from "./NasaMarks";
+
 import { MobileNav } from "./Sidebar";
 import { EVIDENCE, type EvidenceKind, EvidenceMark } from "./ui";
 
