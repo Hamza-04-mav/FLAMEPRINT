@@ -179,7 +179,7 @@ export function Ranking() {
 
   return (
     <div>
-     
+      <PageHeader kicker="Evidence" title="Which NASA experiments back this up?">
         The {TOP} investigations closest to {hab ? `the ${hab.name}` : "this habitat"}, each with an evidence grade.
       </PageHeader>
 

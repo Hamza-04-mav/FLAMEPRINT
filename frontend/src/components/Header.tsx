@@ -160,10 +160,6 @@ export function Header() {
             <Menu className="h-5 w-5" />
           </button>
           <div className="min-w-0 flex-1"><MissionPicker /></div>
-          <a href="https://www.nasa.gov" target="_blank" rel="noreferrer" title="Built on NASA open data (independent entry — not NASA-endorsed)"
-            className="hidden shrink-0 text-dust-100 transition-opacity hover:opacity-80 sm:block">
-            <NasaWordmark className="h-[13px] w-auto" />
-          </a>
           <StatusPopover />
         </div>
       </header>
