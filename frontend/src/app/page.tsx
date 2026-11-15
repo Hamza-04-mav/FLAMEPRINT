@@ -18,6 +18,7 @@ import { RankingToast } from "@/components/RankingToast";
 import { Sidebar } from "@/components/Sidebar";
 import { SpaceView } from "@/components/SpaceView";
 import { StowageInspector } from "@/components/StowageInspector";
+import { FirstRunHints } from "@/components/FirstRunHints";
 import { ErrorNote } from "@/components/ui";
 import { MissionProvider, useMission } from "@/lib/mission";
 import { pageT, pageVariants, SPRING } from "@/lib/motion";
@@ -57,6 +58,7 @@ function Dashboard() {
       <InvestigationDrawer />
       <RankingToast />
       <MobileTabBar />
+      <FirstRunHints />
     </>
   );
 }

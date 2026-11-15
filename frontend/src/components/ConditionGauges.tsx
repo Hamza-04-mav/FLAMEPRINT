@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { clamp, fmtGravity, toPsi } from "@/lib/format";
 import { standardT } from "@/lib/motion";
 import { useMission } from "@/lib/mission";
-import { DUST } from "@/lib/theme";
 import type { Envelope, Range } from "@/lib/types";
 
 /**

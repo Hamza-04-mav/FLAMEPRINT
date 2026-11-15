@@ -55,7 +55,7 @@ function MissionPicker() {
   return (
     <div ref={ref} className="relative inline-flex max-w-full">
       <button onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-haspopup="listbox"
-        title="Change habitat"
+        data-hint="habitat" title="Change habitat"
         className="flex min-w-0 max-w-full items-center gap-2.5 rounded-full border border-[var(--line-strong)] bg-space-900/70 py-1 pl-1.5 pr-3 text-left backdrop-blur-xl transition-colors duration-200 hover:border-ox/50">
         <PlanetGlyph env={env} size={28} />
         <span className="truncate text-[14px] font-semibold text-ink">{hab?.name ?? "Custom mission"}</span>

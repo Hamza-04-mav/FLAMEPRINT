@@ -62,7 +62,7 @@ function Verdict() {
 
       <div className="mt-4 min-h-[84px]" aria-live="polite">
         {v ? (
-          <motion.h1 key={v.headline} initial={{ opacity: 0.4, y: 4 }} animate={{ opacity: analyzing ? 0.8 : 1, y: 0 }} transition={{ duration: 0.25, ease: EASE }}
+          <motion.h1 key={v.headline} data-hint="verdict" initial={{ opacity: 0.4, y: 4 }} animate={{ opacity: analyzing ? 0.8 : 1, y: 0 }} transition={{ duration: 0.25, ease: EASE }}
             className="t-display">
             {v.high > 0
               ? <><span className="text-sun">{v.high} of {v.total}</span>{v.headline.slice(`${v.high} of ${v.total}`.length)}</>
@@ -78,7 +78,7 @@ function Verdict() {
       {analysis ? <ConditionReadout /> : <Skeleton className="mt-6 h-24 w-full" />}
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
-        <a href={passport} target="_blank" rel="noreferrer" className="btn btn-primary"><FileDown className="h-4 w-4" />Get Fire Passport</a>
+        <a href={passport} target="_blank" rel="noreferrer" data-hint="passport" className="btn btn-primary"><FileDown className="h-4 w-4" />Get Fire Passport</a>
         <button onClick={() => setAdjust((x) => !x)} aria-expanded={adjust} className="btn btn-ghost">
           <SlidersHorizontal className="h-4 w-4" />Adjust conditions
           <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adjust ? "rotate-180" : ""}`} />
