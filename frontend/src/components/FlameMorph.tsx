@@ -65,9 +65,10 @@ void main(){
   float halo = exp(-r*r*4.0) * (0.10 + 0.16*o2) * (0.6 + 0.4*gs);
   vec3 c = col * lum + mix(blue, orange, gs) * halo;
 
-  // fuel source: droplet / wick at the centre
-  float fuel = smoothstep(0.042, 0.03, length(p - vec2(0.0, -0.25)));
-  c = mix(c, c * 0.35, fuel);
+  // Soft core where the fuel sits: a gentle Gaussian brightening in the flame's own colour.
+  // (Replaces the old dark "fuel droplet" disc, whose 0.012-wide edge read as a hole at every gravity.)
+  float core = exp(-pow(length(p - vec2(0.0, -0.25)) / 0.11, 2.0));
+  c += (col + mix(blue, orange, gs) * 0.5) * core * 0.16;
   c = 1.0 - exp(-c * 1.7);
   gl_FragColor = vec4(c, max(c.r, max(c.g, c.b)));
 }
