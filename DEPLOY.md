@@ -3,6 +3,24 @@
 Backend on **Render** (FastAPI), frontend on **Vercel** (Next.js), both from this repo. Deploy once Phase 1 passes,
 then redeploy after each change so the live URL never falls behind.
 
+## Option A (current): everything on Vercel, two projects from this repo
+
+**Backend project.** Vercel → Add New → Project → this repo. **Root Directory: `./`** (repo root), Framework Preset:
+**FastAPI** (or Other). Vercel runs the root `index.py` (it imports `backend/app/main.py`) and installs the root
+`requirements.txt` (which points at `backend/requirements.txt`). Env vars: `FLAMEPRINT_LLM=auto`, `GROQ_API_KEY`
+(optional), `CORS_ORIGINS` (the frontend URL, add it after step 2). Deploy, then open
+`https://<backend>.vercel.app/api/health`: expect `"ok": true`.
+
+**Frontend project.** Add New → Project → same repo. **Root Directory: `frontend`** (Next.js detected). Env vars:
+`NEXT_PUBLIC_API_BASE` and `FLAMEPRINT_API_URL`, both `https://<backend>.vercel.app`. Deploy.
+
+**Then** set `CORS_ORIGINS=https://<frontend>.vercel.app` on the backend project and redeploy it.
+
+Limits on Vercel: the disk is read-only, so **Data Lab uploads do not persist** (commit PSI files to `data/psi/` instead);
+the store skips creating `data/imported` there (`test_store_starts_on_read_only_disk`).
+
+## Option B: backend on Render
+
 ## 1. Backend on Render
 
 1. Render → **New → Blueprint** → connect the GitHub repo. Render reads `render.yaml` (root dir `backend`,

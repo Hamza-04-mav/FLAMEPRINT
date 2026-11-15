@@ -59,8 +59,12 @@ class Store:
         self.materials_path = root / "seed" / "materials.json"
         self.psi_dir = root / "psi"
         self.upload_dir = root / "imported"
-        self.upload_dir.mkdir(parents=True, exist_ok=True)
-        self.psi_dir.mkdir(parents=True, exist_ok=True)
+        # Serverless hosts (Vercel) mount the code read-only: serve the committed data and let only uploads fail.
+        for d in (self.upload_dir, self.psi_dir):
+            try:
+                d.mkdir(parents=True, exist_ok=True)
+            except OSError:
+                pass
         self.database_url = database_url
         self._lock = threading.RLock()
         self._ds: Optional[Dataset] = None

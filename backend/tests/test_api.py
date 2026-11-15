@@ -115,3 +115,16 @@ def test_health_reports_seed_loaded_from_default_dir():
     h = TestClient(main.app).get("/api/health").json()
     assert h["ok"] and h["stats"]["investigations"] == 24
     assert main.DATA_DIR.name == "data"
+
+
+def test_store_starts_on_read_only_disk(data_dir, monkeypatch):
+    """Vercel mounts the code read-only: the store must still load the committed catalog."""
+    from pathlib import Path
+    from app.store import Store
+
+    def deny(self, *a, **k):
+        raise OSError(30, "Read-only file system")
+
+    monkeypatch.setattr(Path, "mkdir", deny)
+    s = Store(data_dir)
+    assert s.dataset.investigations
