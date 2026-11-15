@@ -8,7 +8,7 @@ import { DEFAULT_WEIGHTS, useMission } from "@/lib/mission";
 import { DUST } from "@/lib/theme";
 import type { Range, Ranked, Weights } from "@/lib/types";
 import { GradeBadge } from "./GradeBadge";
-import { AresEmblem } from "./NasaMarks";
+
 import { ConfidenceBadge, PageHeader, Skeleton, Slider } from "./ui";
 
 // relevance factors are not risk → dust tints only (no hue)
@@ -179,7 +179,7 @@ export function Ranking() {
 
   return (
     <div>
-      <PageHeader kicker="Evidence" title="Which NASA experiments back this up?" actions={<AresEmblem />}>
+     
         The {TOP} investigations closest to {hab ? `the ${hab.name}` : "this habitat"}, each with an evidence grade.
       </PageHeader>
 
