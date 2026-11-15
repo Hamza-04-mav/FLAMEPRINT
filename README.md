@@ -246,3 +246,4 @@ for scientific intelligence, flame orange `#FF8B32` and amber `#FFC15B` for comb
 Tokens live in `frontend/src/app/globals.css`. 3D (React Three Fiber + GLSL) is used where it explains something: the mission environment
 (lunar, Martian, orbital or Earth, chosen by the preset), the gravity flame, and the condition-space explorer. Expensive canvases load
 lazily, pause when off screen, fall back to static visuals without WebGL, and motion respects `prefers-reduced-motion`.
+
