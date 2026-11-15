@@ -128,8 +128,8 @@ describe("gaps helpers", () => {
 describe("habitat journey planner", () => {
   it("picks the scene, direction and duration", async () => {
     const { planJourney } = await import("./journeyPlan");
-    expect(planJourney("iss", "lunar-base")).toMatchObject({ scene: "iss-moon", dir: 1, duration: 2.1 });
-    expect(planJourney("lunar-base", "suit")).toMatchObject({ scene: "moon-suit", dir: 1, duration: 2.4 });
+    expect(planJourney("iss", "lunar-base")).toMatchObject({ scene: "iss-moon", dir: 1, duration: 2.0 });
+    expect(planJourney("lunar-base", "suit")).toMatchObject({ scene: "moon-suit", dir: 1, duration: 2.0 });
     expect(planJourney("suit", "lunar-base")).toMatchObject({ scene: "moon-suit", dir: -1 }); // mirrored backwards
     expect(planJourney("iss", "mars")).toMatchObject({ scene: "transit", dir: 1 }); // non-adjacent: one transit
     expect(planJourney("mars", "iss")).toMatchObject({ scene: "transit", dir: -1 });

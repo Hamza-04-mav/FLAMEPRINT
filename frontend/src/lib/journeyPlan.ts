@@ -1,4 +1,4 @@
-import { JOURNEY } from "./motion";
+import { TRAVEL } from "./motion";
 
 /** The five scenes of the Answer-page habitat journey. "transit" = generic jump; "to-earth" = calm pull-back. */
 export type JourneyScene = "iss-moon" | "moon-suit" | "suit-rover" | "rover-mars" | "to-earth" | "transit";
@@ -22,7 +22,7 @@ const PAIR: Record<string, JourneyScene> = {
 /** Pure: which scene plays between two habitats, in which direction, and for how long. */
 export function planJourney(from: string, to: string, viewportWidth = 1440): JourneyPlan | null {
   if (!from || !to || from === to) return null;
-  const mobile = viewportWidth < JOURNEY.mobileBreakpoint;
+  const mobile = viewportWidth < 768;
   let scene: JourneyScene = "transit";
   let dir: 1 | -1 = 1;
   if (to === "earth") scene = "to-earth";
@@ -32,6 +32,6 @@ export function planJourney(from: string, to: string, viewportWidth = 1440): Jou
     const a = PATH.indexOf(from as (typeof PATH)[number]), b = PATH.indexOf(to as (typeof PATH)[number]);
     if (a >= 0 && b >= 0 && b < a) dir = -1;
   }
-  const duration = mobile ? JOURNEY.mobile : scene === "moon-suit" ? JOURNEY.hero : JOURNEY.desktop;
+  const duration = mobile ? TRAVEL.mobile : TRAVEL.desktop; // one basic A→B travel (~2 s; ~1.2 s on phones)
   return { from, to, scene, dir, duration };
 }

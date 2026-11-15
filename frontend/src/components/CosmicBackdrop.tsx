@@ -1,7 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion, type MotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
+import { heroPresence } from "@/lib/journey";
 import { PARALLAX } from "@/lib/motion";
+import { useStageHabitat } from "@/lib/stage";
 import { useEffect, useMemo, useRef } from "react";
 import { environmentFor, ENV_TINT } from "@/lib/environment";
 import { useMission } from "@/lib/mission";
@@ -107,8 +109,12 @@ export function Horizon({ envKey, suit }: { envKey: keyof typeof ENV_TINT; suit:
 
 export function CosmicBackdrop() {
   const { scenario } = useMission();
-  const env = environmentFor(scenario.habitatId, scenario.gravityG);
-  const suit = scenario.habitatId === "suit";
+  // scenery follows the last preset: custom slider changes never swap the horizon (only the flame reacts)
+  const stage = useStageHabitat();
+  const env = environmentFor(stage, scenario.gravityG);
+  const suit = stage === "suit";
+  // the Answer hero draws its own planet: the horizon fades out while the hero shows, and back in as it scrolls away
+  const horizonOpacity = useTransform(heroPresence, (v) => 1 - v);
   const t = ENV_TINT[env];
   const reduce = useReducedMotion();
 
@@ -154,7 +160,7 @@ export function CosmicBackdrop() {
       </motion.div>
 
       {/* moon / planet horizon — crossfades per habitat */}
-      <motion.div className="absolute inset-0" style={{ x: hor.x, y: hor.y }}>
+      <motion.div className="absolute inset-0" style={{ x: hor.x, y: hor.y, opacity: horizonOpacity }}>
         <AnimatePresence initial={false}>
           <Horizon key={suit ? "suit" : env} envKey={env} suit={suit} />
         </AnimatePresence>

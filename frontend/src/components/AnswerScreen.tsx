@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion, useMotionValueEvent, useReducedMotion } from "framer-motion";
 import { ArrowUp, Box, ChevronDown, FileDown, Flame, RefreshCw, RotateCcw, SlidersHorizontal } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
@@ -18,7 +18,7 @@ import { ConditionReadout } from "./ConditionGauges";
 import { FlameCanvas } from "./FlameCanvas";
 import { Safe3D } from "./Safe3D";
 import { GradeBadge } from "./GradeBadge";
-import { JourneyOverlay } from "./JourneyOverlay";
+import { HeroStage } from "./HeroStage";
 import { MissionTimeline } from "./MissionTimeline";
 import { StowageSearch } from "./StowageInspector";
 import { TiltCard } from "./TiltCard";
@@ -30,16 +30,57 @@ const MissionScene3D = dynamic(lazyRetry(() => import("./MissionScene3D")), { ss
 const VISIBLE_MATERIALS = 5;
 const EASE = [0.2, 0.7, 0.2, 1] as const;
 
-/* ───────────────────────── verdict ───────────────────────── */
-function Verdict() {
-  const { analysis, analyzing, scenario, setScenario, applyHabitat, habitats } = useMission();
-  const [adjust, setAdjust] = useState(false);
+/* ───────────────────────── hero verdict (overlaid on the hero scene) ───────────────────────── */
+/** The answer, latched to the habitat being left until the travel midpoint, then crossfading to the new one. */
+function HeroVerdict() {
+  const { analysis, analyzing, scenario, habitats } = useMission();
+  const j = useJourney();
+  const [pastMid, setPastMid] = useState(true);
+  useMotionValueEvent(j.progress, "change", (v) => setPastMid(v >= 0.5));
   const hab = habitats.find((h) => h.id === scenario.habitatId);
   const name = hab?.name ?? "Custom mission";
-  const v = analysis ? buildVerdict(analysis.materials, analysis.coverage.grade, name) : null;
   const p = fmtPressure(scenario.pressureKpa);
-  const set = (patch: Partial<typeof scenario>) => setScenario((s) => ({ ...s, ...patch, habitatId: "custom" }));
+  const current = {
+    name, assumed: !!hab?.assumed,
+    line: `${Math.round(scenario.o2Pct)}% O₂ · ${p.psi}`, kpa: `(${Math.round(scenario.pressureKpa)} kPa)`, g: `${fmtGravity(scenario.gravityG)} g`,
+    v: analysis ? buildVerdict(analysis.materials, analysis.coverage.grade, name) : null, grade: analysis?.coverage.grade ?? null,
+  };
+  const latched = useRef<typeof current | null>(null);
+  const hold = j.phase === "play" && !pastMid && !!latched.current;
+  const shown = hold ? latched.current! : current;
+  useEffect(() => { if (!hold) latched.current = current; });
+  const v = shown.v;
+  return (
+    <div className="max-w-[640px]">
+      <div className="font-mono text-[12px] text-mute">
+        {shown.name} <span className="text-slate-400">· {shown.line} <span className="text-[10px]">{shown.kpa}</span> · {shown.g}</span>
+        {shown.assumed && <span className="ml-2 align-middle"><Evidence kind="estimate" label="assumed" /></span>}
+      </div>
+      <div className="mt-4 min-h-[84px]" aria-live="polite">
+        <AnimatePresence mode="wait" initial={false}>
+          {v ? (
+            <motion.h1 key={v.headline} data-hint="verdict" initial={{ opacity: 0, y: 8 }} animate={{ opacity: analyzing && !hold ? 0.8 : 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }} transition={standardT} className="t-display">
+              {v.high > 0
+                ? <><span className="text-sun">{v.high} of {v.total}</span>{v.headline.slice(`${v.high} of ${v.total}`.length)}</>
+                : v.headline}
+            </motion.h1>
+          ) : <motion.div key="sk"><Skeleton className="h-10 w-[85%]" /><Skeleton className="mt-2 h-10 w-[50%]" /></motion.div>}
+        </AnimatePresence>
+      </div>
+      <div className="mt-6">
+        {shown.grade ? <GradeBadge grade={shown.grade} size="lg" showReason /> : <Skeleton className="h-14 w-72" />}
+      </div>
+    </div>
+  );
+}
 
+/* ───────────────────────── verdict details (below the hero, unchanged content) ───────────────────────── */
+function VerdictDetails() {
+  const { analysis, scenario, setScenario, applyHabitat, habitats } = useMission();
+  const [adjust, setAdjust] = useState(false);
+  const hab = habitats.find((h) => h.id === scenario.habitatId);
+  const set = (patch: Partial<typeof scenario>) => setScenario((s) => ({ ...s, ...patch, habitatId: "custom" }));
   // remember the last real preset so "Reset" can snap back from a custom scenario
   const lastPreset = useRef<(typeof habitats)[number] | null>(null);
   useEffect(() => { if (hab) lastPreset.current = hab; }, [hab]);
@@ -57,27 +98,8 @@ function Verdict() {
 
   return (
     <TiltCard as="section" className="panel flex min-w-0 flex-col p-6 sm:p-8">
-      <div className="font-mono text-[12px] text-mute">
-        {name} <span className="text-slate-400">· {Math.round(scenario.o2Pct)}% O₂ · {p.psi} <span className="text-[10px]">({Math.round(scenario.pressureKpa)} kPa)</span> · {fmtGravity(scenario.gravityG)} g</span>
-        {hab?.assumed && <span className="ml-2 align-middle"><Evidence kind="estimate" label="assumed" /></span>}
-      </div>
-
-      <div className="mt-4 min-h-[84px]" aria-live="polite">
-        {v ? (
-          <motion.h1 key={v.headline} data-hint="verdict" initial={{ opacity: 0.4, y: 4 }} animate={{ opacity: analyzing ? 0.8 : 1, y: 0 }} transition={{ duration: 0.25, ease: EASE }}
-            className="t-display">
-            {v.high > 0
-              ? <><span className="text-sun">{v.high} of {v.total}</span>{v.headline.slice(`${v.high} of ${v.total}`.length)}</>
-              : v.headline}
-          </motion.h1>
-        ) : <><Skeleton className="h-10 w-[85%]" /><Skeleton className="mt-2 h-10 w-[50%]" /></>}
-      </div>
-
-      <div className="mt-6">
-        {analysis ? <GradeBadge grade={analysis.coverage.grade} size="lg" showReason /> : <Skeleton className="h-14 w-72" />}
-      </div>
-
-      {analysis ? <ConditionReadout /> : <Skeleton className="mt-6 h-24 w-full" />}
+      <h2 className="sr-only">Conditions and actions</h2>
+      {analysis ? <ConditionReadout /> : <Skeleton className="h-24 w-full" />}
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
         <a href={passport} target="_blank" rel="noreferrer" data-hint="passport" className="btn btn-primary"><FileDown className="h-4 w-4" />Get Fire Passport</a>
@@ -113,10 +135,12 @@ function Verdict() {
 /* ───────────────────────── hero flame (the only WebGL canvas here) ───────────────────────── */
 function HeroFlame() {
   const { scenario, analysis } = useMission();
-  const { gpuBusy } = useJourney(); // a habitat journey owns the only WebGL context while it plays
+  const { owner, report } = useJourney(); // one WebGL context per page: the flame mounts only while it owns the slot
   const webgl = useWebGL();
   const ref = useRef<HTMLDivElement>(null);
   const visible = useInView(ref);
+  useEffect(() => { report("flame", visible); }, [visible, report]);
+  const gpuBusy = owner !== "flame";
   const worst: RiskLevel = analysis?.materials.find((m) => m.level !== "unknown")?.level ?? "elevated";
   const g = scenario.gravityG;
   return (
@@ -232,12 +256,14 @@ function Materials() {
 /* optional 3D scene, never on by default */
 function Habitat3D() {
   const { scenario } = useMission();
-  const { gpuBusy } = useJourney();
+  const { owner, report } = useJourney();
   const webgl = useWebGL();
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const visible = useInView(ref);
+  useEffect(() => { report("habitat3d", open && visible); return () => report("habitat3d", false); }, [open, visible, report]);
+  const gpuBusy = owner !== "habitat3d";
   if (webgl === false) return null;
   return (
     <>
@@ -246,7 +272,7 @@ function Habitat3D() {
       </button>
       {open && (
         <div ref={ref} className="panel relative h-[360px] w-full basis-full overflow-hidden">
-          {gpuBusy ? <div className="grid h-full place-items-center text-[13px] text-dust-400">Travelling…</div> : (
+          {gpuBusy ? <div className="grid h-full place-items-center text-[13px] text-dust-400">Loading the 3D habitat…</div> : (
             <Safe3D label="The 3D habitat">
               <MissionScene3D env={environmentFor(scenario.habitatId, scenario.gravityG)} withRover={scenario.habitatId === "rover"} active={visible} still={!!reduce} />
             </Safe3D>
@@ -273,18 +299,35 @@ export function AnswerScreen() {
   }
   return (
     <JourneyProvider>
-    <JourneyOverlay />
-    <div className="flex flex-col gap-8">
-      {/* the whole story in one glance, before anything else */}
-      <div className="order-first"><AnswerPipeline /></div>
-      {/* mobile: verdict and flame first; desktop: the mission path leads */}
-      <div className="order-2 lg:order-1"><MissionTimeline /></div>
-      <div className="order-1 grid grid-cols-1 gap-6 lg:order-2 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <Verdict />
-        <HeroFlame />
-      </div>
-      <div className="order-3"><Materials /></div>
-    </div>
+      <AnswerBody />
     </JourneyProvider>
+  );
+}
+
+/** Full-viewport hero (scene behind; stepper, verdict and stamp on top), then everything else below, unchanged. */
+function AnswerBody() {
+  const hero = useRef<HTMLElement>(null);
+  const j = useJourney();
+  return (
+    <>
+      <HeroStage sectionRef={hero} />
+      <section ref={hero} aria-label="Your habitat" data-no-reveal
+        onPointerDown={(e) => { if (j.phase === "play" && !(e.target as HTMLElement).closest("button, a")) j.skip(); }}
+        className="relative flex min-h-[calc(100svh-7.5rem)] flex-col gap-8 pb-10">
+        <MissionTimeline />
+        <div className="lg:mt-auto"><HeroVerdict /></div>
+        <div className="hidden items-center gap-2 text-[12px] text-dust-400 lg:flex" aria-hidden>
+          <span className="h-px w-8 bg-dust-500" />Scroll for the details
+        </div>
+      </section>
+      <div className="flex flex-col gap-8">
+        <AnswerPipeline />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <VerdictDetails />
+          <HeroFlame />
+        </div>
+        <Materials />
+      </div>
+    </>
   );
 }

@@ -3,8 +3,8 @@
 > **Read this first.** It is the single source of truth for the project's goal, current state and next steps.
 > Claude (or a person) **must update it at the end of every working session**. See [How to update this file](#how-to-update-this-file).
 >
-> Last updated: **2026-11-15** · Cinematic motion pass committed locally (flame hole fix, living Gaps 2D/3D + morph,
-> Answer habitat journey + stepper glyphs) on top of `origin/main` UI Phases 0–10. **The owner pushes.** Repo:
+> Last updated: **2026-11-15** · Animation pass v2 pushed to `main`: site-wide motion system and the Answer hero travel
+> scene. **Still to do from that brief: the Gaps 2D dashboard chart and 3D coverage surface (work item 3).** Repo:
 > `github.com/Hamza-04-mav/FLAMEPRINT` (private)
 >
 > **UI/UX "Ink sun" upgrade in progress** (presentation-layer only — no scoring math/data/logic changed). Spec: 3-colour palette
@@ -91,6 +91,8 @@ Useful links: `#answer #evidence #gaps #brief #compare` (pages), `#stowage #data
    **Owner-approved exception (2026-11-15):** the Answer-page habitat journey (`JOURNEY`: 2.1 s per hop, 2.4 s for
    Moon base → Suit, 1.2 s under 768 px) and the Gaps 2D↔3D morph (`MORPH`: 700 ms; camera moves 600 ms) may exceed the
    150–300 ms budget. Every other interaction keeps it. Both are off with `prefers-reduced-motion` or without WebGL.
+   **Animation pass v2 (2026-11-15, owner-approved):** site-wide reveals, type-in titles, count-ups, scroll parallax,
+   the Answer hero travel (~2 s) and slow ambient star drift may also exceed the budget. Hover/press stay at 150–200 ms.
 10. **Hiding is not deleting:** every capability stays reachable via "Show details", the Tools menu or expand rows.
 
 ---
@@ -317,6 +319,7 @@ Font: SF system on Apple, Inter fallback. The intro (`Boot.tsx`) shows on the fi
 | 2026-11-15 | Claude Code (with Zaki)    | **UI/UX Phase 9 — accessibility & quality.** Contrast sweep: small text off `dust-500` — `text-slate-500/600` → `slate-400` (≈5.3:1 on navy) across 20 components (passport light theme + dead files excluded). Keyboard **focus ring = yellow + soft glow**. 3D canvases (`MissionScene3D`, `ConditionSpace3D`) get `role="img"` + descriptive `aria-label`. Gaps `FlammabilityMap` gains a **"View as table"** toggle (text alternative listing tested O₂/airflow ranges + the habitat row). Risk already icon+label; evidence marks shape-coded; 3D lazy-loaded. Lighthouse not measurable without a build (Phase 11). Typecheck, lint, 8 vitest pass. |
 | 2026-11-15 | Claude Code (with Zaki)    | **UI/UX Phase 10 — content consistency (+ dropdown bugfix).** One gravity format everywhere via `fmtGravity` (fixed Brief export header + printable passport). Honesty tags (`Evidence`) **restyled as small dust outline tags** (shape mark keeps the kind). New `Abbr`+`GLOSSARY` give jargon (PSI/µg/LOI) hover tooltips (sidebar "PSI", µg gravity tick). **Fixed:** header habitat **dropdown scrolled the whole page** (taller than viewport) — now capped `min(72vh,460px)` with internal scroll + `overscroll-contain`. Typecheck, lint, 8 vitest pass. |
 | 2026-11-15 | Claude Code (with Cerelva) | **Cinematic motion pass** (3 local commits). (1) `FlameMorph`: removed the dark "fuel droplet" disc, now a soft core. (2) Gaps: 2D map entrance, gap connector, glide + trail, hover/focus tooltips, density fills, ghost habitats; 3D exact auto-fit, glass volumes, orb + drop line + axis projections, collision-free labels with leader lines, eased view tabs, fly-to-volume, ≤1.8°/s drift, demand/never frameloop; one 700 ms 2D↔3D morph; fixed audit defect #7 and the drei `<Html>` console error. (3) Answer: habitat journey overlay (ISS→Moon, Moon→Suit hero, Suit→Rover, Rover→Mars, →Earth, transit; mirrored backwards; skippable; retarget; Play chains with a hold), screen-space hand-off onto a replica of the backdrop horizon, unique stepper glyphs and a travelling sun ring. Verified: max 1 live WebGL context across all hops, retarget and skip; reduced motion and no-WebGL fall back cleanly; no console errors; only palette tokens added. New tested helpers: `nearestTested`, `placeLabels`, `planJourney` (11 vitest). Deviations: verdict crossfade happens under the opaque overlay at the midpoint and is revealed by the final dissolve (keeps the scene readable); generic transit carries a capsule so it has a subject. |
+| 2026-11-15 | Claude Code (with Cerelva) | **Animation pass v2.** Motion system in `components/motion/` (AutoReveal: reveals, corner brackets, hairlines, title type-in, count-ups that end on the exact original text, stamp press; TypeIn headlines; ScrollProgress) + backdrop scroll parallax and ambient drift; verified every number identical to the reduced-motion render on 7 pages. Answer hero: full-viewport `HeroStage` + `HeroScene` (one body per habitat, basic A→B travel, sun-beaconed craft), verdict latched until the travel midpoint, GPU slot arbiter in `lib/journey.tsx` (hero / flame / 3D habitat; max 1 live context verified), backdrop horizon cross-fades with the hero. Custom "Adjust conditions" changes only the flame (`lib/stage.ts` keeps the last preset's scenery). Old full-screen journey overlay removed (models moved to `space/Primitives.tsx`). Refs in `docs/refs/` (05/06 motion/travel frames were not provided). **Not done: Gaps 2D/3D graph redesign.** |
 
 ---
 
