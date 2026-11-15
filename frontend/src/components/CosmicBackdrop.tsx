@@ -68,8 +68,9 @@ function Twinkles() {
   );
 }
 
-/** The moon / planet horizon arc, low and large. Changes per habitat; signals "where you are". */
-function Horizon({ envKey, suit }: { envKey: keyof typeof ENV_TINT; suit: boolean }) {
+/** The moon / planet horizon arc, low and large. Changes per habitat; signals "where you are".
+ *  Exported so the habitat journey can end on an exact replica of it (no pop at the hand-off). */
+export function Horizon({ envKey, suit }: { envKey: keyof typeof ENV_TINT; suit: boolean }) {
   const t = ENV_TINT[envKey];
   const size = suit ? "170vmax" : "118vmax"; // the suit sits on a very close crater rim
   const craters = t.crater

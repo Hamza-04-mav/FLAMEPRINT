@@ -124,3 +124,18 @@ describe("gaps helpers", () => {
     expect(axis[0]).toMatchObject({ left: 155, top: 192, leader: false });
   });
 });
+
+describe("habitat journey planner", () => {
+  it("picks the scene, direction and duration", async () => {
+    const { planJourney } = await import("./journeyPlan");
+    expect(planJourney("iss", "lunar-base")).toMatchObject({ scene: "iss-moon", dir: 1, duration: 2.1 });
+    expect(planJourney("lunar-base", "suit")).toMatchObject({ scene: "moon-suit", dir: 1, duration: 2.4 });
+    expect(planJourney("suit", "lunar-base")).toMatchObject({ scene: "moon-suit", dir: -1 }); // mirrored backwards
+    expect(planJourney("iss", "mars")).toMatchObject({ scene: "transit", dir: 1 }); // non-adjacent: one transit
+    expect(planJourney("mars", "iss")).toMatchObject({ scene: "transit", dir: -1 });
+    expect(planJourney("rover", "earth")).toMatchObject({ scene: "to-earth" });
+    expect(planJourney("earth", "suit")).toMatchObject({ scene: "transit" });
+    expect(planJourney("suit", "rover", 375)?.duration).toBe(1.2); // shorter on phones
+    expect(planJourney("iss", "iss")).toBeNull();
+  });
+});

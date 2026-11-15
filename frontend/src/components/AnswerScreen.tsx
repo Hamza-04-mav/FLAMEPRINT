@@ -8,6 +8,7 @@ import { buildVerdict, fmtPressure, LEVEL_STYLE, levelRose } from "@/lib/answer"
 import { environmentFor } from "@/lib/environment";
 import { fmtGravity, toKpa, toPsi } from "@/lib/format";
 import { lazyRetry } from "@/lib/lazyRetry";
+import { JourneyProvider, useJourney } from "@/lib/journey";
 import { useMission } from "@/lib/mission";
 import { standardT } from "@/lib/motion";
 import type { MaterialVerdict, RiskLevel } from "@/lib/types";
@@ -17,6 +18,7 @@ import { ConditionReadout } from "./ConditionGauges";
 import { FlameCanvas } from "./FlameCanvas";
 import { Safe3D } from "./Safe3D";
 import { GradeBadge } from "./GradeBadge";
+import { JourneyOverlay } from "./JourneyOverlay";
 import { MissionTimeline } from "./MissionTimeline";
 import { StowageSearch } from "./StowageInspector";
 import { TiltCard } from "./TiltCard";
@@ -111,6 +113,7 @@ function Verdict() {
 /* ───────────────────────── hero flame (the only WebGL canvas here) ───────────────────────── */
 function HeroFlame() {
   const { scenario, analysis } = useMission();
+  const { gpuBusy } = useJourney(); // a habitat journey owns the only WebGL context while it plays
   const webgl = useWebGL();
   const ref = useRef<HTMLDivElement>(null);
   const visible = useInView(ref);
@@ -120,7 +123,7 @@ function HeroFlame() {
     <section ref={ref} aria-label="Gravity flame"
       className="panel relative h-[240px] overflow-hidden bg-[radial-gradient(ellipse_at_50%_70%,#152033,#0a111d_72%)] lg:h-auto lg:min-h-[340px]">
       <div className="absolute inset-0">
-        {webgl === false
+        {webgl === false || gpuBusy
           ? <div className="grid h-full place-items-center"><FlameCanvas g={g} level={worst} width={140} height={180} /></div>
           : webgl && <Safe3D label="The gravity flame"><FlameMorph active={visible} flames={[{ g, o2: scenario.o2Pct, flow: scenario.flowCmS }]} /></Safe3D>}
       </div>
@@ -229,6 +232,7 @@ function Materials() {
 /* optional 3D scene, never on by default */
 function Habitat3D() {
   const { scenario } = useMission();
+  const { gpuBusy } = useJourney();
   const webgl = useWebGL();
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
@@ -242,9 +246,11 @@ function Habitat3D() {
       </button>
       {open && (
         <div ref={ref} className="panel relative h-[360px] w-full basis-full overflow-hidden">
-          <Safe3D label="The 3D habitat">
-            <MissionScene3D env={environmentFor(scenario.habitatId, scenario.gravityG)} withRover={scenario.habitatId === "rover"} active={visible} still={!!reduce} />
-          </Safe3D>
+          {gpuBusy ? <div className="grid h-full place-items-center text-[13px] text-dust-400">Travelling…</div> : (
+            <Safe3D label="The 3D habitat">
+              <MissionScene3D env={environmentFor(scenario.habitatId, scenario.gravityG)} withRover={scenario.habitatId === "rover"} active={visible} still={!!reduce} />
+            </Safe3D>
+          )}
           <div className="absolute bottom-3 right-3"><Evidence kind="illustrative" label="Scene · illustrative" /></div>
         </div>
       )}
@@ -266,6 +272,8 @@ export function AnswerScreen() {
     );
   }
   return (
+    <JourneyProvider>
+    <JourneyOverlay />
     <div className="flex flex-col gap-8">
       {/* the whole story in one glance, before anything else */}
       <div className="order-first"><AnswerPipeline /></div>
@@ -277,5 +285,6 @@ export function AnswerScreen() {
       </div>
       <div className="order-3"><Materials /></div>
     </div>
+    </JourneyProvider>
   );
 }

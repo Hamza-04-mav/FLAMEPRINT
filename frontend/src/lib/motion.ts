@@ -44,7 +44,19 @@ export const DROP = { type: "spring", stiffness: 180, damping: 14, mass: 0.9 } a
 export const MORPH = { duration: 0.7, fade: 0.15, flyTo: 0.6 } as const;
 
 /** Habitat journey on the Answer page (seconds). */
-export const JOURNEY = { desktop: 2.1, mobile: 1.2, hold: 1.6, mobileBreakpoint: 768 } as const;
+export const JOURNEY = {
+  desktop: 2.1, // adjacent hop / transit
+  hero: 2.4, // Moon base → Suit gets the most screen time
+  mobile: 1.2, // under 768 px
+  hold: 1.6, // Play mode: read the verdict before the next hop
+  mobileBreakpoint: 768,
+  /** Overlay is opaque until this progress, then dissolves into the page (hand-off to the backdrop horizon). */
+  dissolveFrom: 0.86,
+  /** The destination planet starts settling onto the backdrop's horizon at this progress. */
+  handoffFrom: 0.74,
+  /** Actors (astronaut, rover, station…) fade out over this window, before the dissolve, so only the planet blends into the page. */
+  actorsOut: [0.78, 0.9] as const,
+} as const;
 
 /** Ease-in-out with a touch of overshoot for camera moves (cubic). */
 export const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);

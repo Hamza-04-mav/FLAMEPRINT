@@ -4,6 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { Environment } from "@/lib/environment";
+import { ReleaseGL } from "./ReleaseGL";
 
 /* ───────── deterministic value noise (JS, for terrain) ───────── */
 function makeNoise(seed: number) {
@@ -365,6 +366,7 @@ export default function MissionScene3D({ env, withRover, active, still }: { env:
       gl={{ antialias: true, powerPreference: "high-performance" }} frameloop={active ? "always" : "never"}
       onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.05; }}>
       <Scene env={env} withRover={withRover} still={still} />
+      <ReleaseGL />
     </Canvas>
   );
 }

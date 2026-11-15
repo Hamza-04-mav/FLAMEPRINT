@@ -3,6 +3,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo } from "react";
 import * as THREE from "three";
+import { ReleaseGL } from "./ReleaseGL";
 
 const vert = /* glsl */ `
 varying vec2 vUv;
@@ -174,6 +175,7 @@ export default function FlameMorph({ flames, active = true }: { flames: FlameSpe
       onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
       dpr={[1, 1.5]} style={{ width: "100%", height: "100%" }} frameloop={active ? "always" : "never"}>
       <Stage flames={flames} />
+      <ReleaseGL />
     </Canvas>
   );
 }

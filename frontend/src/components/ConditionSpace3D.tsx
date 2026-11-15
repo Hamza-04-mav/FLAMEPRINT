@@ -10,6 +10,7 @@ import { easeInOutCubic, MORPH } from "@/lib/motion";
 import { F_RANGE, habitatFlow, nF, nO2, nP, P_RANGE, plottable } from "@/lib/space";
 import { DUST, INK, SUN } from "@/lib/theme";
 import type { ConditionSpace, Habitat, Scenario, SpacePoint } from "@/lib/types";
+import { ReleaseGL } from "./ReleaseGL";
 
 // world mapping: X = O₂ (log), Y = pressure, Z = effective flow
 const SX = 12, SY = 6, SZ = 8;
@@ -462,6 +463,7 @@ export default function ConditionSpace3D({
         <CameraRig view={view} nonce={viewNonce} focus={focus} morph={morph} instant={instant} scaleRef={scaleRef}
           onMorphDone={() => onMorphDone?.()} onUserMove={onUserMove ?? (() => {})} tweening={tweening} />
         <Projector anchors={anchors} scaleRef={scaleRef} onLabels={setLabels} />
+        <ReleaseGL />
       </Canvas>
       {/* labels appear once the camera has landed, so they never clutter the 2D↔3D morph */}
       <LabelLayer labels={labels} visible={!morph} />
