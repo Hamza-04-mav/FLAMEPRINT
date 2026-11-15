@@ -1,18 +1,20 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { Box, ChevronDown, Crosshair, FileSearch, FlaskConical, Pause, Play, RotateCcw, X } from "lucide-react";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
+import { Box, ChevronDown, Crosshair, FileSearch, FlaskConical, Map as MapIcon, Pause, Play, RotateCcw, X } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { fmtRange, OUTCOME_COLOR, PHASE_COLOR, plural, scoreColor, SEVERITY_COLOR, toPsi } from "@/lib/format";
 import { lazyRetry } from "@/lib/lazyRetry";
 import { useMission } from "@/lib/mission";
 import { effectiveFlow, scenarioInVoid } from "@/lib/space";
 import type { ConditionSpace, NextExperiment } from "@/lib/types";
+import { MORPH, SPRING, standardT } from "@/lib/motion";
+import { DUST, SUN } from "@/lib/theme";
 import { useWebGL } from "@/lib/webgl";
 import type { Selection, ViewPreset } from "./ConditionSpace3D";
-import { FlammabilityMap } from "./FlammabilityMap";
+import { FlammabilityMap, MAP_H, MAP_W } from "./FlammabilityMap";
 import { AresEmblem } from "./NasaMarks";
 import { Safe3D } from "./Safe3D";
 import { ConfidenceBadge, ErrorNote, Evidence, PageHeader, Skeleton } from "./ui";
@@ -83,12 +85,47 @@ export function SpaceView() {
   const [sel, setSel] = useState<Selection>(null);
   const [view, setView] = useState<ViewPreset>("iso");
   const [nonce, setNonce] = useState(0);
-  const [spin, setSpin] = useState(true);
-  const [show3d, setShow3d] = useState(false);
+  const reduce = useReducedMotion();
+  const [spin, setSpin] = useState(!reduce);
+  // 2D ↔ 3D is one continuous move: "to3d"/"to2d" are the 700 ms morphs (instant with reduced motion)
+  const [mode, setMode] = useState<"2d" | "to3d" | "3d" | "to2d">("2d");
+  const [svgOn, setSvgOn] = useState(true);
   const [details, setDetails] = useState(false);
+  const [topH, setTopH] = useState(56);
+  const topBar = useRef<HTMLDivElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
+  const stageVisible = useInView(stage);
+  const [tabHidden, setTabHidden] = useState(false);
   const webgl = useWebGL();
   const load = () => api.space().then((s) => { setSpace(s); setErr(null); }).catch((e) => setErr(e.message));
   useEffect(() => { void load(); }, [dataVersion]);
+  useEffect(() => {
+    const v = () => setTabHidden(document.visibilityState === "hidden");
+    document.addEventListener("visibilitychange", v);
+    return () => document.removeEventListener("visibilitychange", v);
+  }, []);
+  useEffect(() => {
+    const el = topBar.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setTopH(el.offsetHeight + 20));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [mode]);
+
+  const show3d = mode !== "2d";
+  const morphing = mode === "to3d" || mode === "to2d";
+  const enter3d = () => { setSel(null); setView("iso"); setSvgOn(true); setMode("to3d"); };
+  const leave3d = () => {
+    setSel(null);
+    setMode("to2d");
+    // the SVG returns only in the last 150 ms of the reverse morph
+    if (reduce) setSvgOn(true);
+    else setTimeout(() => setSvgOn(true), (MORPH.duration - MORPH.fade) * 1000);
+  };
+  const onMorphDone = () => setMode((m) => (m === "to3d" ? "3d" : m === "to2d" ? "2d" : m));
+  const onCanvasReady = () => { if (mode === "to3d") setSvgOn(false); };
+  const frameloop: "always" | "demand" | "never" = !stageVisible || tabHidden ? "never" : spin || morphing ? "always" : "demand";
+  const stopSpin = useCallback(() => setSpin(false), []);
 
   const hab = habitats.find((h) => h.id === scenario.habitatId);
   const name = hab?.short ?? "Custom";
@@ -230,80 +267,100 @@ export function SpaceView() {
         </aside>
   );
 
+
+  const renderStage = (svg: React.ReactNode) => (
+    <div ref={stage} className={`relative w-full overflow-hidden rounded-[14px] transition-[min-height] duration-700 ${show3d ? "min-h-[400px] lg:min-h-[520px]" : ""}`}
+      style={{ aspectRatio: `${MAP_W} / ${MAP_H}` }}>
+      {show3d && space && webgl !== false && (
+        <div className="absolute inset-0">
+          <Safe3D label="The 3D coverage map">
+            <ConditionSpace3D space={space} scenario={scenario} uEff={uEff} habitats={habitats} highlight={highlight} inVoid={inVoid} missionName={name}
+              selection={sel} onSelect={setSel} view={view} viewNonce={nonce} autoRotate={spin && mode === "3d"} onUserMove={stopSpin}
+              morph={mode === "to3d" ? "in" : mode === "to2d" ? "out" : null} onMorphDone={onMorphDone} onReady={onCanvasReady}
+              frameloop={frameloop} instant={!!reduce} topInset={topH} bottomInset={40} />
+          </Safe3D>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: mode === "3d" ? 1 : 0 }} transition={{ duration: MORPH.fade }}
+            className={mode === "3d" ? "" : "pointer-events-none"}>
+            {/* one wrapping row: the legend can never run under the view toggle */}
+            <div ref={topBar} className="absolute inset-x-3 top-3 flex flex-wrap items-start justify-between gap-2">
+              <div className="pointer-events-none flex min-w-0 flex-1 flex-wrap gap-1.5">
+                {[
+                  [<span key="a" className="led" style={{ color: DUST[400] }} />, "Tested range"],
+                  [<span key="b" className="led" style={{ color: SUN[500] }} />, "High relevance"],
+                  [<span key="c" className="hatch h-3 w-3.5 rounded-[2px] border border-dashed border-dust-400" />, "Untested gap"],
+                  [<span key="d" className="h-2 w-2 rotate-45 bg-dust-300" />, "Other habitats"],
+                ].map(([icon, label]) => (
+                  <span key={label as string} className="flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-space-950/80 px-2.5 py-0.5 text-[11px] text-dust-200 backdrop-blur">{icon}{label}</span>
+                ))}
+              </div>
+              <div className="flex max-w-full flex-wrap items-center justify-end gap-1.5">
+                <div className="flex rounded-[10px] border border-[var(--line)] bg-space-950/85 p-0.5 backdrop-blur">
+                  {VIEWS.map((v) => (
+                    <button key={v.id} title={v.hint} onClick={() => go(v.id)}
+                      className={`relative rounded-[8px] px-1.5 py-1 font-mono text-[10.5px] transition-colors sm:px-2 sm:text-[11px] ${view === v.id ? "text-ink-900" : "text-dust-300 hover:text-dust-100"}`}>
+                      {view === v.id && <motion.span layoutId="view-pill" className="absolute inset-0 rounded-[8px] bg-dust-200" transition={SPRING} />}
+                      <span className="relative">{v.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <button onClick={() => setSpin((v) => !v)} title={spin ? "Stop the idle drift" : "Slow idle drift"} aria-pressed={spin}
+                  className="grid h-7 w-7 place-items-center rounded-[9px] border border-[var(--line)] bg-space-950/85 text-dust-300 backdrop-blur hover:text-dust-100">
+                  {spin ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                </button>
+                <button onClick={() => go("iso")} title="Reset camera"
+                  className="grid h-7 w-7 place-items-center rounded-[9px] border border-[var(--line)] bg-space-950/85 text-dust-300 backdrop-blur hover:text-dust-100">
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+            <div className="pointer-events-none absolute bottom-3 left-3 right-3 truncate font-mono text-[10px] tracking-[0.14em] text-slate-400">
+              DRAG TO ORBIT · SCROLL TO ZOOM · CLICK A RANGE TO FLY TO IT
+            </div>
+          </motion.div>
+        </div>
+      )}
+      <motion.div className="absolute inset-0" initial={false} animate={{ opacity: svgOn ? 1 : 0 }}
+        transition={{ duration: reduce ? 0 : MORPH.fade }} style={{ pointerEvents: mode === "2d" ? "auto" : "none" }}>
+        {svg}
+      </motion.div>
+    </div>
+  );
+
   return (
     <div>
       <PageHeader kicker="Gaps" title="Where NASA has no data yet" actions={<AresEmblem />}>
         Untested is not the same as safe. Here is what is missing, and what to test next.
       </PageHeader>
       {err && <div className="mb-4"><ErrorNote message={err} onRetry={load} /></div>}
-      <div className={`grid grid-cols-1 gap-6 ${show3d ? "xl:grid-cols-[minmax(0,1fr)_340px]" : "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]"}`}>
-        {!show3d ? (
-          <section className="panel p-6">
-            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h2 className="font-display text-[20px] font-semibold text-ink">Oxygen and airflow tested so far</h2>
-                <p className={`mt-1 text-[14px] ${inVoid ? "text-orange-200" : "text-emerald-200"}`}>
-                  {!space ? "Locating your habitat…" : inVoid
-                    ? `${missionLabel} sits outside every tested range: its risk is unknown, not low.`
-                    : `${missionLabel} sits inside at least one tested range.`}
-                </p>
-              </div>
-              {webgl !== false && <button onClick={() => setShow3d(true)} className="btn btn-ghost"><Box className="h-4 w-4" />Explore in 3D</button>}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <section className="panel min-w-0 p-6">
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="font-display text-[20px] font-semibold text-ink">Oxygen and airflow tested so far</h2>
+              <p className="mt-1 text-[14px] text-dust-200">
+                {!space ? "Locating your habitat…" : inVoid
+                  ? `${missionLabel} sits outside every tested range: its risk is unknown, not low.`
+                  : `${missionLabel} sits inside at least one tested range.`}
+              </p>
             </div>
-            {space ? <FlammabilityMap space={space} missionName={hab?.short ?? "Custom"} showCurve={details} detailed={details} /> : <Skeleton className="h-[360px]" />}
-          </section>
-        ) : (
-        <div className="hud-frame relative h-[62vh] min-h-[420px] overflow-hidden !rounded-[16px] xl:h-[min(72vh,700px)]">
-          {webgl === false ? (
-            <div className="grid h-full place-items-center p-6 text-center text-[13px] text-mute">
-              WebGL is not available in this browser. The 2D O₂ × flow plane below shows the same envelopes and your mission.
-            </div>
-          ) : space ? (
-            <Safe3D label="The 3D coverage map"><ConditionSpace3D space={space} scenario={scenario} uEff={uEff} habitats={habitats} highlight={highlight} inVoid={inVoid} missionName={name}
-              selection={sel} onSelect={setSel} view={view} viewNonce={nonce} autoRotate={spin} /></Safe3D>
-          ) : !err && <Skeleton className="absolute inset-0 !rounded-none !bg-transparent" />}
-
-          {/* overlays */}
-          <div className="pointer-events-none absolute left-4 top-4 flex flex-wrap gap-2">
-            {[
-              [<span key="a" className="led" style={{ color: "#8a8178" }} />, "Tested region"],
-              [<span key="b" className="led" style={{ color: "#FFD23F" }} />, "High relevance"],
-              [<span key="c" className="hatch h-3 w-3.5 rounded-[2px] border border-dashed border-ox-2" />, "Data gap"],
-              [<span key="d" className="h-2.5 w-2.5 rotate-45 bg-slate-300" />, "Mission presets"],
-            ].map(([icon, label]) => (
-              <span key={label as string} className="flex items-center gap-2 rounded-full border border-[var(--line)] bg-space-950/75 px-3 py-1 text-[11.5px] text-slate-200 backdrop-blur">{icon}{label}</span>
-            ))}
+            {webgl !== false && (
+              mode === "2d"
+                ? <button onClick={enter3d} className="btn btn-ghost"><Box className="h-4 w-4" />Explore in 3D</button>
+                : <button onClick={leave3d} disabled={morphing} className="btn btn-ghost disabled:opacity-50"><MapIcon className="h-4 w-4" />Back to 2D</button>
+            )}
           </div>
-          <div className="absolute right-4 top-4 flex items-center gap-2">
-            <div className="flex rounded-[10px] border border-[var(--line)] bg-space-950/80 p-1 backdrop-blur">
-              {VIEWS.map((v) => (
-                <button key={v.id} title={v.hint} onClick={() => go(v.id)}
-                  className={`relative rounded-[7px] px-2.5 py-1 font-mono text-[11px] transition-colors ${view === v.id ? "text-white" : "text-mute hover:text-ink"}`}>
-                  {view === v.id && <motion.span layoutId="view-pill" className="absolute inset-0 rounded-[7px] bg-blue" />}
-                  <span className="relative">{v.label}</span>
-                </button>
-              ))}
-            </div>
-            <button onClick={() => setSpin((v) => !v)} title={spin ? "Pause rotation" : "Auto-rotate"}
-              className="grid h-8 w-8 place-items-center rounded-[9px] border border-[var(--line)] bg-space-950/80 text-mute backdrop-blur hover:text-ink">
-              {spin ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-            </button>
-            <button onClick={() => go("iso")} title="Reset camera"
-              className="grid h-8 w-8 place-items-center rounded-[9px] border border-[var(--line)] bg-space-950/80 text-mute backdrop-blur hover:text-ink">
-              <RotateCcw className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          <div className="pointer-events-none absolute bottom-4 left-4 font-mono text-[10px] tracking-[0.16em] text-slate-400">
-            DRAG TO ORBIT · SCROLL TO ZOOM · CLICK A REGION OR POINT TO INSPECT
-          </div>
-          <button onClick={() => setShow3d(false)} className="chip-link absolute bottom-4 right-4">Back to 2D</button>
-        </div>
-        )}
-        {show3d ? inspector : <div className="flex flex-col gap-6">{gapCards}</div>}
-
+          {space
+            ? <FlammabilityMap space={space} missionName={hab?.short ?? "Custom"} showCurve={details} detailed={details} renderStage={renderStage} chrome={mode === "2d"} />
+            : <Skeleton className="h-[360px]" />}
+        </section>
+        <AnimatePresence mode="wait" initial={false}>
+          {mode === "3d" || mode === "to2d"
+            ? <motion.div key="inspector" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={standardT}>{inspector}</motion.div>
+            : <motion.div key="cards" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={standardT} className="flex flex-col gap-6">{gapCards}</motion.div>}
+        </AnimatePresence>
       </div>
 
-      {show3d && <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">{gapCards}</div>}
+      {(mode === "3d" || mode === "to2d") && <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">{gapCards}</div>}
 
       <button onClick={() => setDetails((x) => !x)} aria-expanded={details} className="btn btn-ghost mt-6 !px-0">
         {details ? "Hide details" : "Show details"}<ChevronDown className={`h-4 w-4 transition-transform duration-200 ${details ? "rotate-180" : ""}`} />
@@ -316,7 +373,7 @@ export function SpaceView() {
               <p className="text-[12.5px] text-mute">The chart now also shows the schematic limiting-oxygen curve (a teaching aid, not data) and the PSI test legend.</p>
               <NextExperimentsList />
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
-                {!show3d && inspector}
+                {mode === "2d" && inspector}
         <section className="panel p-5">
           <h3 className="font-display text-[17px] font-semibold text-ink">Not plottable yet</h3>
           <p className="mt-1 text-[12.5px] text-mute">O₂ not characterized in the catalog. Import their PSI test matrices in the Data Lab to place them in the map.</p>

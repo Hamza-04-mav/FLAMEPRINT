@@ -84,3 +84,43 @@ describe("brief cards", () => {
     expect(firstSentence("No full stop here")).toBe("No full stop here");
   });
 });
+
+describe("gaps helpers", () => {
+  it("finds the nearest tested point and the O₂ distance", async () => {
+    const { nearestTested } = await import("./space");
+    const rects = [{ f0: 0, f1: 40, o0: 15, o1: 22 }];
+    const n = nearestTested(16, 30, rects)!;
+    expect(n.flow).toBe(16);
+    expect(n.o2).toBe(22);
+    expect(n.dO2).toBe(8);
+    expect(nearestTested(10, 20, rects)).toBeNull(); // inside a tested range: no connector
+    expect(nearestTested(10, 20, [])).toBeNull(); // no data: no connector
+  });
+
+  it("places labels without overlaps and always keeps the scenario", async () => {
+    const { placeLabels } = await import("./labels");
+    const labels = [
+      { id: "you", x: 100, y: 100, w: 80, h: 20, priority: 0 },
+      { id: "a", x: 100, y: 100, w: 80, h: 20, priority: 2 },
+      { id: "b", x: 102, y: 101, w: 80, h: 20, priority: 3 },
+    ];
+    const out = placeLabels(labels, { w: 400, h: 300 });
+    expect(out[0].id).toBe("you");
+    for (let i = 0; i < out.length; i++) for (let j = i + 1; j < out.length; j++) {
+      const A = out[i], B = out[j];
+      expect(A.left < B.left + 80 && A.left + 80 > B.left && A.top < B.top + 20 && A.top + 20 > B.top).toBe(false);
+    }
+    // a label that only fits inside an exclusion zone is hidden; the scenario never is
+    const tight = placeLabels([{ id: "x", x: 50, y: 30, w: 80, h: 20, priority: 3 }, { id: "you", x: 50, y: 30, w: 80, h: 20, priority: 0 }],
+      { w: 140, h: 70 }, [{ x: 0, y: 0, w: 140, h: 70 }]);
+    expect(tight.map((l) => l.id)).toEqual(["you"]);
+    // fixed labels never move: a tick under the axis title is hidden rather than displaced
+    const axis = placeLabels([
+      { id: "title", x: 200, y: 200, w: 90, h: 16, priority: 1, fixed: true },
+      { id: "tick30", x: 205, y: 202, w: 30, h: 14, priority: 5, fixed: true },
+      { id: "tick15", x: 100, y: 202, w: 30, h: 14, priority: 5, fixed: true },
+    ], { w: 400, h: 300 });
+    expect(axis.map((l) => l.id)).toEqual(["title", "tick15"]);
+    expect(axis[0]).toMatchObject({ left: 155, top: 192, leader: false });
+  });
+});

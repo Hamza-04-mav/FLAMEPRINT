@@ -30,3 +30,29 @@ export function scenarioInVoid(space: ConditionSpace | null, scenario: Scenario,
     return inside(scenario.o2Pct, env.o2Pct, 1) && !!env.pressureKpa && inside(scenario.pressureKpa, env.pressureKpa, 5) && inside(uEff, env.flowCmS, 2);
   });
 }
+
+/** A tested O₂ × airflow rectangle (from an envelope) in data units. */
+export interface TestedRect { f0: number; f1: number; o0: number; o1: number }
+
+/**
+ * Nearest point of tested data to the habitat on the O₂ × airflow plane, for the Gaps "gap connector".
+ * Distance is measured in plot-normalised units (flow / 60, O₂ / 40) so "nearest" matches what the eye sees.
+ * Returns null when the habitat already sits inside a tested rectangle, or when there is no tested data.
+ */
+export function nearestTested(
+  flow: number, o2: number, rects: TestedRect[], points: { flow: number; o2: number }[] = [],
+): { flow: number; o2: number; dO2: number } | null {
+  const nx = (f: number) => f / 60, ny = (o: number) => o / 40;
+  let best: { flow: number; o2: number; d: number } | null = null;
+  for (const r of rects) {
+    if (flow >= r.f0 && flow <= r.f1 && o2 >= r.o0 && o2 <= r.o1) return null;
+    const f = Math.min(Math.max(flow, r.f0), r.f1), o = Math.min(Math.max(o2, r.o0), r.o1);
+    const d = Math.hypot(nx(f - flow), ny(o - o2));
+    if (!best || d < best.d) best = { flow: f, o2: o, d };
+  }
+  for (const p of points) {
+    const d = Math.hypot(nx(p.flow - flow), ny(p.o2 - o2));
+    if (!best || d < best.d) best = { flow: p.flow, o2: p.o2, d };
+  }
+  return best ? { flow: best.flow, o2: best.o2, dO2: +(o2 - best.o2).toFixed(1) } : null;
+}
