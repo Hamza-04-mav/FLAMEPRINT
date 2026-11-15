@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { buildVerdict, fmtPressure, GRADE_STYLE, LEVEL_STYLE } from "@/lib/answer";
 import { api, ApiError } from "@/lib/api";
+import { fmtGravity } from "@/lib/format";
 import { DEFAULT_WEIGHTS, FALLBACK_SCENARIO } from "@/lib/mission";
 import type { Analysis, FuelPhase, Habitat, Scenario } from "@/lib/types";
 
@@ -63,7 +64,7 @@ export default function PassportPage() {
             <div className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-500">FLAMEPRINT · Fire Passport</div>
             <h1 className="mt-1 text-[26px] font-bold leading-tight">{name}</h1>
             <div className="mt-1 font-mono text-[12px] text-slate-700">
-              {sc.o2Pct}% O₂ · {p.psi} ({p.kpa}) · {sc.gravityG} g · {sc.flowCmS} cm/s ventilation · fuels: {sc.phases.join(", ")}
+              {sc.o2Pct}% O₂ · {p.psi} ({p.kpa}) · {fmtGravity(sc.gravityG)} g · {sc.flowCmS} cm/s ventilation · fuels: {sc.phases.join(", ")}
             </div>
           </div>
           <div className="text-right text-[11px] text-slate-600">

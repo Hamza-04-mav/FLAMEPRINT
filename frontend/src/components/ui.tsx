@@ -1,7 +1,7 @@
 "use client";
 
 import { animate, motion, useMotionValue, useTransform } from "framer-motion";
-import { useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 import { CONF_LABEL } from "@/lib/format";
 import { DUST } from "@/lib/theme";
 import type { Confidence } from "@/lib/types";
@@ -98,7 +98,7 @@ export function Slider({
           {ticks!.filter((t) => t.label).map((t, i) => {
             const p = posOf(t.value);
             const align = p <= 4 ? "translate-x-0" : p >= 96 ? "-translate-x-full" : "-translate-x-1/2";
-            return <span key={i} className={`axis-tag absolute whitespace-nowrap ${align}`} style={{ left: `${p}%` }}>{t.label}</span>;
+            return <span key={i} title={GLOSSARY[t.label ?? ""]} className={`axis-tag absolute whitespace-nowrap ${align}`} style={{ left: `${p}%` }}>{t.label}</span>;
           })}
         </div>
       )}
@@ -184,15 +184,31 @@ export function EvidenceMark({ kind, size = 8 }: { kind: EvidenceKind; size?: nu
   return <span style={{ ...common, border: `1px solid ${c}`, borderRadius: 1, opacity: 0.7 }} />;
 }
 
+/** Honesty tag ("Illustrative" / "Approx" / …): a small dust outline tag. The mark
+ *  keeps its per-kind shape + colour so the kind is still distinguishable. */
 export function Evidence({ kind, label, className = "" }: { kind: EvidenceKind; label?: string; className?: string }) {
   const e = EVIDENCE[kind];
   return (
     <span title={e.hint}
-      className={`inline-flex items-center gap-1.5 rounded-[3px] border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] ${className}`}
-      style={{ color: e.color, borderColor: `color-mix(in srgb, ${e.color} 35%, transparent)`, background: `color-mix(in srgb, ${e.color} 8%, transparent)` }}>
+      className={`inline-flex items-center gap-1.5 rounded-[4px] border border-dust-600/60 bg-transparent px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-dust-400 ${className}`}>
       <EvidenceMark kind={kind} size={7} />
       {label ?? e.label}
     </span>
+  );
+}
+
+/** Plain-language glossary for the few jargon terms we can't avoid. */
+export const GLOSSARY: Record<string, string> = {
+  PSI: "Physical Sciences Informatics — NASA's archive of microgravity research data.",
+  "µg": "Microgravity — near-weightless, about 0 g (as on the ISS).",
+  LOI: "Limiting Oxygen Index — the lowest oxygen % that still sustains a flame (1 g lab test).",
+};
+/** Wrap a jargon term so it carries an explanation on hover/focus (no jargon without an 'i'). */
+export function Abbr({ t, children }: { t: string; children?: ReactNode }) {
+  return (
+    <abbr title={GLOSSARY[t] ?? t} className="cursor-help border-b border-dotted border-dust-500 no-underline [text-decoration:none]">
+      {children ?? t}
+    </abbr>
   );
 }
 

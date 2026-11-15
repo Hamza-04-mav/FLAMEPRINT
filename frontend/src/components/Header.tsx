@@ -68,7 +68,7 @@ function MissionPicker() {
         {open && (
           <motion.div role="listbox" initial={{ opacity: 0, y: -6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.16 }}
-            className="panel-float absolute left-0 top-full z-50 mt-2 w-[330px] overflow-hidden p-1.5">
+            className="panel-float scrollbar-thin absolute left-0 top-full z-50 mt-2 max-h-[min(72vh,460px)] w-[330px] overflow-y-auto overscroll-contain p-1.5">
             {habitats.map((h) => {
               const on = h.id === scenario.habitatId;
               return (

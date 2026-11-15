@@ -134,7 +134,7 @@ function FullBrief() {
   }, [analysis]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const docNo = `FP-${(scenario.habitatId || "custom").toUpperCase()}-${(stamp ?? "").slice(0, 10).replace(/-/g, "") || "DRAFT"}`;
-  const header = `# FLAMEPRINT Fire Safety Brief (${docNo})\n\n_Scenario: ${hab?.name ?? "Custom"} · ${scenario.o2Pct}% O₂ · ${toPsi(scenario.pressureKpa)} psi · ${scenario.gravityG} g · ventilation ${scenario.flowCmS} cm/s · fuels: ${scenario.phases.join(", ")}_\n_Generated ${stamp ?? new Date().toISOString()} · ${meta.mode === "llm" ? `Groq (${meta.model})` : "deterministic engine"}_\n\n`;
+  const header = `# FLAMEPRINT Fire Safety Brief (${docNo})\n\n_Scenario: ${hab?.name ?? "Custom"} · ${scenario.o2Pct}% O₂ · ${toPsi(scenario.pressureKpa)} psi · ${fmtGravity(scenario.gravityG)} g · ventilation ${scenario.flowCmS} cm/s · fuels: ${scenario.phases.join(", ")}_\n_Generated ${stamp ?? new Date().toISOString()} · ${meta.mode === "llm" ? `Groq (${meta.model})` : "deterministic engine"}_\n\n`;
   const download = () => {
     const blob = new Blob([header + text], { type: "text/markdown" });
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `${docNo.toLowerCase()}.md` });

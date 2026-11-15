@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { type Tab, useMission } from "@/lib/mission";
+import { Abbr } from "./ui";
 
 export type NavGroup = "main" | "tools";
 /** Five pages, each answering one question, plus a small Tools menu. */
@@ -105,7 +106,7 @@ function Status({ rail }: { rail: boolean }) {
       <div className="mt-2.5 flex items-center gap-2.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/NASA/nasa-6.svg" alt="NASA insignia" width={30} height={30} className="shrink-0 opacity-95" />
-        <span className="text-[11px]">Built on NASA PSI open data. Independent entry, not NASA-endorsed.</span>
+        <span className="text-[11px]">Built on NASA <Abbr t="PSI" /> open data. Independent entry, not NASA-endorsed.</span>
       </div>
     </div>
   );
