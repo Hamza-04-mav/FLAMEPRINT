@@ -1,0 +1,11 @@
+# Never upload secrets or local build/runtime state to Vercel (applies to CLI and Git deploys).
+# data/seed, data/psi and data/templates MUST stay: the backend reads them at runtime (see vercel.json).
+.env
+backend/.env
+.venv
+backend/.venv
+**/__pycache__
+**/.pytest_cache
+**/node_modules
+frontend/.next
+data/imported
