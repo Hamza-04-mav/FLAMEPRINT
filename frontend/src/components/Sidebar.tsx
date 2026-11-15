@@ -95,7 +95,7 @@ function Status({ rail }: { rail: boolean }) {
     return (
       <div className="flex flex-col items-center gap-2.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/NASA/nasa-6.svg" alt="NASA" width={26} height={26} className="shrink-0 opacity-95" title="Built on NASA open data — independent entry, not NASA-endorsed" />
+      
         <span title={text} className="led" style={{ color: tone }} />
       </div>
     );
@@ -105,7 +105,7 @@ function Status({ rail }: { rail: boolean }) {
       <div className="flex items-center gap-2 text-slate-400"><span className="led" style={{ color: tone }} />{text}</div>
       <div className="mt-2.5 flex items-center gap-2.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/NASA/nasa-6.svg" alt="NASA insignia" width={30} height={30} className="shrink-0 opacity-95" />
+    
         <span className="text-[11px]">Built on NASA <Abbr t="PSI" /> open data. Independent entry, not NASA-endorsed.</span>
       </div>
     </div>
